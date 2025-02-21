@@ -13,19 +13,26 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
     cli,
+    digest,
     fs,
     readr,
     renv,
     rlang (>= 1.0.0),
+    tibble,
     usethis,
     withr,
     yaml
 Suggests: 
-    testthat (>= 3.0.0),
+    covr,
+    dplyr,
     knitr,
+    mockery,
+    pkgdown,
+    purrr,
     rmarkdown,
-    pkgdown
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/sebrauschert/toth, https://sebrauschert.github.io/toth
+URL: https://github.com/sebrauschert/toth, https://sebrauschert.github.io/toth, https://sebrauschert.github.io/toth/
 BugReports: https://github.com/sebrauschert/toth/issues
+SystemRequirements: Python (>= 3.7), DVC (>= 2.0.0), Docker

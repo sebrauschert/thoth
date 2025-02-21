@@ -25,6 +25,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
 
     steps:
       - uses: actions/checkout@v3
@@ -39,15 +40,34 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            any::covr
+            any::pkgdown
           needs: check
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
       - name: Install DVC
         if: runner.os != 'Windows'
         run: |
           python -m pip install --upgrade pip
-          pip install dvc[all]
+          pip install 'dvc[all]'
+
+      - name: Check DVC installation
+        if: runner.os != 'Windows'
+        run: |
+          dvc --version
+          which dvc
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          upload-snapshots: true 
+          upload-snapshots: true
+          error-on: '"error"'
+          check-dir: '"check"' 
