@@ -44,6 +44,8 @@ jobs:
             any::rcmdcheck
             any::covr
             any::pkgdown
+            any::knitr
+            any::rmarkdown
           needs: check
 
       - name: Install system dependencies
@@ -65,6 +67,11 @@ jobs:
         run: |
           dvc --version
           which dvc
+
+      - name: Build vignettes
+        run: |
+          Rscript -e 'devtools::build_vignettes()'
+        shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
         with:

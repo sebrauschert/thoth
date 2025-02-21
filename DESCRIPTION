@@ -24,6 +24,7 @@ Imports:
     yaml
 Suggests: 
     covr,
+    devtools,
     dplyr,
     knitr,
     mockery,

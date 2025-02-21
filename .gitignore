@@ -7,10 +7,8 @@
 *.so
 *.dll
 /Meta/
-/doc/
 /docs/
 /pkgdown/
-/inst/doc/
 /vignettes/*.html
 /vignettes/*.R
 .httr-oauth
