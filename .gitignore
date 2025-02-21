@@ -9,8 +9,6 @@
 /Meta/
 /docs/
 /pkgdown/
-/vignettes/*.html
-/vignettes/*.R
 .httr-oauth
 .Renviron
 .Rprofile
@@ -24,6 +22,12 @@
 /check/
 *.tar.gz
 
+# Keep inst/doc directory but ignore generated files
+/inst/doc/*.html
+/inst/doc/*.R
+/inst/doc/*.pdf
+!/inst/doc/.gitkeep
+
 # Test artifacts
 tests/testthat/*.csv
 tests/testthat/*.rds
@@ -33,4 +37,4 @@ tests/testthat/Rplots.pdf
 tests/testthat/*.png
 tests/testthat/*.html
 tests/testthat/.dvc/
-docs
+/doc/
