@@ -19,6 +19,26 @@ knitr::opts_chunk$set(
 
 One of the challenges in bioinformatics and data analysis is documenting and tracking human decisions made during the analysis process. While code and data can be version controlled, the reasoning behind key analytical decisions often remains undocumented. The `toth` package provides functionality to track these decisions in a structured way.
 
+## Installation
+
+To install the package from GitHub, first ensure you have all the required dependencies:
+
+```{r installation}
+# Install required dependencies if not already installed
+required_packages <- c("usethis", "yaml", "cli", "digest", "rmarkdown", "tools")
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)
+  }
+}
+
+# Install toth from GitHub
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+devtools::install_github("sebrauschert/toth")
+```
+
 ## Getting Started
 
 First, let's load the package:
@@ -117,4 +137,4 @@ By tracking analytical decisions in a structured way, we can:
 - Improve reproducibility
 - Generate better documentation
 
-The decision tracking functionality in `toth` helps make human expertise as trackable as code, breaking free from the "90% automation trap" where crucial human judgment remains hidden. 
+The decision tracking functionality in `toth` helps make human expertise as trackable as code, breaking free from the "90% automation trap" where crucial human judgment remains hidden.

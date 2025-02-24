@@ -8,6 +8,7 @@
 #' @param use_docker Logical. Whether to set up Docker configuration. Default is TRUE.
 #' @param use_renv Logical. Whether to initialize renv. Default is TRUE.
 #' @param git_init Logical. Whether to initialize git repository. Default is TRUE.
+#' @param open Logical. Whether to open the new project in RStudio. Default is TRUE.
 #'
 #' @return Invisibly returns the path to the created project.
 #' @export
@@ -20,7 +21,8 @@ create_analytics_project <- function(path,
                                    use_dvc = TRUE,
                                    use_docker = TRUE,
                                    use_renv = TRUE,
-                                   git_init = TRUE) {
+                                   git_init = TRUE,
+                                   open = TRUE) {
   # Check if required system tools are available
   check_system_requirements(use_dvc, use_docker)
   
@@ -57,13 +59,13 @@ create_analytics_project <- function(path,
     setup_docker()
   }
 
-  # Initialize renv if requested
+  # Create R project file and open in RStudio if requested
+  proj_path <- usethis::create_project(path, open = FALSE)
+  
+  # Initialize renv if requested (after project creation)
   if (use_renv) {
     renv::init()
   }
-
-  # Create R project file
-  usethis::create_project(path, open = FALSE)
 
   # Create README
   write_readme(path)
@@ -73,6 +75,13 @@ create_analytics_project <- function(path,
 
   # Success message
   cli::cli_alert_success("Analytics project successfully created at {.path {path}}")
+  
+  # Open the project in RStudio if requested
+  if (open && rstudioapi::isAvailable()) {
+    rstudioapi::openProject(path, newSession = TRUE)
+  } else if (open) {
+    cli::cli_alert_info("Project created but not opened (RStudio not available)")
+  }
   
   invisible(path)
 }
