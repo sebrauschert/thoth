@@ -75,45 +75,24 @@ dvc_track <- function(path, message = NULL) {
   invisible(path)
 }
 
-#' Write CSV with DVC tracking
+#' Write CSV with DVC Tracking
 #'
-#' @description
-#' A wrapper around readr::write_csv that automatically tracks the output file with DVC
-#' and optionally creates a DVC pipeline stage.
+#' @param x Data frame to write
+#' @param file Path to write CSV file
+#' @param message Optional commit message for DVC
+#' @param stage_name Optional name for DVC stage
+#' @param deps Optional dependencies for DVC stage
+#' @param params Optional parameters for DVC stage
+#' @param metrics Logical or character vector indicating whether to track metrics
+#' @param plots Logical or character vector indicating whether to track plots
 #'
-#' @param x A data frame to write
-#' @param file Path to write to
-#' @param message Optional DVC commit message
-#' @param stage_name Optional name for the DVC stage. If provided, creates a pipeline stage.
-#' @param deps Character vector of dependency files (optional, for pipeline stages)
-#' @param metrics Logical. Whether to mark the output as a DVC metric
-#' @param plots Logical. Whether to mark the output as a DVC plot
-#' @param params Named list of parameters for the stage (optional)
-#' @param ... Additional arguments passed to readr::write_csv
-#'
-#' @return The input data frame (invisibly) to allow for further piping
+#' @return Invisibly returns the input data frame
 #' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Simple tracking
-#' data |> write_csv_dvc("data/processed/mydata.csv", "Updated data")
-#'
-#' # As part of a pipeline
-#' data |> write_csv_dvc(
-#'   "data/processed/results.csv",
-#'   stage_name = "process_data",
-#'   deps = "data/raw/input.csv",
-#'   params = list(threshold = 0.5)
-#' )
-#' }
-write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL, 
-                         deps = NULL, metrics = FALSE, plots = FALSE,
-                         params = NULL, ...) {
-  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
-  
-  # Write the file
-  readr::write_csv(x, file, ...)
+write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
+                         deps = NULL, params = NULL,
+                         metrics = FALSE, plots = FALSE) {
+  # Write the data to CSV
+  readr::write_csv(x, file)
   
   # Create DVC stage if stage_name is provided
   if (!is.null(stage_name)) {
@@ -128,12 +107,11 @@ write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
       if (!is.null(deps)) sprintf("input_data <- read_csv(\"%s\")", deps[1]) else NULL,
       if (!is.null(params)) {
         c(
-          "transformed_data <- input_data %>%",
-          sprintf("#  Parameters: %s", paste(names(params), params, sep = "=", collapse = ", "))
+          sprintf("# Parameters:"),
+          sprintf("# %s = %s", names(params), as.character(params))
         )
-      } else {
-        "transformed_data <- input_data"
       },
+      "transformed_data <- x",  # Use the data directly
       sprintf("write_csv(transformed_data, \"%s\")", file)
     )
     

@@ -407,19 +407,141 @@ git_branch_list <- function(all = FALSE) {
 #' git_log(n = 20, oneline = FALSE)  # detailed log
 #' }
 git_log <- function(n = 10, oneline = TRUE) {
+  # Check if git is installed
   check_git()
   
-  args <- c("log", 
-            if(oneline) "--oneline" else NULL,
-            if(!is.null(n)) paste0("-", n) else NULL)
-  
-  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
-  
-  if (!is.null(attr(result, "status"))) {
-    cli::cli_alert_warning("Failed to get Git log")
+  # Check if current directory is a git repository
+  if (!dir.exists(".git")) {
+    cli::cli_alert_warning("Not a Git repository")
     return(invisible(NULL))
   }
   
+  # Build command arguments
+  args <- c("log")
+  if (oneline) args <- c(args, "--oneline")
+  if (!is.null(n)) args <- c(args, paste0("-", n))
+  
+  # Run git command with error handling
+  result <- tryCatch({
+    system2("git", args, stdout = TRUE, stderr = TRUE)
+  }, error = function(e) {
+    cli::cli_alert_warning("Error executing Git command: {e$message}")
+    return(NULL)
+  })
+  
+  # Check for command failure
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to get Git log")
+    if (!is.null(result)) {
+      cli::cli_alert_info("Git output: {paste(result, collapse = '\n')}")
+    }
+    return(invisible(NULL))
+  }
+  
+  # If no commits yet, show appropriate message
+  if (length(result) == 0) {
+    cli::cli_alert_info("No commits yet")
+    return(invisible(NULL))
+  }
+  
+  # Display results
   cat(paste(result, collapse = "\n"), "\n")
   invisible(result)
+}
+
+#' Create a DVC Stage
+#'
+#' @param name Name of the stage
+#' @param cmd Command to execute
+#' @param deps Dependencies
+#' @param outs Outputs
+#' @param metrics Logical or character vector indicating whether to track metrics
+#' @param plots Logical or character vector indicating whether to track plots
+#' @param params Named list of parameters
+#' @param always_changed Logical indicating whether the stage should always be re-run
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+dvc_stage <- function(name, cmd, deps = NULL, outs = NULL, 
+                     metrics = FALSE, plots = FALSE, 
+                     params = NULL, always_changed = FALSE) {
+  check_dvc()
+  
+  # Build the dvc stage add command
+  args <- c("stage", "add", name)
+  
+  # Add dependencies
+  if (!is.null(deps)) {
+    args <- c(args, unlist(lapply(deps, function(d) c("-d", d))))
+  }
+  
+  # Add outputs
+  if (!is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-o", o))))
+  }
+  
+  # Add metrics
+  if (is.character(metrics)) {
+    args <- c(args, unlist(lapply(metrics, function(m) c("-M", m))))
+  } else if (isTRUE(metrics) && !is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-M", o))))
+  }
+  
+  # Add plots
+  if (is.character(plots)) {
+    args <- c(args, unlist(lapply(plots, function(p) c("-p", p))))
+  } else if (isTRUE(plots) && !is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-p", o))))
+  }
+  
+  # Add parameters with proper formatting
+  if (!is.null(params)) {
+    param_args <- mapply(
+      function(name, value) {
+        # Format the parameter value based on its type
+        formatted_value <- if (is.character(value)) {
+          shQuote(value)
+        } else if (is.numeric(value)) {
+          as.character(value)
+        } else if (is.logical(value)) {
+          tolower(as.character(value))
+        } else {
+          as.character(value)
+        }
+        c("-p", paste(name, formatted_value, sep = "="))
+      },
+      names(params),
+      params,
+      SIMPLIFY = FALSE
+    )
+    args <- c(args, unlist(param_args))
+  }
+  
+  # Add always-changed flag if requested
+  if (always_changed) {
+    args <- c(args, "--always-changed")
+  }
+  
+  # Add the command
+  args <- c(args, "-c", shQuote(cmd))
+  
+  # Run the command with error handling
+  result <- tryCatch({
+    system2("dvc", args, stdout = TRUE, stderr = TRUE)
+  }, error = function(e) {
+    cli::cli_alert_warning("Error executing DVC command: {e$message}")
+    return(NULL)
+  })
+  
+  # Check for command failure
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to create DVC stage: {name}")
+    if (!is.null(result)) {
+      cli::cli_alert_info("DVC output: {paste(result, collapse = '\n')}")
+    }
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Created DVC stage: {name}")
+  invisible(TRUE)
 } 
