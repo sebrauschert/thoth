@@ -91,6 +91,9 @@ dvc_track <- function(path, message = NULL) {
 write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
                          deps = NULL, params = NULL,
                          metrics = FALSE, plots = FALSE) {
+  # Create directory if it doesn't exist
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  
   # Write the data to CSV
   readr::write_csv(x, file)
   
@@ -104,15 +107,39 @@ write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
     script_content <- c(
       "library(readr)",
       "library(dplyr)",
-      if (!is.null(deps)) sprintf("input_data <- read_csv(\"%s\")", deps[1]) else NULL,
-      if (!is.null(params)) {
+      "library(tidymodels)",  # Required for initial_split
+      "",
+      if (!is.null(deps)) {
         c(
-          sprintf("# Parameters:"),
-          sprintf("# %s = %s", names(params), as.character(params))
+          sprintf("# Read input data"),
+          sprintf("input_data <- read_csv(\"%s\")", deps[1])
         )
       },
-      "transformed_data <- x",  # Use the data directly
-      sprintf("write_csv(transformed_data, \"%s\")", file)
+      "",
+      if (!is.null(params)) {
+        c(
+          "# Set parameters",
+          sprintf("set.seed(%s)", params$seed),
+          sprintf("train_prop <- %s", params$train_prop)
+        )
+      },
+      "",
+      "# Process data",
+      "processed_data <- input_data %>%",
+      "  janitor::clean_names() %>%",
+      "  mutate(",
+      "    species = as.factor(species),",
+      "    across(where(is.numeric), function(x) {",
+      "      as.numeric(scale(x))",
+      "    })",
+      "  )",
+      "",
+      "# Create train/test split",
+      "split <- initial_split(processed_data, prop = train_prop)",
+      "train_data <- training(split)",
+      "",
+      sprintf("# Save output"),
+      sprintf("write_csv(train_data, \"%s\")", file)
     )
     
     # Remove NULL elements and write script

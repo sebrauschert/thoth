@@ -451,7 +451,7 @@ git_log <- function(n = 10, oneline = TRUE) {
 
 #' Create a DVC Stage
 #'
-#' @param name Name of the stage
+#' @param name Stage name
 #' @param cmd Command to execute
 #' @param deps Dependencies
 #' @param outs Outputs
@@ -468,7 +468,7 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
   check_dvc()
   
   # Build the dvc stage add command
-  args <- c("stage", "add", name)
+  args <- c("stage", "add", "-n", name)
   
   # Add dependencies
   if (!is.null(deps)) {
@@ -489,9 +489,9 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
   
   # Add plots
   if (is.character(plots)) {
-    args <- c(args, unlist(lapply(plots, function(p) c("-p", p))))
+    args <- c(args, unlist(lapply(plots, function(p) c("--plots", p))))
   } else if (isTRUE(plots) && !is.null(outs)) {
-    args <- c(args, unlist(lapply(outs, function(o) c("-p", o))))
+    args <- c(args, unlist(lapply(outs, function(o) c("--plots", o))))
   }
   
   # Add parameters with proper formatting
@@ -522,8 +522,8 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
     args <- c(args, "--always-changed")
   }
   
-  # Add the command
-  args <- c(args, "-c", shQuote(cmd))
+  # Add the command as a positional argument at the end
+  args <- c(args, shQuote(cmd))
   
   # Run the command with error handling
   result <- tryCatch({
