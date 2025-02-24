@@ -5,14 +5,24 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>DVC with toth • toth</title>
+<title>Data Version Control with toth • toth</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_Pro-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DVC with toth">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Version Control with toth">
+<style>
+code .op, pre .op {
+  unicode-bidi: normal !important;
+  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+}
+.sourceCode .op {
+  content: "|>" !important;
+  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+}
+</style>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,7 +49,7 @@
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
-    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">DVC with toth</a></li>
+    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
     <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
@@ -71,7 +81,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>DVC with toth</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Data Version Control with toth</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sebrauschert/toth/blob/main/vignettes/dvc-tracking.Rmd" class="external-link"><code>vignettes/dvc-tracking.Rmd</code></a></small>
@@ -83,273 +93,302 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The <code>toth</code> package provides seamless integration with DVC
-(Data Version Control) for tracking data files in your R analytics
-projects. This guide demonstrates how to use DVC through R functions,
-making it easy to version control your data alongside your code.</p>
+<p>Data Version Control (DVC) is a powerful tool for managing data
+science workflows. While DVC is written in Python, <code>toth</code>
+provides seamless integration with R, allowing you to:</p>
+<ol style="list-style-type: decimal">
+<li>Track large data files without storing them in Git</li>
+<li>Create reproducible pipelines</li>
+<li>Track metrics and plots</li>
+<li>Share data across team members</li>
+</ol>
+<p>This guide will walk you through setting up DVC and using it
+effectively with <code>toth</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
+</h2>
+<p>Before starting, ensure you have:</p>
+<ol style="list-style-type: decimal">
+<li>
+<p>DVC installed:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">pip</span> install dvc</span></code></pre></div>
+</li>
+<li>
+<p>Git initialized in your project:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">git</span> init</span></code></pre></div>
+</li>
+<li>
+<p>toth installed:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/toth"</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="project-setup">Project Setup<a class="anchor" aria-label="anchor" href="#project-setup"></a>
 </h2>
-<p>The <code>toth</code> package automatically configures DVC when
-creating a new project:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p>When you create a new analytics project with <code>toth</code>, DVC
+is automatically set up:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create a new project with DVC enabled</span></span>
 <span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
-<span>  <span class="st">"my_project"</span>,</span>
-<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="st">"my_analysis"</span>,</span>
+<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># DVC is enabled by default</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>This sets up: - DVC initialization - Appropriate
-<code>.gitignore</code> rules - Standard project structure - DVC
-configuration files</p>
+<p>This: - Initializes DVC - Creates data directories tracked by DVC -
+Sets up appropriate .gitignore rules - Creates a basic DVC pipeline
+structure</p>
 </div>
 <div class="section level2">
-<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+<h2 id="simple-data-tracking">Simple Data Tracking<a class="anchor" aria-label="anchor" href="#simple-data-tracking"></a>
 </h2>
 <div class="section level3">
-<h3 id="simple-data-tracking">Simple Data Tracking<a class="anchor" aria-label="anchor" href="#simple-data-tracking"></a>
+<h3 id="tracking-csv-files">Tracking CSV Files<a class="anchor" aria-label="anchor" href="#tracking-csv-files"></a>
 </h3>
-<p>The most basic way to track files is to use
-<code><a href="../reference/write_csv_dvc.html">write_csv_dvc()</a></code> or <code><a href="../reference/write_rds_dvc.html">write_rds_dvc()</a></code>:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create example data</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,</span>
-<span>  y <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
+<p>The simplest way to track data files is using the DVC-aware write
+functions:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Track a CSV file</span></span>
+<span><span class="va">data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/processed/results.csv"</span>,</span>
+<span>  message <span class="op">=</span> <span class="st">"Add processed results"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Write and track CSV file</span></span>
-<span><span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/processed/example.csv"</span>,</span>
-<span>    <span class="st">"Added processed data"</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="co"># Track with additional readr::write_csv parameters</span></span>
+<span><span class="va">data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/processed/results.csv"</span>,</span>
+<span>  message <span class="op">=</span> <span class="st">"Add processed results"</span>,</span>
+<span>  na <span class="op">=</span> <span class="st">"NA"</span>,</span>
+<span>  quote <span class="op">=</span> <span class="st">"needed"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="tracking-r-objects">Tracking R Objects<a class="anchor" aria-label="anchor" href="#tracking-r-objects"></a>
+</h3>
+<p>For R objects, use <code>write_rds_dvc</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Save and track a model</span></span>
+<span><span class="va">model</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"models/rf_model.rds"</span>,</span>
+<span>  message <span class="op">=</span> <span class="st">"Save trained random forest model"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="manual-tracking">Manual Tracking<a class="anchor" aria-label="anchor" href="#manual-tracking"></a>
+</h3>
+<p>You can also track files after they’ve been written:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Write file normally</span></span>
+<span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"data/processed/results.csv"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Track R objects</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="va">model</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"models/linear_model.rds"</span>,</span>
-<span>    <span class="st">"Saved linear model"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Track with DVC</span></span>
+<span><span class="fu"><a href="../reference/dvc_track.html">dvc_track</a></span><span class="op">(</span><span class="st">"data/processed/results.csv"</span>, <span class="st">"Add processed results"</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="creating-dvc-pipelines">Creating DVC Pipelines<a class="anchor" aria-label="anchor" href="#creating-dvc-pipelines"></a>
+</h2>
+<p>DVC pipelines help make your analysis reproducible by tracking: -
+Input dependencies - Output files - Parameters - Metrics and plots</p>
+<div class="section level3">
+<h3 id="basic-pipeline-stage">Basic Pipeline Stage<a class="anchor" aria-label="anchor" href="#basic-pipeline-stage"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create a data processing stage</span></span>
+<span><span class="va">data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/processed/results.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"process_data"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"data/raw/input.csv"</span>,</span>
+<span>  params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="data-processing-pipelines">Data Processing Pipelines<a class="anchor" aria-label="anchor" href="#data-processing-pipelines"></a>
+<h3 id="tracking-metrics">Tracking Metrics<a class="anchor" aria-label="anchor" href="#tracking-metrics"></a>
 </h3>
-<p>Integrate DVC tracking into your data processing workflows:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example data pipeline</span></span>
-<span><span class="va">raw_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Clean data</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span></span>
-<span>    date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,</span>
-<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Save intermediate results</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/interim/cleaned.csv"</span>,</span>
-<span>    <span class="st">"Saved cleaned data"</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Continue processing</span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span></span>
-<span>    mean_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>,</span>
-<span>    sd_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Save final results</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/processed/summary.csv"</span>,</span>
-<span>    <span class="st">"Saved summary statistics"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<p>Track evaluation metrics automatically:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"metrics/evaluation.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"evaluate_model"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"models/rf_model.rds"</span>, <span class="st">"data/test/test.csv"</span><span class="op">)</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># Mark as DVC metrics</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="tracking-multiple-files">Tracking Multiple Files<a class="anchor" aria-label="anchor" href="#tracking-multiple-files"></a>
+<h3 id="tracking-plots">Tracking Plots<a class="anchor" aria-label="anchor" href="#tracking-plots"></a>
 </h3>
-<p>You can track multiple files in sequence:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Split data by category</span></span>
-<span><span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">group_split</span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">walk2</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">category</span><span class="op">)</span>,</span>
-<span>    <span class="op">~</span><span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>      <span class="va">.x</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data/processed"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">.y</span>, <span class="st">".csv"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Saved data for category"</span>, <span class="va">.y</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<p>Track visualization files:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Save plot data with DVC tracking</span></span>
+<span><span class="va">plot_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"plots/feature_importance.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"create_plots"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"models/rf_model.rds"</span>,</span>
+<span>  plots <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># Mark as DVC plot</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="complete-pipeline-example">Complete Pipeline Example<a class="anchor" aria-label="anchor" href="#complete-pipeline-example"></a>
+</h2>
+<p>Here’s a complete example of a machine learning pipeline:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1. Data Preprocessing</span></span>
+<span><span class="va">raw_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/processed/preprocessed.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"preprocess"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"data/raw/input.csv"</span>,</span>
+<span>  params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    remove_na <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    normalize <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Feature Engineering</span></span>
+<span><span class="va">features</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/processed/features.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"feature_engineering"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"data/processed/preprocessed.csv"</span>,</span>
+<span>  params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    n_components <span class="op">=</span> <span class="fl">10</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Model Training</span></span>
+<span><span class="va">model</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"models/rf_model.rds"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"train_model"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"data/processed/features.csv"</span>,</span>
+<span>  params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    ntree <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>    mtry <span class="op">=</span> <span class="fl">3</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Model Evaluation</span></span>
+<span><span class="va">metrics</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"metrics/evaluation.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"evaluate"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"models/rf_model.rds"</span>,</span>
+<span>    <span class="st">"data/processed/features.csv"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. Create Plots</span></span>
+<span><span class="va">plot_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="st">"plots/performance.csv"</span>,</span>
+<span>  stage_name <span class="op">=</span> <span class="st">"visualize"</span>,</span>
+<span>  deps <span class="op">=</span> <span class="st">"metrics/evaluation.csv"</span>,</span>
+<span>  plots <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="working-with-remote-storage">Working with Remote Storage<a class="anchor" aria-label="anchor" href="#working-with-remote-storage"></a>
+</h2>
+<p>DVC supports various remote storage options (S3, GCS, etc.). Once
+configured, you can:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Pull data from remote</span></span>
+<span><span class="fu">dvc_pull</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Push data to remote</span></span>
+<span><span class="fu">dvc_push</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pull specific files</span></span>
+<span><span class="fu">dvc_pull</span><span class="op">(</span><span class="st">"data/processed/features.csv"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
 </h2>
-<div class="section level3">
-<h3 id="file-organization">File Organization<a class="anchor" aria-label="anchor" href="#file-organization"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Raw data</span></span>
-<span><span class="va">raw_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/raw/survey_2024.csv"</span>,</span>
-<span>    <span class="st">"Added raw survey data"</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Processed data</span></span>
-<span><span class="va">processed_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/processed/survey_2024_clean.csv"</span>,</span>
-<span>    <span class="st">"Added cleaned survey data"</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Analysis results</span></span>
-<span><span class="va">results</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"results/survey_2024_analysis.csv"</span>,</span>
-<span>    <span class="st">"Added analysis results"</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Models with version info</span></span>
-<span><span class="va">model</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"models/xgboost_v2.rds"</span>,</span>
-<span>    <span class="st">"Updated XGBoost model with hyperparameter tuning (accuracy: 0.92)"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Using tryCatch for error handling</span></span>
-<span><span class="va">safe_write</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">path</span>, <span class="va">message</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">path</span>, <span class="va">message</span><span class="op">)</span>,</span>
-<span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="st">"Failed to save data: "</span>, <span class="va">e</span><span class="op">$</span><span class="va">message</span><span class="op">)</span></span>
-<span>      <span class="cn">NULL</span></span>
-<span>    <span class="op">}</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Using purrr::safely</span></span>
-<span><span class="va">safe_write_dvc</span> <span class="op">&lt;-</span> <span class="fu">safely</span><span class="op">(</span><span class="va">write_csv_dvc</span><span class="op">)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">safe_write_dvc</span><span class="op">(</span><span class="va">data</span>, <span class="st">"data/output.csv"</span>, <span class="st">"Saved output"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Check system requirements</span></span>
-<span><span class="fu"><a href="../reference/check_system_requirements.html">check_system_requirements</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="advanced-usage">Advanced Usage<a class="anchor" aria-label="anchor" href="#advanced-usage"></a>
-</h2>
-<div class="section level3">
-<h3 id="conditional-tracking">Conditional Tracking<a class="anchor" aria-label="anchor" href="#conditional-tracking"></a>
-</h3>
-<p>Track files based on conditions:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">process_and_track</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">threshold</span> <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">analyze_data</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">accuracy</span> <span class="op">&gt;</span> <span class="va">threshold</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">results</span> <span class="op">|&gt;</span></span>
-<span>      <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>        <span class="st">"results/high_accuracy.csv"</span>,</span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Results with accuracy %.2f"</span>, <span class="va">results</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span></span>
-<span>      <span class="op">)</span></span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="va">results</span> <span class="op">|&gt;</span></span>
-<span>      <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>        <span class="st">"results/low_accuracy.csv"</span>,</span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Results with accuracy %.2f"</span>, <span class="va">results</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span></span>
-<span>      <span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="tracking-with-metadata">Tracking with Metadata<a class="anchor" aria-label="anchor" href="#tracking-with-metadata"></a>
-</h3>
-<p>Include relevant metadata in commit messages:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">save_model_version</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">version</span>, <span class="va">metrics</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">model</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"models/model_v%s.rds"</span>, <span class="va">version</span><span class="op">)</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
-<span>        <span class="st">"Model v%s: accuracy=%.3f, f1=%.3f"</span>,</span>
-<span>        <span class="va">version</span>, <span class="va">metrics</span><span class="op">$</span><span class="va">accuracy</span>, <span class="va">metrics</span><span class="op">$</span><span class="va">f1</span></span>
-<span>      <span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="integration-with-other-tools">Integration with Other Tools<a class="anchor" aria-label="anchor" href="#integration-with-other-tools"></a>
-</h2>
-<div class="section level3">
-<h3 id="renv-integration">renv Integration<a class="anchor" aria-label="anchor" href="#renv-integration"></a>
-</h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Save environment with model</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>  packages <span class="op">=</span> <span class="fu">renv</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/renv/reference/dependencies.html" class="external-link">dependencies</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"models/model_with_deps.rds"</span>,</span>
-<span>    <span class="st">"Saved model with package dependencies"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="collaboration-workflow">Collaboration Workflow<a class="anchor" aria-label="anchor" href="#collaboration-workflow"></a>
-</h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># After pulling new code with git pull:</span></span>
-<span><span class="va">new_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/raw/new_experiment.csv"</span>,</span>
-<span>    <span class="st">"Add new experiment data"</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">process_data</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"data/processed/new_experiment_processed.csv"</span>,</span>
-<span>    <span class="st">"Add processed experiment data"</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">train_model</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
-<span>    <span class="st">"models/new_experiment_model.rds"</span>,</span>
-<span>    <span class="st">"Add model for new experiment"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
-</h2>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Organize Data</strong>:
 <ul>
-<li>Check out the <a href="getting-started.html">Getting Started
-guide</a> for basic package usage</li>
-<li>Learn about <a href="docker-setup.html">Docker Setup</a> for
-containerized environments</li>
-<li>Explore <a href="custom-templates.html">Custom Templates</a> for
-report styling</li>
-<li>Visit the <a href="../reference/index.html">function reference</a>
-for detailed documentation</li>
+<li>Keep raw data in <code>data/raw/</code>
+</li>
+<li>Store processed data in <code>data/processed/</code>
+</li>
+<li>Save models in <code>models/</code>
+</li>
+<li>Keep metrics in <code>metrics/</code>
+</li>
+<li>Store plots in <code>plots/</code>
+</li>
 </ul>
+</li>
+<li>
+<strong>Use Meaningful Stage Names</strong>:
+<ul>
+<li>Make stage names descriptive</li>
+<li>Use consistent naming conventions</li>
+<li>Include the purpose in the name</li>
+</ul>
+</li>
+<li>
+<strong>Track Dependencies</strong>:
+<ul>
+<li>Always specify input dependencies</li>
+<li>Include R scripts as dependencies</li>
+<li>Track configuration files</li>
+</ul>
+</li>
+<li>
+<strong>Use Parameters</strong>:
+<ul>
+<li>Track important hyperparameters</li>
+<li>Include preprocessing parameters</li>
+<li>Document parameter choices</li>
+</ul>
+</li>
+<li>
+<strong>Commit Regularly</strong>:
+<ul>
+<li>Commit .dvc files to Git</li>
+<li>Use meaningful commit messages</li>
+<li>Push data to remote storage</li>
+</ul>
+</li>
+</ol>
 </div>
 <div class="section level2">
-<h2 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
 </h2>
-<ul>
-<li>Read the function documentation with <code><a href="../reference/dvc_track.html">?dvc_track</a></code>,
-<code><a href="../reference/write_csv_dvc.html">?write_csv_dvc</a></code>, or <code><a href="../reference/write_rds_dvc.html">?write_rds_dvc</a></code>
+<p>Common issues and solutions:</p>
+<ol style="list-style-type: decimal">
+<li>
+<p><strong>DVC not initialized</strong>:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Initialize DVC manually</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="st">"init"</span><span class="op">)</span></span></code></pre></div>
 </li>
-<li>File issues on <a href="https://github.com/sebrauschert/toth/issues" class="external-link">GitHub</a>
+<li>
+<p><strong>File not tracked</strong>:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check if file is tracked</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"status"</span>, <span class="st">"path/to/file"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </li>
-<li>Check the <a href="https://sebrauschert.github.io/toth">package
-website</a> for updates</li>
-</ul>
+<li>
+<p><strong>Pipeline not updating</strong>:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Force pipeline stage rerun</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"repro"</span>, <span class="st">"--force"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol>
+</div>
+<div class="section level2">
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h2>
+<p>DVC integration in <code>toth</code> provides a seamless way to: -
+Track large data files - Create reproducible pipelines - Share data
+across team members - Monitor experiments - Maintain data science
+workflows</p>
+<p>By following these practices, you can create reproducible analyses
+that are easy to share and collaborate on.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

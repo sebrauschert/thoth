@@ -16,6 +16,16 @@
 <meta name="description" content="Provides a framework for setting up reproducible analytics projects with integrated version control for data using DVC (Data Version Control), containerization using Docker, dependency management using renv, and customizable reporting using Quarto. Implements best practices for project organization, workflow management, and reproducible research.">
 <meta property="og:description" content="Provides a framework for setting up reproducible analytics projects with integrated version control for data using DVC (Data Version Control), containerization using Docker, dependency management using renv, and customizable reporting using Quarto. Implements best practices for project organization, workflow management, and reproducible research.">
 <meta property="og:image" content="https://sebrauschert.github.io/toth/logo.png">
+<style>
+code .op, pre .op {
+  unicode-bidi: normal !important;
+  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+}
+.sourceCode .op {
+  content: "|>" !important;
+  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+}
+</style>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,7 +52,7 @@
 <li><a class="dropdown-item" href="articles/getting-started.html">Getting Started</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
-    <li><a class="dropdown-item" href="articles/dvc-tracking.html">DVC with toth</a></li>
+    <li><a class="dropdown-item" href="articles/dvc-tracking.html">Data Version Control</a></li>
     <li><a class="dropdown-item" href="articles/docker-setup.html">Docker Setup</a></li>
     <li><a class="dropdown-item" href="articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="articles/decision-tracking.html">Decision Tracking</a></li>
@@ -89,6 +99,11 @@
 </ul>
 <p>This package is still in active development and should be used with caution.</p>
 </div>
+</div>
+<div class="section level1">
+<h1 id="why-toth">Why Toth?<a class="anchor" aria-label="anchor" href="#why-toth"></a>
+</h1>
+<p><code>toth</code>, named after the ancient Egyptian deity of wisdom and writing, embodies the essence of preserving and documenting knowledge. Just as Toth was revered for recording the deeds of the living and maintaining cosmic order, this R package ensures analytical integrity through comprehensive version control of code, data and analytical decisions. By seamlessly integrating DVC, Git, and Docker, Toth aims to create a robust framework for reproducible analytics, making it effortless to track data lineage, manage dependencies, and share reproducible environments. Whether you’re collaborating on a team project or maintaining consistency in your solo analyses, <code>toth</code> serves as your faithful scribe, ensuring that every step of your analytical journey is documented, reproducible, and trustworthy.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -190,6 +205,7 @@
 <p><sub>Toth icon by <a href="https://www.freepik.com" class="external-link">Freepik</a></sub></p>
 </div>
 </div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
