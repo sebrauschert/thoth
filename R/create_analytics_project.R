@@ -160,16 +160,39 @@ write_gitignore <- function() {
 #' Set up DVC Tracking
 #' @keywords internal
 setup_dvc_tracking <- function() {
-  # Add data directories to DVC
-  system2("dvc", args = c("add", "data/raw"))
-  system2("dvc", args = c("add", "data/processed"))
-  
   # Create .dvcignore
   dvcignore_content <- c(
     "# Add patterns of files dvc should ignore, which are specific to your project",
     "# For example: *.png, *.log"
   )
   writeLines(dvcignore_content, ".dvcignore")
+  
+  # Create .gitignore if it doesn't exist
+  if (!file.exists(".gitignore")) {
+    gitignore_content <- c(
+      ".Rproj.user/",
+      ".Rhistory",
+      ".RData",
+      ".Ruserdata",
+      "*.Rproj",
+      "/data/raw/*",
+      "/data/processed/*",
+      "!/data/raw/.gitkeep",
+      "!/data/processed/.gitkeep",
+      ".env",
+      "renv/library/",
+      "renv/python/",
+      "renv/staging/",
+      "/.dvc/cache"
+    )
+    writeLines(gitignore_content, ".gitignore")
+  }
+  
+  # Create .gitkeep files
+  dir.create("data/raw", recursive = TRUE, showWarnings = FALSE)
+  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
+  file.create("data/raw/.gitkeep")
+  file.create("data/processed/.gitkeep")
 }
 
 #' Set up Docker Configuration
