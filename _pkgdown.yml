@@ -64,6 +64,10 @@ navbar:
         href: articles/custom-templates.html
       - text: Decision Tracking
         href: articles/decision-tracking.html
+      - text: '-------'
+      - text: Examples
+      - text: End-to-End Example
+        href: articles/end-to-end-example.html
     github:
       icon: fab fa-github
       href: https://github.com/sebrauschert/toth
@@ -123,6 +127,7 @@ articles:
   - docker-setup
   - custom-templates
   - decision-tracking
+  - end-to-end-example
 news:
   releases:
   - text: Version 0.0.0.9000

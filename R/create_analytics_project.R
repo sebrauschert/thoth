@@ -175,8 +175,11 @@ setup_dvc_tracking <- function() {
 #' Set up Docker Configuration
 #' @keywords internal
 setup_docker <- function() {
+  # Get current R version
+  r_version <- paste0(R.version$major, ".", R.version$minor)
+  
   dockerfile_content <- c(
-    "FROM rocker/verse:latest",
+    sprintf("FROM rocker/rstudio:%s", r_version),
     "",
     "# Install system dependencies",
     "RUN apt-get update && apt-get install -y \\",
@@ -193,10 +196,14 @@ setup_docker <- function() {
     "COPY . /project/",
     "",
     "# Install R packages",
+    "RUN R -e 'install.packages(\"renv\")'",
     "RUN R -e 'renv::restore()'",
     "",
+    "# Set permissions for RStudio user",
+    "RUN chown -R rstudio:rstudio /project",
+    "",
     "# Command to keep the container running",
-    "CMD [\"/bin/bash\"]"
+    "CMD [\"/init\"]"
   )
   writeLines(dockerfile_content, "docker/Dockerfile")
   
@@ -209,10 +216,14 @@ setup_docker <- function() {
     "      - \"8787:8787\"",
     "    environment:",
     "      - PASSWORD=rstudio",
+    "      - ROOT=TRUE",
     "    volumes:",
-    "      - .:/project"
+    "      - .:/project",
+    "    user: rstudio"
   )
   writeLines(docker_compose_content, "docker/docker-compose.yml")
+  
+  cli::cli_alert_success("Docker configuration created with R version {r_version}")
 }
 
 #' Write Project README
