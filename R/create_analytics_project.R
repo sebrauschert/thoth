@@ -22,12 +22,21 @@ create_analytics_project <- function(path,
                                    use_docker = TRUE,
                                    use_renv = TRUE,
                                    git_init = TRUE,
-                                   open = TRUE) {
+                                   open = rlang::is_interactive()) {
   # Check if required system tools are available
   check_system_requirements(use_dvc, use_docker)
   
-  # Create project directory
-  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  # Normalize path
+  path <- normalizePath(path, mustWork = FALSE)
+  
+  # Create the basic project using usethis
+  usethis::create_project(
+    path = path,
+    rstudio = TRUE,  # Always create as RStudio project
+    open = FALSE     # We'll handle opening later
+  )
+  
+  # Change to project directory for remaining setup
   old_wd <- setwd(path)
   on.exit(setwd(old_wd))
 
@@ -42,7 +51,7 @@ create_analytics_project <- function(path,
   
   lapply(dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 
-  # Initialize Git if requested
+  # Initialize Git if requested (after project creation)
   if (git_init) {
     system2("git", args = c("init"))
     write_gitignore()
@@ -58,11 +67,8 @@ create_analytics_project <- function(path,
   if (use_docker) {
     setup_docker()
   }
-
-  # Create R project file and open in RStudio if requested
-  proj_path <- usethis::create_project(path, open = FALSE)
   
-  # Initialize renv if requested (after project creation)
+  # Initialize renv if requested
   if (use_renv) {
     renv::init()
   }
@@ -76,11 +82,16 @@ create_analytics_project <- function(path,
   # Success message
   cli::cli_alert_success("Analytics project successfully created at {.path {path}}")
   
-  # Open the project in RStudio if requested
-  if (open && rstudioapi::isAvailable()) {
-    rstudioapi::openProject(path, newSession = TRUE)
-  } else if (open) {
-    cli::cli_alert_info("Project created but not opened (RStudio not available)")
+  # Open the project if requested
+  if (open) {
+    if (rstudioapi::isAvailable()) {
+      rstudioapi::openProject(path, newSession = TRUE)
+    } else {
+      # Set working directory and active project
+      setwd(path)
+      usethis::proj_set(path)
+      cli::cli_alert_info("Project activated. Working directory changed to: {.path {path}}")
+    }
   }
   
   invisible(path)
