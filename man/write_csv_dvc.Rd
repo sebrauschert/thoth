@@ -4,7 +4,17 @@
 \alias{write_csv_dvc}
 \title{Write CSV with DVC tracking}
 \usage{
-write_csv_dvc(x, file, message = NULL, ...)
+write_csv_dvc(
+  x,
+  file,
+  message = NULL,
+  stage_name = NULL,
+  deps = NULL,
+  metrics = FALSE,
+  plots = FALSE,
+  params = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A data frame to write}
@@ -13,6 +23,16 @@ write_csv_dvc(x, file, message = NULL, ...)
 
 \item{message}{Optional DVC commit message}
 
+\item{stage_name}{Optional name for the DVC stage. If provided, creates a pipeline stage.}
+
+\item{deps}{Character vector of dependency files (optional, for pipeline stages)}
+
+\item{metrics}{Logical. Whether to mark the output as a DVC metric}
+
+\item{plots}{Logical. Whether to mark the output as a DVC plot}
+
+\item{params}{Named list of parameters for the stage (optional)}
+
 \item{...}{Additional arguments passed to readr::write_csv}
 }
 \value{
@@ -20,9 +40,19 @@ The input data frame (invisibly) to allow for further piping
 }
 \description{
 A wrapper around readr::write_csv that automatically tracks the output file with DVC
+and optionally creates a DVC pipeline stage.
 }
 \examples{
 \dontrun{
+# Simple tracking
 data |> write_csv_dvc("data/processed/mydata.csv", "Updated data")
+
+# As part of a pipeline
+data |> write_csv_dvc(
+  "data/processed/results.csv",
+  stage_name = "process_data",
+  deps = "data/raw/input.csv",
+  params = list(threshold = 0.5)
+)
 }
 }

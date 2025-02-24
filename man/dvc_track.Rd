@@ -21,7 +21,7 @@ write functions. It is designed to be used in a pipe chain after write operation
 \examples{
 \dontrun{
 data |>
-  write_csv("data/processed/mydata.csv") |>
+  readr::write_csv("data/processed/mydata.csv") |>
   dvc_track("Updated processed data")
 }
 }

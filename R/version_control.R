@@ -119,11 +119,20 @@ dvc_push <- function(path = NULL, remote = NULL) {
 
 #' Add Files to Git
 #'
+#' Adds file contents to the index (staging area).
+#'
 #' @param path Character vector of file paths to add
 #' @param force Logical. Whether to force add ignored files. Default is FALSE.
 #'
 #' @return Invisibly returns the added paths
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_add("analysis.R")
+#' git_add(c("data/results.csv", "plots/figure1.png"))
+#' git_add(".", force = FALSE)  # add all changes
+#' }
 git_add <- function(path, force = FALSE) {
   check_git()
   
@@ -141,11 +150,19 @@ git_add <- function(path, force = FALSE) {
 
 #' Commit Changes to Git
 #'
+#' Records changes to the repository.
+#'
 #' @param message Commit message
 #' @param all Logical. Whether to automatically stage modified and deleted files. Default is FALSE.
 #'
 #' @return Invisibly returns TRUE if successful
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_commit("Add analysis script")
+#' git_commit("Update results", all = TRUE)
+#' }
 git_commit <- function(message, all = FALSE) {
   check_git()
   
@@ -175,4 +192,234 @@ check_git <- function() {
   if (system2("which", "git", stdout = NULL, stderr = NULL) != 0) {
     stop("Git is not installed. Please install it first.")
   }
+}
+
+#' Get Git Status
+#'
+#' Shows the working tree status, indicating which files have been modified,
+#' added, deleted, or untracked.
+#'
+#' @param short Logical. Whether to show status in short format. Default is TRUE.
+#'
+#' @return Character vector containing status output
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_status()
+#' git_status(short = FALSE)  # detailed output
+#' }
+git_status <- function(short = TRUE) {
+  check_git()
+  
+  args <- c("status", if(short) "--short" else NULL)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to get Git status")
+    return(invisible(NULL))
+  }
+  
+  if (length(result) == 0) {
+    cli::cli_alert_info("Working directory clean")
+  } else {
+    cat(paste(result, collapse = "\n"), "\n")
+  }
+  
+  invisible(result)
+}
+
+#' Pull Changes from Git Remote
+#'
+#' Fetches changes from a remote repository and integrates them into the current branch.
+#'
+#' @param remote Name of the remote. Default is NULL (uses default remote).
+#' @param branch Name of the branch. Default is NULL (uses current branch).
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_pull()
+#' git_pull("origin", "main")
+#' }
+git_pull <- function(remote = NULL, branch = NULL) {
+  check_git()
+  
+  args <- c("pull", remote, branch)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to pull changes from remote")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Successfully pulled changes")
+  invisible(TRUE)
+}
+
+#' Push Changes to Git Remote
+#'
+#' Uploads local branch commits to a remote repository.
+#'
+#' @param remote Name of the remote. Default is NULL (uses default remote).
+#' @param branch Name of the branch. Default is NULL (uses current branch).
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_push()
+#' git_push("origin", "feature/new-analysis")
+#' }
+git_push <- function(remote = NULL, branch = NULL) {
+  check_git()
+  
+  args <- c("push", remote, branch)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to push changes to remote")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Successfully pushed changes")
+  invisible(TRUE)
+}
+
+#' Create a New Git Branch
+#'
+#' Creates a new branch and optionally switches to it.
+#'
+#' @param branch_name Name of the new branch
+#' @param checkout Logical. Whether to checkout the new branch. Default is TRUE.
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_branch("feature/new-analysis")
+#' git_branch("hotfix/bug-123", checkout = FALSE)
+#' }
+git_branch <- function(branch_name, checkout = TRUE) {
+  check_git()
+  
+  args <- c("branch", branch_name)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to create branch: {branch_name}")
+    return(invisible(FALSE))
+  }
+  
+  if (checkout) {
+    args <- c("checkout", branch_name)
+    result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+    
+    if (!is.null(attr(result, "status"))) {
+      cli::cli_alert_warning("Failed to checkout branch: {branch_name}")
+      return(invisible(FALSE))
+    }
+  }
+  
+  cli::cli_alert_success("Created{if (checkout) ' and checked out' else ''} branch: {branch_name}")
+  invisible(TRUE)
+}
+
+#' Checkout a Git Branch
+#'
+#' Switches to a specified branch, optionally creating it if it doesn't exist.
+#'
+#' @param branch_name Name of the branch to checkout
+#' @param create Logical. Whether to create the branch if it doesn't exist. Default is FALSE.
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_checkout("main")
+#' git_checkout("feature/new-analysis", create = TRUE)
+#' }
+git_checkout <- function(branch_name, create = FALSE) {
+  check_git()
+  
+  args <- c("checkout", if(create) "-b" else NULL, branch_name)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to checkout branch: {branch_name}")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Checked out branch: {branch_name}")
+  invisible(TRUE)
+}
+
+#' List Git Branches
+#'
+#' Shows a list of all branches in the repository.
+#'
+#' @param all Logical. Whether to show all branches (including remotes). Default is FALSE.
+#'
+#' @return Character vector of branch names
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_branch_list()
+#' git_branch_list(all = TRUE)  # include remote branches
+#' }
+git_branch_list <- function(all = FALSE) {
+  check_git()
+  
+  args <- c("branch", if(all) "-a" else NULL)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to list branches")
+    return(invisible(NULL))
+  }
+  
+  # Clean up branch names
+  branches <- gsub("^[\\* ]\\s*", "", result)
+  cat(paste(result, collapse = "\n"), "\n")
+  
+  invisible(branches)
+}
+
+#' Get Git Log
+#'
+#' Shows the commit logs.
+#'
+#' @param n Number of commits to show. Default is 10.
+#' @param oneline Logical. Whether to show each commit on one line. Default is TRUE.
+#'
+#' @return Character vector containing log output
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_log()
+#' git_log(n = 20, oneline = FALSE)  # detailed log
+#' }
+git_log <- function(n = 10, oneline = TRUE) {
+  check_git()
+  
+  args <- c("log", 
+            if(oneline) "--oneline" else NULL,
+            if(!is.null(n)) paste0("-", n) else NULL)
+  
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to get Git log")
+    return(invisible(NULL))
+  }
+  
+  cat(paste(result, collapse = "\n"), "\n")
+  invisible(result)
 } 

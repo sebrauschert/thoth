@@ -1,0 +1,209 @@
+---
+title: "Git Integration with toth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Git Integration with toth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Introduction
+
+Version control is essential for reproducible analytics. While Git commands can be run directly from the terminal, `toth` provides convenient R functions for common Git operations. This integration allows you to manage your version control directly from your R scripts or console.
+
+## Basic Git Operations
+
+### Checking Repository Status
+
+Use `git_status()` to see which files have been modified:
+
+```r
+library(toth)
+
+# Check status (short format)
+git_status()
+
+# Check status with full details
+git_status(short = FALSE)
+```
+
+### Staging and Committing Changes
+
+Add files to the staging area and commit changes:
+
+```r
+# Stage specific files
+git_add("analysis.R")
+git_add(c("data/processed/results.csv", "plots/figure1.png"))
+
+# Stage all modified files
+git_add(".", force = FALSE)
+
+# Commit staged changes
+git_commit("Add initial analysis script")
+
+# Stage and commit in one step
+git_commit("Update results", all = TRUE)
+```
+
+## Branch Management
+
+### Working with Branches
+
+Create, switch, and manage branches:
+
+```r
+# List all branches
+git_branch_list()
+
+# Include remote branches
+git_branch_list(all = TRUE)
+
+# Create a new branch
+git_branch("feature/new-analysis")
+
+# Switch to existing branch
+git_checkout("main")
+
+# Create and switch to new branch
+git_checkout("feature/bugfix", create = TRUE)
+```
+
+## Remote Operations
+
+### Syncing with Remote Repository
+
+Push and pull changes:
+
+```r
+# Pull latest changes
+git_pull()
+
+# Pull from specific remote and branch
+git_pull("origin", "main")
+
+# Push changes
+git_push()
+
+# Push to specific remote and branch
+git_push("origin", "feature/new-analysis")
+```
+
+## Viewing History
+
+### Checking Commit History
+
+View repository history:
+
+```r
+# View recent commits
+git_log()
+
+# View more commits
+git_log(n = 20)
+
+# View detailed log
+git_log(oneline = FALSE)
+```
+
+## Integration with DVC
+
+The Git functions in `toth` work seamlessly with DVC tracking:
+
+```r
+# Add and track a data file with DVC
+dvc_add("data/raw/large_dataset.csv")
+
+# Stage the .dvc file
+git_add("data/raw/large_dataset.csv.dvc")
+
+# Commit the tracking file
+git_commit("Add large dataset tracking")
+
+# Push both Git changes and DVC data
+git_push()
+dvc_push()
+```
+
+## Best Practices
+
+1. **Regular Commits**
+   - Make small, focused commits
+   - Write clear commit messages
+   - Use present tense in commit messages
+
+2. **Branch Management**
+   - Create feature branches for new work
+   - Keep main/master branch stable
+   - Delete merged feature branches
+
+3. **Syncing**
+   - Pull changes before starting new work
+   - Push changes regularly
+   - Handle conflicts promptly
+
+4. **Integration with Analysis Workflow**
+   ```r
+   # Example workflow
+   library(toth)
+   
+   # Start new feature
+   git_checkout("feature/analysis", create = TRUE)
+   
+   # Do some work...
+   process_data()
+   
+   # Track changes
+   git_add("R/analysis.R")
+   git_commit("Add data processing function")
+   
+   # Push changes
+   git_push("origin", "feature/analysis")
+   ```
+
+## Common Patterns
+
+### Feature Development
+
+```r
+# Start new feature
+git_checkout("main")
+git_pull()
+git_checkout("feature/new-analysis", create = TRUE)
+
+# Work on feature...
+
+# Commit changes
+git_add(".")
+git_commit("Complete new analysis")
+
+# Push to remote
+git_push("origin", "feature/new-analysis")
+```
+
+### Hotfix
+
+```r
+# Create hotfix branch
+git_checkout("main")
+git_checkout("hotfix/bug-123", create = TRUE)
+
+# Fix bug...
+
+# Commit and push
+git_add("R/bugfix.R")
+git_commit("Fix calculation error")
+git_push()
+```
+
+## Conclusion
+
+The Git integration in `toth` provides a convenient way to manage version control directly from R. By combining these functions with your analysis workflow, you can maintain a clean and traceable project history. 

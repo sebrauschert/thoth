@@ -58,6 +58,8 @@ navbar:
       - text: Features
       - text: Data Version Control
         href: articles/dvc-tracking.html
+      - text: Git Integration
+        href: articles/git-integration.html
       - text: Docker Setup
         href: articles/docker-setup.html
       - text: Custom Templates
@@ -100,8 +102,26 @@ reference:
   desc: Functions for tracking data and managing DVC pipelines using tidyverse-style functions
   contents:
   - dvc_track
+  - dvc_add
+  - dvc_commit
+  - dvc_pull
+  - dvc_push
   - write_csv_dvc
   - write_rds_dvc
+  - dvc_stage
+  - version_control
+- title: Git Integration
+  desc: Functions for managing Git version control
+  contents:
+  - git_status
+  - git_add
+  - git_commit
+  - git_push
+  - git_pull
+  - git_branch
+  - git_checkout
+  - git_branch_list
+  - git_log
 - title: Decision Tracking
   desc: Functions for tracking human decisions in analyses
   contents:
@@ -124,6 +144,7 @@ articles:
 - title: Features
   contents:
   - dvc-tracking
+  - git-integration
   - docker-setup
   - custom-templates
   - decision-tracking

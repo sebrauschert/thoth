@@ -74,7 +74,10 @@ processed_data <- read_csv("data/raw/iris.csv") %>%
   janitor::clean_names() %>%
   mutate(
     species = as.factor(species),
-    across(where(is.numeric), scale)
+    # Scale numeric columns properly
+    across(where(is.numeric), function(x) {
+      as.numeric(scale(x))
+    })
   )
 
 # Create train/test split

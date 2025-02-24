@@ -9,7 +9,8 @@ create_analytics_project(
   use_dvc = TRUE,
   use_docker = TRUE,
   use_renv = TRUE,
-  git_init = TRUE
+  git_init = TRUE,
+  open = rlang::is_interactive()
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ create_analytics_project(
 \item{use_renv}{Logical. Whether to initialize renv. Default is TRUE.}
 
 \item{git_init}{Logical. Whether to initialize git repository. Default is TRUE.}
+
+\item{open}{Logical. Whether to open the new project in RStudio. Default is TRUE.}
 }
 \value{
 Invisibly returns the path to the created project.
