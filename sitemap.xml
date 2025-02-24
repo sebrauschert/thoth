@@ -3,6 +3,7 @@
 <url><loc>https://sebrauschert.github.io/toth/CONTRIBUTING.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/LICENSE-text.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/articles/custom-templates.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/articles/decision-tracking.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/articles/docker-setup.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/articles/dvc-tracking.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/articles/getting-started.html</loc></url>
@@ -16,11 +17,18 @@
 <url><loc>https://sebrauschert.github.io/toth/reference/create_custom_css.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/create_quarto_template.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/create_template_yaml.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/decision_tracking.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/dvc_track.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/example_projects.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/export_decision_tree.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/generate_methods_section.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/index.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/initialize_decision_tree.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/record_decision.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/setup_docker.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/setup_dvc_tracking.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/setup_quarto_template.html</loc></url>
+<url><loc>https://sebrauschert.github.io/toth/reference/toth-package.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/write_csv_dvc.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/write_gitignore.html</loc></url>
 <url><loc>https://sebrauschert.github.io/toth/reference/write_rds_dvc.html</loc></url>
