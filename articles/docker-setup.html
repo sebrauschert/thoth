@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Docker Setup • toth</title>
+<title>Docker Setup with toth • toth</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_Pro-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Docker Setup">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Docker Setup with toth">
 <style>
 code .op, pre .op {
   unicode-bidi: normal !important;
@@ -57,6 +57,7 @@ code .op, pre .op {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/end-to-end-example.html">End-to-End Example</a></li>
+    <li><a class="dropdown-item" href="../articles/bioinformatics-example.html">RNA-seq Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -85,7 +86,7 @@ code .op, pre .op {
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Docker Setup</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Docker Setup with toth</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sebrauschert/toth/blob/main/vignettes/docker-setup.Rmd" class="external-link"><code>vignettes/docker-setup.Rmd</code></a></small>
@@ -95,234 +96,249 @@ code .op, pre .op {
     
     
 <div class="section level2">
-<h2 id="introduction-to-docker-with-r">Introduction to Docker with R<a class="anchor" aria-label="anchor" href="#introduction-to-docker-with-r"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Docker provides a way to package your R environment, dependencies,
-and code into a reproducible container. <code>toth</code> automatically
-sets up a Docker configuration that includes R, RStudio Server, and all
-necessary tools for reproducible analytics.</p>
+<p>Docker containerization is essential for reproducible analytics.
+<code>toth</code> automatically sets up a Docker environment that
+matches your local R setup, ensuring that your analysis can be easily
+shared and reproduced by others.</p>
 </div>
 <div class="section level2">
-<h2 id="understanding-the-default-setup">Understanding the Default Setup<a class="anchor" aria-label="anchor" href="#understanding-the-default-setup"></a>
+<h2 id="automatic-docker-configuration">Automatic Docker Configuration<a class="anchor" aria-label="anchor" href="#automatic-docker-configuration"></a>
 </h2>
-<p>When you create a new project with <code>toth</code>, it generates
-two key Docker files:</p>
+<p>When you create a new analytics project with <code>toth</code>, it
+automatically:</p>
+<ol style="list-style-type: decimal">
+<li>Detects your current R version</li>
+<li>Creates a Dockerfile based on the matching
+<code>rocker/rstudio</code> image</li>
+<li>Sets up a docker-compose configuration for easy deployment</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create new project with Docker enabled</span></span>
+<span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
+<span>  <span class="st">"my_analysis"</span>,</span>
+<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># Docker is enabled by default</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="version-matching">Version Matching<a class="anchor" aria-label="anchor" href="#version-matching"></a>
+</h2>
+<p>One of the key features of <code>toth</code>’s Docker integration is
+automatic R version matching:</p>
+<ul>
+<li>The Dockerfile uses exactly the same R version as your local
+installation</li>
+<li>This ensures that your analysis environment can be perfectly
+replicated</li>
+<li>Makes it easy to share your complete analysis environment with
+collaborators</li>
+</ul>
+<p>For example, if you’re using R 4.3.2, the generated Dockerfile will
+start with:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="kw">FROM</span> rocker/rstudio:4.3.2</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="docker-configuration">Docker Configuration<a class="anchor" aria-label="anchor" href="#docker-configuration"></a>
+</h2>
+<p>The setup creates two key files:</p>
 <div class="section level3">
-<h3 id="dockerfile">Dockerfile<a class="anchor" aria-label="anchor" href="#dockerfile"></a>
+<h3 id="dockerfile">1. Dockerfile<a class="anchor" aria-label="anchor" href="#dockerfile"></a>
 </h3>
-<div class="sourceCode" id="cb1"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="kw">FROM</span> rocker/verse:latest</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Install system dependencies</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="dt">\</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    python3-pip <span class="dt">\</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /var/lib/apt/lists/<span class="pp">*</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Install DVC</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">pip3</span> install dvc</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Create working directory</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="kw">WORKDIR</span> /project</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># Copy project files</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="kw">COPY</span> . /project/</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co"># Install R packages</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">R</span> <span class="at">-e</span> <span class="st">'renv::restore()'</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co"># Command to keep the container running</span></span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"/bin/bash"</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Uses your exact R version</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="kw">FROM</span> rocker/rstudio:${R_VERSION}</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Install system dependencies</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    python3-pip <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /var/lib/apt/lists/<span class="pp">*</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># Install DVC</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">pip3</span> install dvc</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># Create working directory</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="kw">WORKDIR</span> /project</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co"># Copy project files</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="kw">COPY</span> . /project/</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># Install R packages</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">R</span> <span class="at">-e</span> <span class="st">'install.packages("renv")'</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">R</span> <span class="at">-e</span> <span class="st">'renv::restore()'</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co"># Set permissions for RStudio user</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">chown</span> <span class="at">-R</span> rstudio:rstudio /project</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co"># Command to keep the container running</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"/init"</span>]</span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="docker-compose-yml">docker-compose.yml<a class="anchor" aria-label="anchor" href="#docker-compose-yml"></a>
+<h3 id="docker-compose-yml">2. docker-compose.yml<a class="anchor" aria-label="anchor" href="#docker-compose-yml"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="at">  </span><span class="fu">rstudio</span><span class="kw">:</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> .</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"8787:8787"</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> PASSWORD=rstudio</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> .:/project</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="at">  </span><span class="fu">rstudio</span><span class="kw">:</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"8787:8787"</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> PASSWORD=rstudio</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ROOT=TRUE</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> .:/project</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="at">    </span><span class="fu">user</span><span class="kw">:</span><span class="at"> rstudio</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+<h2 id="using-the-docker-environment">Using the Docker Environment<a class="anchor" aria-label="anchor" href="#using-the-docker-environment"></a>
 </h2>
 <div class="section level3">
 <h3 id="starting-the-environment">Starting the Environment<a class="anchor" aria-label="anchor" href="#starting-the-environment"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Build and start the container</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Access RStudio Server at http://localhost:8787</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># Username: rstudio</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># Password: rstudio</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># From your project directory</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="ex">docker-compose</span> up <span class="at">-d</span></span></code></pre></div>
+<p>Then visit <code>http://localhost:8787</code> in your browser: -
+Username: rstudio - Password: rstudio</p>
 </div>
 <div class="section level3">
 <h3 id="stopping-the-environment">Stopping the Environment<a class="anchor" aria-label="anchor" href="#stopping-the-environment"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">docker</span> compose down</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">docker-compose</span> down</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="customizing-the-environment">Customizing the Environment<a class="anchor" aria-label="anchor" href="#customizing-the-environment"></a>
+<h2 id="benefits-of-version-matched-containers">Benefits of Version-Matched Containers<a class="anchor" aria-label="anchor" href="#benefits-of-version-matched-containers"></a>
 </h2>
-<div class="section level3">
-<h3 id="adding-system-dependencies">Adding System Dependencies<a class="anchor" aria-label="anchor" href="#adding-system-dependencies"></a>
-</h3>
-<p>Modify the Dockerfile to include additional system packages:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="dt">\</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>    python3-pip <span class="dt">\</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    libgdal-dev <span class="dt">\</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    libproj-dev <span class="dt">\</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /var/lib/apt/lists/<span class="pp">*</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="adding-r-packages">Adding R Packages<a class="anchor" aria-label="anchor" href="#adding-r-packages"></a>
-</h3>
 <ol style="list-style-type: decimal">
 <li>
-<p><strong>Using renv</strong> (Recommended):</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># In R</span></span>
-<span><span class="fu">renv</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/renv/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"package_name"</span><span class="op">)</span></span>
-<span><span class="fu">renv</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/renv/reference/snapshot.html" class="external-link">snapshot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<strong>Perfect Reproducibility</strong>
+<ul>
+<li>Exact same R version as development</li>
+<li>All dependencies installed automatically</li>
+<li>System-level configurations matched</li>
+</ul>
 </li>
 <li>
-<p><strong>Direct Installation</strong> (Dockerfile):</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">R</span> <span class="at">-e</span> <span class="st">'install.packages("package_name")'</span></span></code></pre></div>
+<strong>Easy Sharing</strong>
+<ul>
+<li>Share your complete analysis environment</li>
+<li>Recipients don’t need to match your R setup</li>
+<li>Just need Docker installed</li>
+</ul>
+</li>
+<li>
+<strong>Collaboration</strong>
+<ul>
+<li>Team members can run identical environments</li>
+<li>No “works on my machine” problems</li>
+<li>Consistent results across systems</li>
+</ul>
+</li>
+<li>
+<strong>Long-term Preservation</strong>
+<ul>
+<li>Archive the exact environment with your analysis</li>
+<li>Future-proof your work</li>
+<li>Easy to spin up years later</li>
+</ul>
 </li>
 </ol>
 </div>
-<div class="section level3">
-<h3 id="customizing-rstudio-settings">Customizing RStudio Settings<a class="anchor" aria-label="anchor" href="#customizing-rstudio-settings"></a>
-</h3>
-<p>Add custom RStudio preferences:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="kw">COPY</span> rstudio-prefs.json /home/rstudio/.config/rstudio/rstudio-prefs.json</span></code></pre></div>
-</div>
-</div>
 <div class="section level2">
-<h2 id="advanced-configuration">Advanced Configuration<a class="anchor" aria-label="anchor" href="#advanced-configuration"></a>
+<h2 id="example-workflow">Example Workflow<a class="anchor" aria-label="anchor" href="#example-workflow"></a>
 </h2>
-<div class="section level3">
-<h3 id="environment-variables">Environment Variables<a class="anchor" aria-label="anchor" href="#environment-variables"></a>
-</h3>
-<p>Use a <code>.env</code> file for configuration:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># .env</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="va">POSTGRES_PASSWORD</span><span class="op">=</span>secret</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="va">AWS_ACCESS_KEY_ID</span><span class="op">=</span>your_key</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="va">AWS_SECRET_ACCESS_KEY</span><span class="op">=</span>your_secret</span></code></pre></div>
-<p>Update docker-compose.yml:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="at">  </span><span class="fu">rstudio</span><span class="kw">:</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="at">    </span><span class="fu">env_file</span><span class="kw">:</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> .env</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="adding-services">Adding Services<a class="anchor" aria-label="anchor" href="#adding-services"></a>
-</h3>
-<p>Extend docker-compose.yml to include additional services:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="at">  </span><span class="fu">rstudio</span><span class="kw">:</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">    # ... existing config ...</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="at">  </span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres</span><span class="kw">:</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:latest</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> POSTGRES_PASSWORD=${POSTGRES_PASSWORD}</span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres_data:/var/lib/postgresql/data</span></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres_data</span><span class="kw">:</span></span></code></pre></div>
-</div>
+<ol style="list-style-type: decimal">
+<li>
+<p><strong>Development</strong></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create project with Docker</span></span>
+<span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span><span class="st">"analysis"</span>, use_docker <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Work on your analysis locally</span></span>
+<span><span class="co"># All dependencies are tracked in renv.lock</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Sharing</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Share your project including docker/ directory</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">git</span> push origin main</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># Recipients can simply:</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository<span class="op">&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="bu">cd</span> <span class="op">&lt;</span>repository<span class="op">&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="ex">docker-compose</span> up <span class="at">-d</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Collaboration</strong></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Team members can work in identical environments</span></span>
+<span><span class="co"># Regardless of their local R setup</span></span></code></pre></div>
+</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
 </h2>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Security</strong>
+<strong>Version Control</strong>
 <ul>
-<li>Never commit sensitive information in Dockerfile</li>
-<li>Use .env files for secrets (and add to .gitignore)</li>
-<li>Regularly update base images</li>
+<li>Keep Dockerfile and docker-compose.yml in version control</li>
+<li>Update them when dependencies change</li>
+<li>Document any custom modifications</li>
 </ul>
 </li>
 <li>
-<strong>Performance</strong>
+<strong>Testing</strong>
 <ul>
-<li>Use .dockerignore to exclude unnecessary files</li>
-<li>Layer your Dockerfile efficiently</li>
-<li>Consider multi-stage builds for complex setups</li>
+<li>Regularly test the Docker build</li>
+<li>Verify that analysis runs in container</li>
+<li>Check for reproducibility</li>
 </ul>
 </li>
 <li>
-<strong>Development Workflow</strong>
+<strong>Documentation</strong>
 <ul>
-<li>Use volumes for development</li>
-<li>Set up proper user permissions</li>
-<li>Configure Git to ignore Docker-specific files</li>
+<li>Document any special setup requirements</li>
+<li>Include Docker-specific instructions in README</li>
+<li>Note system requirements</li>
 </ul>
 </li>
 </ol>
 </div>
 <div class="section level2">
-<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
+<h2 id="customization">Customization<a class="anchor" aria-label="anchor" href="#customization"></a>
 </h2>
-<p>Common issues and solutions:</p>
+<p>You can customize the Docker setup by modifying:</p>
 <ol style="list-style-type: decimal">
 <li>
-<p><strong>Permission Issues</strong></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Fix file ownership</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> 1000:1000 .</span></code></pre></div>
+<strong>Dockerfile</strong>
+<ul>
+<li>Add system dependencies</li>
+<li>Install additional tools</li>
+<li>Modify environment settings</li>
+</ul>
 </li>
 <li>
-<p><strong>Port Conflicts</strong></p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Change port mapping in docker-compose.yml</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">ports</span><span class="kw">:</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="st">"8788:8787"</span><span class="co">  # Use different host port</span></span></code></pre></div>
-</li>
-<li>
-<p><strong>Memory Issues</strong></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="at">  </span><span class="fu">rstudio</span><span class="kw">:</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="at">    </span><span class="fu">mem_limit</span><span class="kw">:</span><span class="at"> 4g</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="at">    </span><span class="fu">mem_reservation</span><span class="kw">:</span><span class="at"> 2g</span></span></code></pre></div>
+<strong>docker-compose.yml</strong>
+<ul>
+<li>Change port mappings</li>
+<li>Add environment variables</li>
+<li>Configure volumes</li>
+</ul>
 </li>
 </ol>
 </div>
 <div class="section level2">
-<h2 id="integration-with-toth">Integration with toth<a class="anchor" aria-label="anchor" href="#integration-with-toth"></a>
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p><code>toth</code> provides convenient setup and configuration:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create project with Docker support</span></span>
-<span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
-<span>  <span class="st">"my_project"</span>,</span>
-<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># This sets up:</span></span>
-<span><span class="co"># - Dockerfile with R and system dependencies</span></span>
-<span><span class="co"># - docker-compose.yml for easy orchestration</span></span>
-<span><span class="co"># - .dockerignore for proper file exclusion</span></span>
-<span><span class="co"># - Default RStudio configuration</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
-</h2>
-<ul>
-<li>Explore Docker’s <a href="https://docs.docker.com" class="external-link">official
-documentation</a>
-</li>
-<li>Learn about Docker Compose features</li>
-<li>Set up continuous integration with Docker</li>
-<li>Create custom base images for your needs</li>
-</ul>
+<p><code>toth</code>’s Docker integration with automatic R version
+matching ensures that your analytics projects are: - Perfectly
+reproducible - Easy to share - Future-proof - Collaboration-ready</p>
+<p>By automatically creating a Docker environment that matches your
+development setup, <code>toth</code> removes the complexity of
+environment management while ensuring your analysis can be reproduced
+exactly as intended.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
