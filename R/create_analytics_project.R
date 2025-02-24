@@ -71,6 +71,13 @@ create_analytics_project <- function(path,
   # Initialize renv if requested
   if (use_renv) {
     renv::init()
+    
+    # Install toth in the new project
+    cli::cli_alert_info("Installing toth package in the project environment...")
+    renv::install("sebrauschert/toth")
+    
+    # Take a snapshot
+    renv::snapshot(prompt = FALSE)
   }
 
   # Create README

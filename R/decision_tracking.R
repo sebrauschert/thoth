@@ -138,10 +138,24 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
   # Write output based on format
   switch(format,
          "md" = writeLines(methods, output_path),
-         "html" = rmarkdown::render(text = methods, output_file = output_path, 
-                                  output_format = "html_document"),
-         "pdf" = rmarkdown::render(text = methods, output_file = output_path, 
-                                 output_format = "pdf_document"),
+         "html" = {
+           # Create temporary Rmd file
+           temp_rmd <- tempfile(fileext = ".Rmd")
+           writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
+           rmarkdown::render(temp_rmd, output_file = output_path, 
+                           output_format = "html_document",
+                           quiet = TRUE)
+           unlink(temp_rmd)  # Clean up temp file
+         },
+         "pdf" = {
+           # Create temporary Rmd file
+           temp_rmd <- tempfile(fileext = ".Rmd")
+           writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
+           rmarkdown::render(temp_rmd, output_file = output_path, 
+                           output_format = "pdf_document",
+                           quiet = TRUE)
+           unlink(temp_rmd)  # Clean up temp file
+         },
          stop("Unsupported format. Use 'md', 'html', or 'pdf'.")
   )
   
