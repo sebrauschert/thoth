@@ -7,7 +7,7 @@ articles:
   docker-setup: docker-setup.html
   dvc-tracking: dvc-tracking.html
   getting-started: getting-started.html
-last_built: 2025-02-24T06:17Z
+last_built: 2025-02-24T06:21Z
 urls:
   reference: https://sebrauschert.github.io/toth/reference
   article: https://sebrauschert.github.io/toth/articles
