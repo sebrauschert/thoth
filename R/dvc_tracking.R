@@ -118,10 +118,30 @@ write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
   
   # Create DVC stage if stage_name is provided
   if (!is.null(stage_name)) {
+    # Construct a proper R command that includes all necessary parts
+    cmd_parts <- c(
+      "library(readr);",
+      if (!is.null(deps)) sprintf("input_data <- read_csv('%s');", deps[1]) else NULL,
+      # Add any data transformations based on parameters
+      if (!is.null(params)) {
+        param_code <- paste(
+          "transformed_data <- input_data %>%",
+          sprintf("  # Parameters: %s", 
+                 paste(names(params), params, sep = "=", collapse = ", ")),
+          sep = "\n"
+        )
+      } else {
+        "transformed_data <- input_data"
+      },
+      sprintf("write_csv(transformed_data, '%s')", file)
+    )
+    
+    # Combine into a single command
+    cmd <- sprintf("Rscript -e '%s'", paste(cmd_parts, collapse = " "))
+    
     dvc_stage(
       name = stage_name,
-      cmd = sprintf("Rscript -e 'readr::write_csv(readr::read_csv(\"%s\"), \"%s\")'", 
-                   if(!is.null(deps)) deps[1] else "NA", file),
+      cmd = cmd,
       deps = deps,
       outs = file,
       metrics = metrics,
@@ -242,10 +262,22 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
     args <- c(args, unlist(lapply(outs, function(o) c("-p", o))))
   }
   
-  # Add parameters
+  # Add parameters with proper formatting
   if (!is.null(params)) {
     param_args <- mapply(
-      function(name, value) sprintf("-p %s=%s", name, value),
+      function(name, value) {
+        # Format the parameter value based on its type
+        formatted_value <- if (is.character(value)) {
+          shQuote(value)
+        } else if (is.numeric(value)) {
+          as.character(value)
+        } else if (is.logical(value)) {
+          tolower(as.character(value))
+        } else {
+          as.character(value)
+        }
+        sprintf("-p %s=%s", name, formatted_value)
+      },
       names(params),
       params,
       SIMPLIFY = FALSE
@@ -258,8 +290,8 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
     args <- c(args, "--always-changed")
   }
   
-  # Add the command
-  args <- c(args, "--no-exec", cmd)
+  # Add the command with proper quoting
+  args <- c(args, "--no-exec", shQuote(cmd))
   
   # Run the command
   result <- system2("dvc", args, stdout = TRUE, stderr = TRUE)
