@@ -117,25 +117,34 @@ write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
   
   # Create DVC stage if stage_name is provided
   if (!is.null(stage_name)) {
-    # Construct R command for the stage
-    cmd_parts <- c(
-      "library(readr);",
-      if (!is.null(deps)) sprintf("input_data <- read_csv('%s');", deps[1]) else NULL,
-      # Add any data transformations based on parameters
+    # Create a temporary R script for the stage
+    script_file <- tempfile(pattern = "dvc_stage_", fileext = ".R")
+    on.exit(unlink(script_file))
+    
+    # Write R script content
+    script_content <- c(
+      "library(readr)",
+      "library(dplyr)",
+      if (!is.null(deps)) sprintf("input_data <- read_csv(\"%s\")", deps[1]) else NULL,
       if (!is.null(params)) {
-        sprintf("# Parameters: %s", 
-               paste(names(params), params, sep = "=", collapse = ", "))
+        c(
+          "transformed_data <- input_data %>%",
+          sprintf("#  Parameters: %s", paste(names(params), params, sep = "=", collapse = ", "))
+        )
+      } else {
+        "transformed_data <- input_data"
       },
-      sprintf("write_csv(transformed_data, '%s')", file)
+      sprintf("write_csv(transformed_data, \"%s\")", file)
     )
     
-    # Remove NULL elements and combine into a single command
-    cmd <- paste(cmd_parts[!sapply(cmd_parts, is.null)], collapse = " ")
+    # Remove NULL elements and write script
+    script_content <- script_content[!sapply(script_content, is.null)]
+    writeLines(script_content, script_file)
     
-    # Create the stage
+    # Create the stage using the script file
     dvc_stage(
       name = stage_name,
-      cmd = sprintf("Rscript -e '%s'", cmd),
+      cmd = sprintf("Rscript %s", script_file),
       deps = deps,
       outs = file,
       metrics = metrics,
@@ -285,13 +294,19 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
   }
   
   # Add the command with proper quoting
-  args <- c(args, "--no-exec", cmd)
+  args <- c(args, "--no-exec", shQuote(cmd))
   
   # Run the command
-  result <- system2("dvc", args, stdout = TRUE, stderr = TRUE)
+  result <- tryCatch({
+    system2("dvc", args, stdout = TRUE, stderr = TRUE)
+  }, error = function(e) {
+    cli::cli_alert_warning("Error executing DVC command: {e$message}")
+    return(NULL)
+  })
   
   if (!is.null(attr(result, "status"))) {
     cli::cli_alert_warning("Failed to create DVC stage: {name}")
+    cli::cli_alert_info("DVC output: {paste(result, collapse = '\n')}")
     return(invisible(FALSE))
   }
   
