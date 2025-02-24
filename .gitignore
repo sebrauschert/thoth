@@ -22,11 +22,12 @@
 /check/
 *.tar.gz
 
-# Keep inst/doc directory but ignore generated files
-/inst/doc/*.html
-/inst/doc/*.R
-/inst/doc/*.pdf
-!/inst/doc/.gitkeep
+# Vignette files
+vignettes/*.html
+vignettes/*.R
+!vignettes/*.Rmd
+inst/doc/
+doc/
 
 # Test artifacts
 tests/testthat/*.csv

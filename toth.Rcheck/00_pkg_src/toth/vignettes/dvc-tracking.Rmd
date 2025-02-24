@@ -1,0 +1,268 @@
+---
+title: "DVC with toth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DVC with toth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Introduction
+
+The `toth` package provides seamless integration with DVC (Data Version Control) for tracking data files in your R analytics projects. This guide demonstrates how to use DVC through R functions, making it easy to version control your data alongside your code.
+
+## Project Setup
+
+The `toth` package automatically configures DVC when creating a new project:
+
+```{r setup}
+library(toth)
+library(tidyverse)
+
+# Create a new project with DVC enabled
+create_analytics_project(
+  "my_project",
+  use_dvc = TRUE,
+  git_init = TRUE
+)
+```
+
+This sets up:
+- DVC initialization
+- Appropriate `.gitignore` rules
+- Standard project structure
+- DVC configuration files
+
+## Basic Usage
+
+### Simple Data Tracking
+
+The most basic way to track files is to use `write_csv_dvc()` or `write_rds_dvc()`:
+
+```{r}
+# Create example data
+data <- tibble(
+  x = 1:5,
+  y = letters[1:5]
+)
+
+# Write and track CSV file
+data |>
+  write_csv_dvc(
+    "data/processed/example.csv",
+    "Added processed data"
+  )
+
+# Track R objects
+model <- lm(mpg ~ wt, data = mtcars)
+model |>
+  write_rds_dvc(
+    "models/linear_model.rds",
+    "Saved linear model"
+  )
+```
+
+### Data Processing Pipelines
+
+Integrate DVC tracking into your data processing workflows:
+
+```{r}
+# Example data pipeline
+raw_data |>
+  # Clean data
+  mutate(
+    date = as.Date(date),
+    value = as.numeric(value)
+  ) |>
+  # Save intermediate results
+  write_csv_dvc(
+    "data/interim/cleaned.csv",
+    "Saved cleaned data"
+  ) |>
+  # Continue processing
+  group_by(category) |>
+  summarise(
+    mean_value = mean(value),
+    sd_value = sd(value)
+  ) |>
+  # Save final results
+  write_csv_dvc(
+    "data/processed/summary.csv",
+    "Saved summary statistics"
+  )
+```
+
+### Tracking Multiple Files
+
+You can track multiple files in sequence:
+
+```{r}
+# Split data by category
+data |>
+  group_split(category) |>
+  walk2(
+    unique(data$category),
+    ~write_csv_dvc(
+      .x,
+      file.path("data/processed", paste0(.y, ".csv")),
+      paste("Saved data for category", .y)
+    )
+  )
+```
+
+## Best Practices
+
+### File Organization
+
+```{r}
+# Raw data
+raw_data |>
+  write_csv_dvc(
+    "data/raw/survey_2024.csv",
+    "Added raw survey data"
+  )
+
+# Processed data
+processed_data |>
+  write_csv_dvc(
+    "data/processed/survey_2024_clean.csv",
+    "Added cleaned survey data"
+  )
+
+# Analysis results
+results |>
+  write_csv_dvc(
+    "results/survey_2024_analysis.csv",
+    "Added analysis results"
+  )
+
+# Models with version info
+model |>
+  write_rds_dvc(
+    "models/xgboost_v2.rds",
+    "Updated XGBoost model with hyperparameter tuning (accuracy: 0.92)"
+  )
+```
+
+### Error Handling
+
+```{r}
+# Using tryCatch for error handling
+safe_write <- function(data, path, message) {
+  tryCatch(
+    write_csv_dvc(data, path, message),
+    error = function(e) {
+      warning("Failed to save data: ", e$message)
+      NULL
+    }
+  )
+}
+
+# Using purrr::safely
+safe_write_dvc <- safely(write_csv_dvc)
+result <- safe_write_dvc(data, "data/output.csv", "Saved output")
+
+# Check system requirements
+check_system_requirements()
+```
+
+## Advanced Usage
+
+### Conditional Tracking
+
+Track files based on conditions:
+
+```{r}
+process_and_track <- function(data, threshold = 0.9) {
+  results <- analyze_data(data)
+  
+  if (results$accuracy > threshold) {
+    results |>
+      write_csv_dvc(
+        "results/high_accuracy.csv",
+        sprintf("Results with accuracy %.2f", results$accuracy)
+      )
+  } else {
+    results |>
+      write_csv_dvc(
+        "results/low_accuracy.csv",
+        sprintf("Results with accuracy %.2f", results$accuracy)
+      )
+  }
+}
+```
+
+### Tracking with Metadata
+
+Include relevant metadata in commit messages:
+
+```{r}
+save_model_version <- function(model, version, metrics) {
+  model |>
+    write_rds_dvc(
+      sprintf("models/model_v%s.rds", version),
+      sprintf(
+        "Model v%s: accuracy=%.3f, f1=%.3f",
+        version, metrics$accuracy, metrics$f1
+      )
+    )
+}
+```
+
+## Integration with Other Tools
+
+### renv Integration
+
+```{r}
+# Save environment with model
+list(
+  model = model,
+  packages = renv::dependencies()
+) |>
+  write_rds_dvc(
+    "models/model_with_deps.rds",
+    "Saved model with package dependencies"
+  )
+```
+
+### Collaboration Workflow
+
+```{r}
+# After pulling new code with git pull:
+new_data |>
+  write_csv_dvc(
+    "data/raw/new_experiment.csv",
+    "Add new experiment data"
+  ) |>
+  process_data() |>
+  write_csv_dvc(
+    "data/processed/new_experiment_processed.csv",
+    "Add processed experiment data"
+  ) |>
+  train_model() |>
+  write_rds_dvc(
+    "models/new_experiment_model.rds",
+    "Add model for new experiment"
+  )
+```
+
+## Next Steps
+
+- Check out the [Getting Started guide](getting-started.html) for basic package usage
+- Learn about [Docker Setup](docker-setup.html) for containerized environments
+- Explore [Custom Templates](custom-templates.html) for report styling
+- Visit the [function reference](../reference/index.html) for detailed documentation
+
+## Getting Help
+
+- Read the function documentation with `?dvc_track`, `?write_csv_dvc`, or `?write_rds_dvc`
+- File issues on [GitHub](https://github.com/sebrauschert/toth/issues)
+- Check the [package website](https://sebrauschert.github.io/toth) for updates 

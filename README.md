@@ -1,6 +1,6 @@
 # toth <img src="man/figures/logo.png" align="right" height="139" alt="toth logo"/>
 
-<sub>Logo designed by [Freepik](https://www.freepik.com)</sub>
+
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml)
@@ -18,6 +18,8 @@
 - Containerization with Docker
 - Dependency management with renv
 - Customizable reporting with Quarto
+
+This package is still in active development and should be used with caution.
 
 ## Installation
 
@@ -104,3 +106,6 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribut
 ## License
 
 MIT 
+
+
+<sub>Toth icon by [Freepik](https://www.freepik.com)</sub>

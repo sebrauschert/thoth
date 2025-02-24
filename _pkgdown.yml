@@ -50,6 +50,8 @@ navbar:
         href: articles/docker-setup.html
       - text: Custom Templates
         href: articles/custom-templates.html
+      - text: Decision Tracking
+        href: articles/decision-tracking.html
     github:
       icon: fab fa-github
       href: https://github.com/sebrauschert/toth
@@ -63,6 +65,12 @@ footer:
   components:
     attribution: Toth icon design by [Freepik](https://www.freepik.com)
 reference:
+- title: Package Overview
+  desc: Package documentation and data
+  contents:
+  - toth-package
+  - example_projects
+  - decision_tracking
 - title: Project Setup
   desc: Functions for creating and setting up analytics projects
   contents:
@@ -78,6 +86,14 @@ reference:
   - dvc_track
   - write_csv_dvc
   - write_rds_dvc
+- title: Decision Tracking
+  desc: Functions for tracking human decisions in analyses
+  contents:
+  - decision_tracking
+  - initialize_decision_tree
+  - record_decision
+  - generate_methods_section
+  - export_decision_tree
 - title: Quarto Integration
   desc: Functions for customizing Quarto reports
   contents:
@@ -94,6 +110,7 @@ articles:
   - dvc-tracking
   - docker-setup
   - custom-templates
+  - decision-tracking
 news:
   releases:
   - text: Version 0.0.0.9000

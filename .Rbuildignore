@@ -24,3 +24,6 @@
 ^doc$
 ^inst/doc$
 ^vignettes/.*\.(html|R)$
+^\.dvc$
+^.*\.dvc$
+^data-raw$
