@@ -21,6 +21,10 @@
 
 This package is still in active development and should be used with caution.
 
+# Why Toth?
+
+`toth`, named after the ancient Egyptian deity of wisdom and writing, embodies the essence of preserving and documenting knowledge. Just as Toth was revered for recording the deeds of the living and maintaining cosmic order, this R package ensures analytical integrity through comprehensive version control of code, data and analytical decisions. By seamlessly integrating DVC, Git, and Docker, Toth aims to create a robust framework for reproducible analytics, making it effortless to track data lineage, manage dependencies, and share reproducible environments. Whether you're collaborating on a team project or maintaining consistency in your solo analyses, `toth` serves as your faithful scribe, ensuring that every step of your analytical journey is documented, reproducible, and trustworthy.
+
 ## Installation
 
 You can install the development version of toth from GitHub with:

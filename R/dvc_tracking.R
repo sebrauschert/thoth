@@ -12,7 +12,7 @@
 #' @examples
 #' \dontrun{
 #' data |>
-#'   write_csv("data/processed/mydata.csv") |>
+#'   readr::write_csv("data/processed/mydata.csv") |>
 #'   dvc_track("Updated processed data")
 #' }
 dvc_track <- function(path, message = NULL) {
@@ -79,21 +79,60 @@ dvc_track <- function(path, message = NULL) {
 #'
 #' @description
 #' A wrapper around readr::write_csv that automatically tracks the output file with DVC
+#' and optionally creates a DVC pipeline stage.
 #'
 #' @param x A data frame to write
 #' @param file Path to write to
 #' @param message Optional DVC commit message
+#' @param stage_name Optional name for the DVC stage. If provided, creates a pipeline stage.
+#' @param deps Character vector of dependency files (optional, for pipeline stages)
+#' @param metrics Logical. Whether to mark the output as a DVC metric
+#' @param plots Logical. Whether to mark the output as a DVC plot
+#' @param params Named list of parameters for the stage (optional)
 #' @param ... Additional arguments passed to readr::write_csv
+#'
 #' @return The input data frame (invisibly) to allow for further piping
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' # Simple tracking
 #' data |> write_csv_dvc("data/processed/mydata.csv", "Updated data")
+#'
+#' # As part of a pipeline
+#' data |> write_csv_dvc(
+#'   "data/processed/results.csv",
+#'   stage_name = "process_data",
+#'   deps = "data/raw/input.csv",
+#'   params = list(threshold = 0.5)
+#' )
 #' }
-write_csv_dvc <- function(x, file, message = NULL, ...) {
+write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL, 
+                         deps = NULL, metrics = FALSE, plots = FALSE,
+                         params = NULL, ...) {
+  # Create directory if it doesn't exist
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  
+  # Write the file
   readr::write_csv(x, file, ...)
-  dvc_track(file, message)
+  
+  # Create DVC stage if stage_name is provided
+  if (!is.null(stage_name)) {
+    dvc_stage(
+      name = stage_name,
+      cmd = sprintf("Rscript -e 'readr::write_csv(readr::read_csv(\"%s\"), \"%s\")'", 
+                   if(!is.null(deps)) deps[1] else "NA", file),
+      deps = deps,
+      outs = file,
+      metrics = metrics,
+      plots = plots,
+      params = params
+    )
+  } else {
+    # Otherwise just track the file
+    dvc_track(file, message)
+  }
+  
   invisible(x)
 }
 
@@ -101,20 +140,135 @@ write_csv_dvc <- function(x, file, message = NULL, ...) {
 #'
 #' @description
 #' A wrapper around saveRDS that automatically tracks the output file with DVC
+#' and optionally creates a DVC pipeline stage.
 #'
 #' @param object Object to save
 #' @param file Path to write to
 #' @param message Optional DVC commit message
+#' @param stage_name Optional name for the DVC stage. If provided, creates a pipeline stage.
+#' @param deps Character vector of dependency files (optional, for pipeline stages)
+#' @param metrics Logical. Whether to mark the output as a DVC metric
+#' @param plots Logical. Whether to mark the output as a DVC plot
+#' @param params Named list of parameters for the stage (optional)
 #' @param ... Additional arguments passed to saveRDS
+#'
 #' @return The input object (invisibly) to allow for further piping
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' # Simple tracking
 #' model |> write_rds_dvc("models/model.rds", "Updated model")
+#'
+#' # As part of a pipeline
+#' model |> write_rds_dvc(
+#'   "models/rf_model.rds",
+#'   stage_name = "train_model",
+#'   deps = c("data/processed/training.csv", "R/train_model.R"),
+#'   params = list(ntree = 500)
+#' )
 #' }
-write_rds_dvc <- function(object, file, message = NULL, ...) {
+write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
+                         deps = NULL, metrics = FALSE, plots = FALSE,
+                         params = NULL, ...) {
+  # Create directory if it doesn't exist
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  
+  # Save the object
   saveRDS(object, file, ...)
-  dvc_track(file, message)
+  
+  # Create DVC stage if stage_name is provided
+  if (!is.null(stage_name)) {
+    dvc_stage(
+      name = stage_name,
+      cmd = sprintf("Rscript -e 'saveRDS(readRDS(\"%s\"), \"%s\")'", 
+                   if(!is.null(deps)) deps[1] else "NA", file),
+      deps = deps,
+      outs = file,
+      metrics = metrics,
+      plots = plots,
+      params = params
+    )
+  } else {
+    # Otherwise just track the file
+    dvc_track(file, message)
+  }
+  
   invisible(object)
+}
+
+#' Create a DVC Pipeline Stage
+#'
+#' @param name Stage name
+#' @param cmd Command to run
+#' @param deps Character vector of dependencies
+#' @param outs Character vector of outputs
+#' @param metrics Logical or character vector. If TRUE, marks all outputs as metrics. If character, specifies which outputs are metrics.
+#' @param plots Logical or character vector. If TRUE, marks all outputs as plots. If character, specifies which outputs are plots.
+#' @param params Named list of parameters for the stage
+#' @param always_changed Logical. Whether to always mark the stage as changed
+#'
+#' @return Invisibly returns TRUE if successful
+#' @keywords internal
+dvc_stage <- function(name, cmd, deps = NULL, outs = NULL, 
+                     metrics = FALSE, plots = FALSE, 
+                     params = NULL, always_changed = FALSE) {
+  check_dvc()
+  
+  # Build the dvc run command
+  args <- c("run", "--name", name)
+  
+  # Add dependencies
+  if (!is.null(deps)) {
+    args <- c(args, unlist(lapply(deps, function(d) c("-d", d))))
+  }
+  
+  # Add outputs
+  if (!is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-o", o))))
+  }
+  
+  # Add metrics
+  if (is.character(metrics)) {
+    args <- c(args, unlist(lapply(metrics, function(m) c("-M", m))))
+  } else if (isTRUE(metrics) && !is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-M", o))))
+  }
+  
+  # Add plots
+  if (is.character(plots)) {
+    args <- c(args, unlist(lapply(plots, function(p) c("-p", p))))
+  } else if (isTRUE(plots) && !is.null(outs)) {
+    args <- c(args, unlist(lapply(outs, function(o) c("-p", o))))
+  }
+  
+  # Add parameters
+  if (!is.null(params)) {
+    param_args <- mapply(
+      function(name, value) sprintf("-p %s=%s", name, value),
+      names(params),
+      params,
+      SIMPLIFY = FALSE
+    )
+    args <- c(args, unlist(param_args))
+  }
+  
+  # Add always-changed flag if requested
+  if (always_changed) {
+    args <- c(args, "--always-changed")
+  }
+  
+  # Add the command
+  args <- c(args, "--no-exec", cmd)
+  
+  # Run the command
+  result <- system2("dvc", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to create DVC stage: {name}")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Created DVC stage: {name}")
+  invisible(TRUE)
 } 

@@ -4,6 +4,18 @@ template:
   light-switch: yes
   theme: arrow-light
   theme-dark: arrow-dark
+  includes:
+    in_header: |
+      <style>
+      code .op, pre .op {
+        unicode-bidi: normal !important;
+        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+      }
+      .sourceCode .op {
+        content: "|>" !important;
+        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+      }
+      </style>
   bslib:
     primary: '#C471ED'
     bg: '#ffffff'
@@ -44,7 +56,7 @@ navbar:
         href: articles/getting-started.html
       - text: '-------'
       - text: Features
-      - text: DVC with toth
+      - text: Data Version Control
         href: articles/dvc-tracking.html
       - text: Docker Setup
         href: articles/docker-setup.html
@@ -81,7 +93,7 @@ reference:
   - write_gitignore
   - write_readme
 - title: DVC Integration
-  desc: Functions for tracking data with DVC
+  desc: Functions for tracking data and managing DVC pipelines using tidyverse-style functions
   contents:
   - dvc_track
   - write_csv_dvc

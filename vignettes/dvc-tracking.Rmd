@@ -1,8 +1,8 @@
 ---
-title: "DVC with toth"
+title: "Data Version Control with toth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{DVC with toth}
+  %\VignetteIndexEntry{Data Version Control with toth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,252 +17,277 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `toth` package provides seamless integration with DVC (Data Version Control) for tracking data files in your R analytics projects. This guide demonstrates how to use DVC through R functions, making it easy to version control your data alongside your code.
+Data Version Control (DVC) is a powerful tool for managing data science workflows. While DVC is written in Python, `toth` provides seamless integration with R, allowing you to:
+
+1. Track large data files without storing them in Git
+2. Create reproducible pipelines
+3. Track metrics and plots
+4. Share data across team members
+
+This guide will walk you through setting up DVC and using it effectively with `toth`.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+1. DVC installed:
+   ```bash
+   pip install dvc
+   ```
+
+2. Git initialized in your project:
+   ```bash
+   git init
+   ```
+
+3. toth installed:
+   ```r
+   remotes::install_github("sebrauschert/toth")
+   ```
 
 ## Project Setup
 
-The `toth` package automatically configures DVC when creating a new project:
+When you create a new analytics project with `toth`, DVC is automatically set up:
 
-```{r setup}
+```r
 library(toth)
-library(tidyverse)
-
-# Create a new project with DVC enabled
 create_analytics_project(
-  "my_project",
-  use_dvc = TRUE,
-  git_init = TRUE
+  "my_analysis",
+  use_dvc = TRUE  # DVC is enabled by default
 )
 ```
 
-This sets up:
-- DVC initialization
-- Appropriate `.gitignore` rules
-- Standard project structure
-- DVC configuration files
+This:
+- Initializes DVC
+- Creates data directories tracked by DVC
+- Sets up appropriate .gitignore rules
+- Creates a basic DVC pipeline structure
 
-## Basic Usage
+## Simple Data Tracking
 
-### Simple Data Tracking
+### Tracking CSV Files
 
-The most basic way to track files is to use `write_csv_dvc()` or `write_rds_dvc()`:
+The simplest way to track data files is using the DVC-aware write functions:
 
-```{r}
-# Create example data
-data <- tibble(
-  x = 1:5,
-  y = letters[1:5]
+```r
+# Track a CSV file
+data |> write_csv_dvc(
+  "data/processed/results.csv",
+  message = "Add processed results"
 )
 
-# Write and track CSV file
-data |>
-  write_csv_dvc(
-    "data/processed/example.csv",
-    "Added processed data"
-  )
-
-# Track R objects
-model <- lm(mpg ~ wt, data = mtcars)
-model |>
-  write_rds_dvc(
-    "models/linear_model.rds",
-    "Saved linear model"
-  )
+# Track with additional readr::write_csv parameters
+data |> write_csv_dvc(
+  "data/processed/results.csv",
+  message = "Add processed results",
+  na = "NA",
+  quote = "needed"
+)
 ```
 
-### Data Processing Pipelines
+### Tracking R Objects
 
-Integrate DVC tracking into your data processing workflows:
+For R objects, use `write_rds_dvc`:
 
-```{r}
-# Example data pipeline
-raw_data |>
-  # Clean data
-  mutate(
-    date = as.Date(date),
-    value = as.numeric(value)
-  ) |>
-  # Save intermediate results
-  write_csv_dvc(
-    "data/interim/cleaned.csv",
-    "Saved cleaned data"
-  ) |>
-  # Continue processing
-  group_by(category) |>
-  summarise(
-    mean_value = mean(value),
-    sd_value = sd(value)
-  ) |>
-  # Save final results
-  write_csv_dvc(
-    "data/processed/summary.csv",
-    "Saved summary statistics"
-  )
+```r
+# Save and track a model
+model |> write_rds_dvc(
+  "models/rf_model.rds",
+  message = "Save trained random forest model"
+)
 ```
 
-### Tracking Multiple Files
+### Manual Tracking
 
-You can track multiple files in sequence:
+You can also track files after they've been written:
 
-```{r}
-# Split data by category
-data |>
-  group_split(category) |>
-  walk2(
-    unique(data$category),
-    ~write_csv_dvc(
-      .x,
-      file.path("data/processed", paste0(.y, ".csv")),
-      paste("Saved data for category", .y)
-    )
+```r
+# Write file normally
+readr::write_csv(data, "data/processed/results.csv")
+
+# Track with DVC
+dvc_track("data/processed/results.csv", "Add processed results")
+```
+
+## Creating DVC Pipelines
+
+DVC pipelines help make your analysis reproducible by tracking:
+- Input dependencies
+- Output files
+- Parameters
+- Metrics and plots
+
+### Basic Pipeline Stage
+
+```r
+# Create a data processing stage
+data |> write_csv_dvc(
+  "data/processed/results.csv",
+  stage_name = "process_data",
+  deps = "data/raw/input.csv",
+  params = list(threshold = 0.5)
+)
+```
+
+### Tracking Metrics
+
+Track evaluation metrics automatically:
+
+```r
+metrics |> write_csv_dvc(
+  "metrics/evaluation.csv",
+  stage_name = "evaluate_model",
+  deps = c("models/rf_model.rds", "data/test/test.csv"),
+  metrics = TRUE  # Mark as DVC metrics
+)
+```
+
+### Tracking Plots
+
+Track visualization files:
+
+```r
+# Save plot data with DVC tracking
+plot_data |> write_csv_dvc(
+  "plots/feature_importance.csv",
+  stage_name = "create_plots",
+  deps = "models/rf_model.rds",
+  plots = TRUE  # Mark as DVC plot
+)
+```
+
+## Complete Pipeline Example
+
+Here's a complete example of a machine learning pipeline:
+
+```r
+library(toth)
+
+# 1. Data Preprocessing
+raw_data |> write_csv_dvc(
+  "data/processed/preprocessed.csv",
+  stage_name = "preprocess",
+  deps = "data/raw/input.csv",
+  params = list(
+    remove_na = TRUE,
+    normalize = TRUE
   )
+)
+
+# 2. Feature Engineering
+features |> write_csv_dvc(
+  "data/processed/features.csv",
+  stage_name = "feature_engineering",
+  deps = "data/processed/preprocessed.csv",
+  params = list(
+    n_components = 10
+  )
+)
+
+# 3. Model Training
+model |> write_rds_dvc(
+  "models/rf_model.rds",
+  stage_name = "train_model",
+  deps = "data/processed/features.csv",
+  params = list(
+    ntree = 500,
+    mtry = 3
+  )
+)
+
+# 4. Model Evaluation
+metrics |> write_csv_dvc(
+  "metrics/evaluation.csv",
+  stage_name = "evaluate",
+  deps = c(
+    "models/rf_model.rds",
+    "data/processed/features.csv"
+  ),
+  metrics = TRUE
+)
+
+# 5. Create Plots
+plot_data |> write_csv_dvc(
+  "plots/performance.csv",
+  stage_name = "visualize",
+  deps = "metrics/evaluation.csv",
+  plots = TRUE
+)
+```
+
+## Working with Remote Storage
+
+DVC supports various remote storage options (S3, GCS, etc.). Once configured, you can:
+
+```r
+# Pull data from remote
+dvc_pull()
+
+# Push data to remote
+dvc_push()
+
+# Pull specific files
+dvc_pull("data/processed/features.csv")
 ```
 
 ## Best Practices
 
-### File Organization
+1. **Organize Data**:
+   - Keep raw data in `data/raw/`
+   - Store processed data in `data/processed/`
+   - Save models in `models/`
+   - Keep metrics in `metrics/`
+   - Store plots in `plots/`
 
-```{r}
-# Raw data
-raw_data |>
-  write_csv_dvc(
-    "data/raw/survey_2024.csv",
-    "Added raw survey data"
-  )
+2. **Use Meaningful Stage Names**:
+   - Make stage names descriptive
+   - Use consistent naming conventions
+   - Include the purpose in the name
 
-# Processed data
-processed_data |>
-  write_csv_dvc(
-    "data/processed/survey_2024_clean.csv",
-    "Added cleaned survey data"
-  )
+3. **Track Dependencies**:
+   - Always specify input dependencies
+   - Include R scripts as dependencies
+   - Track configuration files
 
-# Analysis results
-results |>
-  write_csv_dvc(
-    "results/survey_2024_analysis.csv",
-    "Added analysis results"
-  )
+4. **Use Parameters**:
+   - Track important hyperparameters
+   - Include preprocessing parameters
+   - Document parameter choices
 
-# Models with version info
-model |>
-  write_rds_dvc(
-    "models/xgboost_v2.rds",
-    "Updated XGBoost model with hyperparameter tuning (accuracy: 0.92)"
-  )
-```
+5. **Commit Regularly**:
+   - Commit .dvc files to Git
+   - Use meaningful commit messages
+   - Push data to remote storage
 
-### Error Handling
+## Troubleshooting
 
-```{r}
-# Using tryCatch for error handling
-safe_write <- function(data, path, message) {
-  tryCatch(
-    write_csv_dvc(data, path, message),
-    error = function(e) {
-      warning("Failed to save data: ", e$message)
-      NULL
-    }
-  )
-}
+Common issues and solutions:
 
-# Using purrr::safely
-safe_write_dvc <- safely(write_csv_dvc)
-result <- safe_write_dvc(data, "data/output.csv", "Saved output")
+1. **DVC not initialized**:
+   ```r
+   # Initialize DVC manually
+   system2("dvc", "init")
+   ```
 
-# Check system requirements
-check_system_requirements()
-```
+2. **File not tracked**:
+   ```r
+   # Check if file is tracked
+   system2("dvc", c("status", "path/to/file"))
+   ```
 
-## Advanced Usage
+3. **Pipeline not updating**:
+   ```r
+   # Force pipeline stage rerun
+   system2("dvc", c("repro", "--force"))
+   ```
 
-### Conditional Tracking
+## Conclusion
 
-Track files based on conditions:
+DVC integration in `toth` provides a seamless way to:
+- Track large data files
+- Create reproducible pipelines
+- Share data across team members
+- Monitor experiments
+- Maintain data science workflows
 
-```{r}
-process_and_track <- function(data, threshold = 0.9) {
-  results <- analyze_data(data)
-  
-  if (results$accuracy > threshold) {
-    results |>
-      write_csv_dvc(
-        "results/high_accuracy.csv",
-        sprintf("Results with accuracy %.2f", results$accuracy)
-      )
-  } else {
-    results |>
-      write_csv_dvc(
-        "results/low_accuracy.csv",
-        sprintf("Results with accuracy %.2f", results$accuracy)
-      )
-  }
-}
-```
-
-### Tracking with Metadata
-
-Include relevant metadata in commit messages:
-
-```{r}
-save_model_version <- function(model, version, metrics) {
-  model |>
-    write_rds_dvc(
-      sprintf("models/model_v%s.rds", version),
-      sprintf(
-        "Model v%s: accuracy=%.3f, f1=%.3f",
-        version, metrics$accuracy, metrics$f1
-      )
-    )
-}
-```
-
-## Integration with Other Tools
-
-### renv Integration
-
-```{r}
-# Save environment with model
-list(
-  model = model,
-  packages = renv::dependencies()
-) |>
-  write_rds_dvc(
-    "models/model_with_deps.rds",
-    "Saved model with package dependencies"
-  )
-```
-
-### Collaboration Workflow
-
-```{r}
-# After pulling new code with git pull:
-new_data |>
-  write_csv_dvc(
-    "data/raw/new_experiment.csv",
-    "Add new experiment data"
-  ) |>
-  process_data() |>
-  write_csv_dvc(
-    "data/processed/new_experiment_processed.csv",
-    "Add processed experiment data"
-  ) |>
-  train_model() |>
-  write_rds_dvc(
-    "models/new_experiment_model.rds",
-    "Add model for new experiment"
-  )
-```
-
-## Next Steps
-
-- Check out the [Getting Started guide](getting-started.html) for basic package usage
-- Learn about [Docker Setup](docker-setup.html) for containerized environments
-- Explore [Custom Templates](custom-templates.html) for report styling
-- Visit the [function reference](../reference/index.html) for detailed documentation
-
-## Getting Help
-
-- Read the function documentation with `?dvc_track`, `?write_csv_dvc`, or `?write_rds_dvc`
-- File issues on [GitHub](https://github.com/sebrauschert/toth/issues)
-- Check the [package website](https://sebrauschert.github.io/toth) for updates 
+By following these practices, you can create reproducible analyses that are easy to share and collaborate on. 
