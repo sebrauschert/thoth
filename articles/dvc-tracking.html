@@ -50,6 +50,7 @@ code .op, pre .op {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
     <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
+    <li><a class="dropdown-item" href="../articles/git-integration.html">Git Integration</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
     <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
@@ -297,13 +298,13 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 configured, you can:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pull data from remote</span></span>
-<span><span class="fu">dvc_pull</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/dvc_pull.html">dvc_pull</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Push data to remote</span></span>
-<span><span class="fu">dvc_push</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/dvc_push.html">dvc_push</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Pull specific files</span></span>
-<span><span class="fu">dvc_pull</span><span class="op">(</span><span class="st">"data/processed/features.csv"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/dvc_pull.html">dvc_pull</a></span><span class="op">(</span><span class="st">"data/processed/features.csv"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>

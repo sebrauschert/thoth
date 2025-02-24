@@ -50,6 +50,7 @@ code .op, pre .op {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
     <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
+    <li><a class="dropdown-item" href="../articles/git-integration.html">Git Integration</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
     <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
@@ -153,7 +154,10 @@ features</p>
 <span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu">clean_names</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span></span>
 <span>    species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
-<span>    <span class="fu">across</span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">scale</span><span class="op">)</span></span>
+<span>    <span class="co"># Scale numeric columns properly</span></span>
+<span>    <span class="fu">across</span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create train/test split</span></span>

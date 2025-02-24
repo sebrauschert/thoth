@@ -34,6 +34,7 @@ code .op, pre .op {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
     <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
+    <li><a class="dropdown-item" href="../articles/git-integration.html">Git Integration</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
     <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
@@ -74,7 +75,8 @@ for reproducible analysis using DVC, Docker, renv, and Quarto.</p>
 <span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  use_renv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  open <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/is_interactive.html" class="external-link">is_interactive</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,6 +102,10 @@ for reproducible analysis using DVC, Docker, renv, and Quarto.</p>
 
 <dt id="arg-git-init">git_init<a class="anchor" aria-label="anchor" href="#arg-git-init"></a></dt>
 <dd><p>Logical. Whether to initialize git repository. Default is TRUE.</p></dd>
+
+
+<dt id="arg-open">open<a class="anchor" aria-label="anchor" href="#arg-open"></a></dt>
+<dd><p>Logical. Whether to open the new project in RStudio. Default is TRUE.</p></dd>
 
 </dl></div>
     <div class="section level2">
