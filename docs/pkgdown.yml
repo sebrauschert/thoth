@@ -1,0 +1,17 @@
+pandoc: 3.6.3
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  bioinformatics-example: bioinformatics-example.html
+  custom-templates: custom-templates.html
+  decision-tracking: decision-tracking.html
+  docker-setup: docker-setup.html
+  dvc-tracking: dvc-tracking.html
+  end-to-end-example: end-to-end-example.html
+  getting-started: getting-started.html
+  git-integration: git-integration.html
+  thoth: thoth.html
+last_built: 2025-02-25T04:53Z
+urls:
+  reference: https://sebrauschert.github.io/thoth/reference
+  article: https://sebrauschert.github.io/thoth/articles

@@ -7,7 +7,6 @@
 *.so
 *.dll
 /Meta/
-/docs/
 /pkgdown/
 .httr-oauth
 .Renviron

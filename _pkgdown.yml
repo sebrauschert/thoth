@@ -1,11 +1,34 @@
 url: https://sebrauschert.github.io/thoth/
 template:
   bootstrap: 5
-  bootswatch: flatly
+  light-switch: yes
+  theme: arrow-light
+  theme-dark: arrow-dark
+  includes:
+    in_header: |
+      <style>
+      code .op, pre .op {
+        unicode-bidi: normal !important;
+        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+      }
+      .sourceCode .op {
+        content: "|>" !important;
+        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
+      }
+      </style>
   bslib:
-    primary: "#0054AD"
+    primary: '#C471ED'
+    bg: '#ffffff'
+    fg: '#000000'
+    bg-dark: '#202123'
+    fg-dark: '#ffffff'
+    base_font:
+      google: Source Sans Pro
+    heading_font:
+      google: Source Sans Pro
+    code_font:
+      google: JetBrains Mono
     border-radius: 0.5rem
-    btn-border-radius: 0.25rem
 
 development:
   mode: auto
@@ -13,12 +36,24 @@ development:
   version_tooltip: "Version"
 
 navbar:
+  bg: primary
+  type: light
   structure:
-    left:  [intro, reference, articles, tutorials, news]
-    right: [search, github]
+    left:
+    - intro
+    - getting-started
+    - reference
+    - articles
+    right:
+    - search
+    - github
+    - lightswitch
   components:
     intro:
       text: Get started
+      href: articles/getting-started.html
+    getting-started:
+      text: Getting Started
       href: articles/getting-started.html
     reference:
       text: Reference
@@ -26,27 +61,30 @@ navbar:
     articles:
       text: Articles
       menu:
-      - text: "Core Functionality"
-      - text: DVC Tracking
+      - text: Getting Started
+        href: articles/getting-started.html
+      - text: '-------'
+      - text: Features
+      - text: Data Version Control
         href: articles/dvc-tracking.html
       - text: Git Integration
         href: articles/git-integration.html
       - text: Docker Setup
         href: articles/docker-setup.html
-      - text: Decision Tracking
-        href: articles/decision-tracking.html
       - text: Custom Templates
         href: articles/custom-templates.html
-      - text: -------
-      - text: "Examples"
+      - text: Decision Tracking
+        href: articles/decision-tracking.html
+      - text: '-------'
+      - text: Examples
       - text: End-to-End Example
         href: articles/end-to-end-example.html
-      - text: Bioinformatics Example
+      - text: RNA-seq Analysis
         href: articles/bioinformatics-example.html
     github:
       icon: fab fa-github
       href: https://github.com/sebrauschert/thoth
-      aria-label: GitHub
+      aria-label: GitHub Repository
 
 footer:
   structure:
