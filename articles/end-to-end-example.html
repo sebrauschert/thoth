@@ -5,34 +5,22 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>End-to-End Example with Iris Dataset • toth</title>
-<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>End-to-End Example with Iris Dataset • thoth</title>
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_Pro-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="End-to-End Example with Iris Dataset">
-<style>
-code .op, pre .op {
-  unicode-bidi: normal !important;
-  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-}
-.sourceCode .op {
-  content: "|>" !important;
-  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-}
-</style>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">toth</a>
+    <a class="navbar-brand me-2" href="../index.html">thoth</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-info me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,23 +29,30 @@ code .op, pre .op {
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
-    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Core Functionality</h6></li>
+    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">DVC Tracking</a></li>
     <li><a class="dropdown-item" href="../articles/git-integration.html">Git Integration</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
-    <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
+    <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/end-to-end-example.html">End-to-End Example</a></li>
-    <li><a class="dropdown-item" href="../articles/bioinformatics-example.html">RNA-seq Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/bioinformatics-example.html">Bioinformatics Example</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-news">
+<li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/sebrauschert/thoth/releases/tag/v0.0.0.9000">Version 0.0.0.9000</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../news/index.html">Changelog</a></li>
   </ul>
 </li>
       </ul>
@@ -65,15 +60,7 @@ code .op, pre .op {
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/sebrauschert/toth" aria-label="GitHub Repository"><span class="fa fab fa-github"></span></a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
-<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
-    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
-    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
-  </ul>
-</li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/sebrauschert/thoth" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -89,7 +76,7 @@ code .op, pre .op {
       <img src="../logo.png" class="logo" alt=""><h1>End-to-End Example with Iris Dataset</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/sebrauschert/toth/blob/main/vignettes/end-to-end-example.Rmd" class="external-link"><code>vignettes/end-to-end-example.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sebrauschert/thoth/blob/main/vignettes/end-to-end-example.Rmd" class="external-link"><code>vignettes/end-to-end-example.Rmd</code></a></small>
       <div class="d-none name"><code>end-to-end-example.Rmd</code></div>
     </div>
 
@@ -99,7 +86,7 @@ code .op, pre .op {
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>This vignette provides a complete end-to-end example of using
-<code>toth</code> with the classic iris dataset. We’ll cover:</p>
+<code>thoth</code> with the classic iris dataset. We’ll cover:</p>
 <ol style="list-style-type: decimal">
 <li>Setting up a new analytics project</li>
 <li>Versioning the raw data</li>
@@ -114,7 +101,7 @@ code .op, pre .op {
 </h2>
 <p>First, let’s create a new analytics project with DVC enabled:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span></span>
@@ -136,8 +123,8 @@ code .op, pre .op {
 DVC:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save raw iris data</span></span>
-<span><span class="va">iris</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">iris</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/raw/iris.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add raw iris dataset"</span></span>
@@ -151,12 +138,12 @@ snake_case 2. Creating a train/test split 3. Scaling numeric
 features</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Read and process data</span></span>
-<span><span class="va">processed_data</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/raw/iris.csv"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu">clean_names</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span><span class="va">processed_data</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/raw/iris.csv"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/clean_names.html" class="external-link">clean_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>    <span class="co"># Scale numeric columns properly</span></span>
-<span>    <span class="fu">across</span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
@@ -168,7 +155,7 @@ features</p>
 <span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Save processed datasets with DVC</span></span>
-<span><span class="va">train_data</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">train_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/processed/train.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add processed training data"</span>,</span>
@@ -180,7 +167,7 @@ features</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">test_data</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">test_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/processed/test.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add processed test data"</span></span>
@@ -195,18 +182,18 @@ features</p>
 <span><span class="va">rf_spec</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
 <span>  trees <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  mtry <span class="op">=</span> <span class="fl">3</span></span>
-<span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="va">rf_spec</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="va">rf_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">fit</span><span class="op">(</span></span>
 <span>    <span class="va">species</span> <span class="op">~</span> <span class="va">.</span>,</span>
 <span>    data <span class="op">=</span> <span class="va">train_data</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Save model with DVC</span></span>
-<span><span class="va">rf_fit</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">rf_fit</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"models/rf_model.rds"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add trained random forest model"</span>,</span>
@@ -224,26 +211,27 @@ features</p>
 <p>Let’s evaluate our model and track the metrics:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make predictions</span></span>
-<span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="va">rf_fit</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="va">rf_fit</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">bind_cols</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Calculate metrics</span></span>
-<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="va">predictions</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">metrics</span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">bind_rows</span><span class="op">(</span></span>
-<span>    <span class="va">predictions</span> <span class="op">%&gt;%</span></span>
-<span>      <span class="fu">conf_mat</span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>      <span class="fu">autoplot</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>      <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu">ggsave</span><span class="op">(</span></span>
-<span>        <span class="st">"plots/confusion_matrix.png"</span>,</span>
-<span>        width <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>        height <span class="op">=</span> <span class="fl">6</span></span>
-<span>      <span class="op">)</span></span>
+<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/metrics.html">metrics</a></span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create and save confusion matrix plot</span></span>
+<span><span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/conf_mat.html">conf_mat</a></span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">autoplot</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu">ggsave</span><span class="op">(</span></span>
+<span>    filename <span class="op">=</span> <span class="st">"plots/confusion_matrix.png"</span>,</span>
+<span>    plot <span class="op">=</span> <span class="va">.</span>,</span>
+<span>    width <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>    height <span class="op">=</span> <span class="fl">6</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Save metrics with DVC</span></span>
-<span><span class="va">metrics</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">metrics</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"metrics/model_metrics.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add model evaluation metrics"</span>,</span>
@@ -287,6 +275,9 @@ features</p>
 <span>  evidence <span class="op">=</span> <span class="st">"models/rf_model.rds"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Create reports directory if it doesn't exist</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"reports"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Export decision tree</span></span>
 <span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span></span>
 <span>  <span class="va">decision_file</span>,</span>
@@ -322,7 +313,7 @@ Model training stage 3. Model evaluation stage</p>
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
 <p>This example demonstrated how to: - Set up a complete analytics
-project with <code>toth</code> - Version data and models with DVC -
+project with <code>thoth</code> - Version data and models with DVC -
 Create reproducible pipelines - Track analysis decisions - Share results
 with collaborators</p>
 <p>The resulting project structure is:</p>
@@ -355,7 +346,7 @@ with collaborators</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Toth icon design by <a href="https://www.freepik.com" class="external-link">Freepik</a></p>
+  <p>Thoth icon design by <a href="https://www.freepik.com" class="external-link">Freepik</a></p>
 </div>
 
     </footer>

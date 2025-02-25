@@ -5,34 +5,22 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Data Version Control with toth • toth</title>
-<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Data Version Control with thoth • thoth</title>
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_Pro-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Version Control with toth">
-<style>
-code .op, pre .op {
-  unicode-bidi: normal !important;
-  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-}
-.sourceCode .op {
-  content: "|>" !important;
-  font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-}
-</style>
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Version Control with thoth">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">toth</a>
+    <a class="navbar-brand me-2" href="../index.html">thoth</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-info me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,23 +29,30 @@ code .op, pre .op {
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Features</h6></li>
-    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">Data Version Control</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Core Functionality</h6></li>
+    <li><a class="dropdown-item" href="../articles/dvc-tracking.html">DVC Tracking</a></li>
     <li><a class="dropdown-item" href="../articles/git-integration.html">Git Integration</a></li>
     <li><a class="dropdown-item" href="../articles/docker-setup.html">Docker Setup</a></li>
-    <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><a class="dropdown-item" href="../articles/decision-tracking.html">Decision Tracking</a></li>
+    <li><a class="dropdown-item" href="../articles/custom-templates.html">Custom Templates</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/end-to-end-example.html">End-to-End Example</a></li>
-    <li><a class="dropdown-item" href="../articles/bioinformatics-example.html">RNA-seq Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/bioinformatics-example.html">Bioinformatics Example</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-news">
+<li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/sebrauschert/thoth/releases/tag/v0.0.0.9000">Version 0.0.0.9000</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../news/index.html">Changelog</a></li>
   </ul>
 </li>
       </ul>
@@ -65,15 +60,7 @@ code .op, pre .op {
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/sebrauschert/toth" aria-label="GitHub Repository"><span class="fa fab fa-github"></span></a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
-<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
-    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
-    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
-  </ul>
-</li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/sebrauschert/thoth" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -86,20 +73,22 @@ code .op, pre .op {
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Data Version Control with toth</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Data Version Control with thoth</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/sebrauschert/toth/blob/main/vignettes/dvc-tracking.Rmd" class="external-link"><code>vignettes/dvc-tracking.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sebrauschert/thoth/blob/main/vignettes/dvc-tracking.Rmd" class="external-link"><code>vignettes/dvc-tracking.Rmd</code></a></small>
       <div class="d-none name"><code>dvc-tracking.Rmd</code></div>
     </div>
 
     
     
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Data Version Control (DVC) is a powerful tool for managing data
-science workflows. While DVC is written in Python, <code>toth</code>
+science workflows. While DVC is written in Python, <code>thoth</code>
 provides seamless integration with R, allowing you to:</p>
 <ol style="list-style-type: decimal">
 <li>Track large data files without storing them in Git</li>
@@ -108,7 +97,7 @@ provides seamless integration with R, allowing you to:</p>
 <li>Share data across team members</li>
 </ol>
 <p>This guide will walk you through setting up DVC and using it
-effectively with <code>toth</code>.</p>
+effectively with <code>thoth</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -117,26 +106,26 @@ effectively with <code>toth</code>.</p>
 <ol style="list-style-type: decimal">
 <li>
 <p>DVC installed:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">pip</span> install dvc</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">pip</span> install dvc</span></code></pre></div>
 </li>
 <li>
 <p>Git initialized in your project:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">git</span> init</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">git</span> init</span></code></pre></div>
 </li>
 <li>
-<p>toth installed:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/toth"</span><span class="op">)</span></span></code></pre></div>
+<p>thoth installed:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/thoth"</span><span class="op">)</span></span></code></pre></div>
 </li>
 </ol>
 </div>
 <div class="section level2">
 <h2 id="project-setup">Project Setup<a class="anchor" aria-label="anchor" href="#project-setup"></a>
 </h2>
-<p>When you create a new analytics project with <code>toth</code>, DVC
+<p>When you create a new analytics project with <code>thoth</code>, DVC
 is automatically set up:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
 <span>  <span class="st">"my_analysis"</span>,</span>
 <span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># DVC is enabled by default</span></span>
@@ -153,7 +142,7 @@ structure</p>
 </h3>
 <p>The simplest way to track data files is using the DVC-aware write
 functions:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Track a CSV file</span></span>
 <span><span class="va">data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>  <span class="st">"data/processed/results.csv"</span>,</span>
@@ -172,7 +161,7 @@ functions:</p>
 <h3 id="tracking-r-objects">Tracking R Objects<a class="anchor" aria-label="anchor" href="#tracking-r-objects"></a>
 </h3>
 <p>For R objects, use <code>write_rds_dvc</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save and track a model</span></span>
 <span><span class="va">model</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
 <span>  <span class="st">"models/rf_model.rds"</span>,</span>
@@ -183,7 +172,7 @@ functions:</p>
 <h3 id="manual-tracking">Manual Tracking<a class="anchor" aria-label="anchor" href="#manual-tracking"></a>
 </h3>
 <p>You can also track files after they’ve been written:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Write file normally</span></span>
 <span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"data/processed/results.csv"</span><span class="op">)</span></span>
 <span></span>
@@ -199,7 +188,7 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 <div class="section level3">
 <h3 id="basic-pipeline-stage">Basic Pipeline Stage<a class="anchor" aria-label="anchor" href="#basic-pipeline-stage"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a data processing stage</span></span>
 <span><span class="va">data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>  <span class="st">"data/processed/results.csv"</span>,</span>
@@ -212,7 +201,7 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 <h3 id="tracking-metrics">Tracking Metrics<a class="anchor" aria-label="anchor" href="#tracking-metrics"></a>
 </h3>
 <p>Track evaluation metrics automatically:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>  <span class="st">"metrics/evaluation.csv"</span>,</span>
 <span>  stage_name <span class="op">=</span> <span class="st">"evaluate_model"</span>,</span>
@@ -224,7 +213,7 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 <h3 id="tracking-plots">Tracking Plots<a class="anchor" aria-label="anchor" href="#tracking-plots"></a>
 </h3>
 <p>Track visualization files:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save plot data with DVC tracking</span></span>
 <span><span class="va">plot_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>  <span class="st">"plots/feature_importance.csv"</span>,</span>
@@ -238,8 +227,8 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 <h2 id="complete-pipeline-example">Complete Pipeline Example<a class="anchor" aria-label="anchor" href="#complete-pipeline-example"></a>
 </h2>
 <p>Here’s a complete example of a machine learning pipeline:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/toth" class="external-link">toth</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Data Preprocessing</span></span>
 <span><span class="va">raw_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
@@ -297,7 +286,7 @@ Input dependencies - Output files - Parameters - Metrics and plots</p>
 </h2>
 <p>DVC supports various remote storage options (S3, GCS, etc.). Once
 configured, you can:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pull data from remote</span></span>
 <span><span class="fu"><a href="../reference/dvc_pull.html">dvc_pull</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -367,19 +356,19 @@ configured, you can:</p>
 <ol style="list-style-type: decimal">
 <li>
 <p><strong>DVC not initialized</strong>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Initialize DVC manually</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="st">"init"</span><span class="op">)</span></span></code></pre></div>
 </li>
 <li>
 <p><strong>File not tracked</strong>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check if file is tracked</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"status"</span>, <span class="st">"path/to/file"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </li>
 <li>
 <p><strong>Pipeline not updating</strong>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Force pipeline stage rerun</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"repro"</span>, <span class="st">"--force"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </li>
@@ -388,7 +377,7 @@ configured, you can:</p>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>DVC integration in <code>toth</code> provides a seamless way to: -
+<p>DVC integration in <code>thoth</code> provides a seamless way to: -
 Track large data files - Create reproducible pipelines - Share data
 across team members - Monitor experiments - Maintain data science
 workflows</p>
@@ -406,7 +395,7 @@ that are easy to share and collaborate on.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Toth icon design by <a href="https://www.freepik.com" class="external-link">Freepik</a></p>
+  <p>Thoth icon design by <a href="https://www.freepik.com" class="external-link">Freepik</a></p>
 </div>
 
     </footer>
