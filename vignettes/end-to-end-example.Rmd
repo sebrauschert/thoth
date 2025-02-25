@@ -151,16 +151,17 @@ predictions <- rf_fit %>%
 
 # Calculate metrics
 metrics <- predictions %>%
-  metrics(truth = species, estimate = .pred_class) %>%
-  bind_rows(
-    predictions %>%
-      conf_mat(truth = species, estimate = .pred_class) %>%
-      autoplot() %>%
-      ggplot2::ggsave(
-        "plots/confusion_matrix.png",
-        width = 8,
-        height = 6
-      )
+  metrics(truth = species, estimate = .pred_class)
+
+# Create and save confusion matrix plot
+predictions %>%
+  conf_mat(truth = species, estimate = .pred_class) %>%
+  autoplot() %>%
+  ggplot2::ggsave(
+    filename = "plots/confusion_matrix.png",
+    plot = .,
+    width = 8,
+    height = 6
   )
 
 # Save metrics with DVC
@@ -208,6 +209,9 @@ record_decision(
   reasoning = "RF can capture non-linear relationships and feature interactions",
   evidence = "models/rf_model.rds"
 )
+
+# Create reports directory if it doesn't exist
+dir.create("reports", showWarnings = FALSE)
 
 # Export decision tree
 export_decision_tree(

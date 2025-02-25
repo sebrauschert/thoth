@@ -75,93 +75,88 @@ dvc_track <- function(path, message = NULL) {
   invisible(path)
 }
 
-#' Write CSV with DVC Tracking
+#' Write a CSV file and track it with DVC
 #'
-#' @param x Data frame to write
-#' @param file Path to write CSV file
-#' @param message Optional commit message for DVC
-#' @param stage_name Optional name for DVC stage
-#' @param deps Optional dependencies for DVC stage
-#' @param params Optional parameters for DVC stage
-#' @param metrics Logical or character vector indicating whether to track metrics
-#' @param plots Logical or character vector indicating whether to track plots
-#'
-#' @return Invisibly returns the input data frame
+#' @param x A data frame to write to CSV
+#' @param path Path to save the CSV file
+#' @param message Git commit message
+#' @param stage_name Optional DVC stage name
+#' @param deps Optional vector of dependency files
+#' @param params Optional list of parameters
+#' @param metrics Logical, whether to track as DVC metrics (default: FALSE)
 #' @export
-write_csv_dvc <- function(x, file, message = NULL, stage_name = NULL,
-                         deps = NULL, params = NULL,
-                         metrics = FALSE, plots = FALSE) {
+write_csv_dvc <- function(x, path, message, stage_name = NULL,
+                         deps = NULL, params = NULL, metrics = FALSE) {
   # Create directory if it doesn't exist
-  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
-  
-  # Write the data to CSV
-  readr::write_csv(x, file)
-  
-  # Create DVC stage if stage_name is provided
-  if (!is.null(stage_name)) {
-    # Create a temporary R script for the stage
-    script_file <- tempfile(pattern = "dvc_stage_", fileext = ".R")
-    on.exit(unlink(script_file))
-    
-    # Write R script content
-    script_content <- c(
-      "library(readr)",
-      "library(dplyr)",
-      "library(tidymodels)",  # Required for initial_split
-      "",
-      if (!is.null(deps)) {
-        c(
-          sprintf("# Read input data"),
-          sprintf("input_data <- read_csv(\"%s\")", deps[1])
-        )
-      },
-      "",
-      if (!is.null(params)) {
-        c(
-          "# Set parameters",
-          sprintf("set.seed(%s)", params$seed),
-          sprintf("train_prop <- %s", params$train_prop)
-        )
-      },
-      "",
-      "# Process data",
-      "processed_data <- input_data %>%",
-      "  janitor::clean_names() %>%",
-      "  mutate(",
-      "    species = as.factor(species),",
-      "    across(where(is.numeric), function(x) {",
-      "      as.numeric(scale(x))",
-      "    })",
-      "  )",
-      "",
-      "# Create train/test split",
-      "split <- initial_split(processed_data, prop = train_prop)",
-      "train_data <- training(split)",
-      "",
-      sprintf("# Save output"),
-      sprintf("write_csv(train_data, \"%s\")", file)
-    )
-    
-    # Remove NULL elements and write script
-    script_content <- script_content[!sapply(script_content, is.null)]
-    writeLines(script_content, script_file)
-    
-    # Create the stage using the script file
-    dvc_stage(
-      name = stage_name,
-      cmd = sprintf("Rscript %s", script_file),
-      deps = deps,
-      outs = file,
-      metrics = metrics,
-      plots = plots,
-      params = params
-    )
-  } else {
-    # Otherwise just track the file
-    dvc_track(file, message)
+  dir_path <- dirname(path)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
   }
   
-  invisible(x)
+  # Write the CSV file
+  readr::write_csv(x, path)
+  
+  # If no stage name provided, just track with dvc add
+  if (is.null(stage_name)) {
+    tryCatch({
+      dvc_add(path)
+      git_add(path)
+      git_commit(message)
+    }, error = function(e) {
+      cli::cli_abort(
+        c("Failed to track file with DVC",
+          "i" = "Error message: {conditionMessage(e)}"),
+        call = NULL
+      )
+    })
+    return(invisible(NULL))
+  }
+  
+  # Prepare DVC stage command
+  temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
+  writeLines(sprintf('readr::write_csv(x, "%s")', path), temp_script)
+  
+  # Build DVC command arguments
+  dvc_args <- c("stage", "add", "-n", stage_name)
+  
+  if (!is.null(deps)) {
+    dvc_args <- c(dvc_args, "-d", deps)
+  }
+  
+  # File can't be both output and metrics
+  if (metrics) {
+    dvc_args <- c(dvc_args, "-M", path)
+  } else {
+    dvc_args <- c(dvc_args, "-o", path)
+  }
+  
+  if (!is.null(params)) {
+    param_args <- unlist(Map(function(name, value) {
+      c("-p", sprintf("%s=%s", name, as.character(value)))
+    }, names(params), params))
+    dvc_args <- c(dvc_args, param_args)
+  }
+  
+  dvc_args <- c(dvc_args, sprintf("'Rscript %s'", temp_script))
+  
+  # Execute DVC command with better error handling
+  result <- tryCatch({
+    system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
+    git_add(c(path, "dvc.yaml", "dvc.lock"))
+    git_commit(message)
+    cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
+  }, error = function(e) {
+    unlink(temp_script)
+    cli::cli_abort(
+      c("Failed to create DVC stage: {stage_name}",
+        "i" = "DVC output: {paste(result, collapse = '\n')}"),
+      call = NULL
+    )
+  }, finally = {
+    unlink(temp_script)
+  })
+  
+  invisible(NULL)
 }
 
 #' Write RDS with DVC tracking
