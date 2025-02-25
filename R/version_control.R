@@ -136,6 +136,11 @@ dvc_push <- function(path = NULL, remote = NULL) {
 git_add <- function(path, force = FALSE) {
   check_git()
   
+  # Force add .dvc files
+  if (any(grepl("\\.dvc$", path))) {
+    force <- TRUE
+  }
+  
   args <- c("add", if(force) "-f" else NULL, path)
   result <- system2("git", args, stdout = TRUE, stderr = TRUE)
   

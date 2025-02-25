@@ -42,7 +42,7 @@ dvc_track <- function(path, message = NULL) {
     }
     # Create .gitignore if it doesn't exist
     if (!file.exists(".gitignore")) {
-      writeLines(c("/data", "/.dvc/cache"), ".gitignore")
+      writeLines(c("/data", "!/data/**/*.dvc", "/.dvc/cache"), ".gitignore")
     }
   }
   

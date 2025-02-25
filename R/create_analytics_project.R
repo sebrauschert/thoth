@@ -177,6 +177,8 @@ setup_dvc_tracking <- function() {
       "/data/processed/*",
       "!/data/raw/.gitkeep",
       "!/data/processed/.gitkeep",
+      "!/data/raw/**/*.dvc",
+      "!/data/processed/**/*.dvc",
       ".env",
       "renv/library/",
       "renv/python/",

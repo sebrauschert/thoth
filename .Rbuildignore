@@ -29,3 +29,4 @@
 ^thoth\.Rcheck$
 ^\.\.$
 ^\.\.Rcheck$
+^test-package\.R$
