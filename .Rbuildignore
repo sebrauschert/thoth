@@ -20,9 +20,10 @@
 ^\.idea$
 ^revdep$
 ^check$
-^Meta$
-^doc$
-^vignettes/.*\.(html|R)$
+# Keep vignette outputs for browseVignettes()
+# ^Meta$
+# ^doc$
+# ^vignettes/.*\.(html|R)$
 ^\.dvc$
 ^.*\.dvc$
 ^data-raw$
@@ -30,3 +31,5 @@
 ^\.\.$
 ^\.\.Rcheck$
 ^test-package\.R$
+^doc$
+^Meta$
