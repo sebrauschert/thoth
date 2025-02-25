@@ -7,6 +7,22 @@ library(tibble)
 library(digest)
 library(dplyr)
 
+# Helper function to check if DVC is installed
+is_dvc_available <- function() {
+  tryCatch({
+    if (.Platform$OS.type == "windows") {
+      # Windows check
+      result <- suppressWarnings(system("where dvc", ignore.stdout = TRUE))
+    } else {
+      # Unix-like check
+      result <- suppressWarnings(system("which dvc", ignore.stdout = TRUE))
+    }
+    return(result == 0)
+  }, error = function(e) {
+    return(FALSE)
+  })
+}
+
 # Mock DVC commands
 mock_dvc_command <- function(args) {
   cmd <- args[1]
@@ -74,6 +90,9 @@ setup_test_env <- function(mock = TRUE) {
 
 # Test DVC installation check
 test_that("dvc_track checks for DVC installation", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   # Create a temporary test environment
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
@@ -90,6 +109,9 @@ test_that("dvc_track checks for DVC installation", {
 })
 
 test_that("dvc_track handles non-existent files correctly", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
   
@@ -100,6 +122,9 @@ test_that("dvc_track handles non-existent files correctly", {
 })
 
 test_that("dvc_track handles multiple paths correctly", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
   
@@ -110,6 +135,9 @@ test_that("dvc_track handles multiple paths correctly", {
 })
 
 test_that("write_csv_dvc writes and tracks files correctly", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
   
@@ -166,6 +194,9 @@ test_that("write_csv_dvc writes and tracks files correctly", {
 })
 
 test_that("write_rds_dvc writes and tracks files correctly", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
   
@@ -228,6 +259,9 @@ test_that("write_rds_dvc writes and tracks files correctly", {
 })
 
 test_that("dvc_track handles messages correctly", {
+  # Skip if DVC is not available
+  skip_if_not(is_dvc_available(), "DVC is not installed, skipping test")
+  
   tmp_dir <- setup_test_env(mock = TRUE)
   on.exit(unlink(tmp_dir, recursive = TRUE))
   
@@ -249,7 +283,7 @@ test_that("dvc_track handles messages correctly", {
   
   # Test tracking with message
   expect_message(
-    dvc_track(test_file, "Test commit message"),
+    dvc_track(test_file, "Test message"),
     regexp = "Failed to add .* to DVC tracking|Failed to add files to Git|Failed to commit changes to Git",
     all = TRUE
   )

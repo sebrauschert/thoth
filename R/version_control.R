@@ -186,7 +186,21 @@ git_commit <- function(message, all = FALSE) {
 #' Check DVC Installation
 #' @keywords internal
 check_dvc <- function() {
-  if (system2("which", "dvc", stdout = NULL, stderr = NULL) != 0) {
+  # Platform-specific check for DVC
+  dvc_installed <- tryCatch({
+    if (.Platform$OS.type == "windows") {
+      # Windows check
+      result <- suppressWarnings(system("where dvc", ignore.stdout = TRUE))
+    } else {
+      # Unix-like check
+      result <- suppressWarnings(system("which dvc", ignore.stdout = TRUE))
+    }
+    result == 0
+  }, error = function(e) {
+    FALSE
+  })
+  
+  if (!dvc_installed) {
     stop("DVC is not installed. Please install it first: https://dvc.org/doc/install")
   }
 }
@@ -194,7 +208,21 @@ check_dvc <- function() {
 #' Check Git Installation
 #' @keywords internal
 check_git <- function() {
-  if (system2("which", "git", stdout = NULL, stderr = NULL) != 0) {
+  # Platform-specific check for Git
+  git_installed <- tryCatch({
+    if (.Platform$OS.type == "windows") {
+      # Windows check
+      result <- suppressWarnings(system("where git", ignore.stdout = TRUE))
+    } else {
+      # Unix-like check
+      result <- suppressWarnings(system("which git", ignore.stdout = TRUE))
+    }
+    result == 0
+  }, error = function(e) {
+    FALSE
+  })
+  
+  if (!git_installed) {
     stop("Git is not installed. Please install it first.")
   }
 }

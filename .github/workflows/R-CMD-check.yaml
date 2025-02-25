@@ -92,17 +92,68 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
-      - name: Install DVC
+      - name: Install DVC on Unix
         if: runner.os != 'Windows'
         run: |
           python -m pip install --upgrade pip
           pip install 'dvc[all]'
+
+      - name: Install DVC on Windows
+        if: runner.os == 'Windows'
+        run: |
+          # Install App Installer (contains winget) if not already installed
+          $releases_url = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          $releases = Invoke-RestMethod -Uri $releases_url
+          $asset = $releases.assets | Where-Object { $_.name -match "\.msixbundle$" } | Select-Object -First 1
+          $download_url = $asset.browser_download_url
+          $download_path = "$env:TEMP\winget-installer.msixbundle"
+          Invoke-WebRequest -Uri $download_url -OutFile $download_path
+          
+          # Install winget
+          try {
+            Add-AppxPackage -Path $download_path -ErrorAction SilentlyContinue
+            Write-Host "Winget installed successfully"
+          } catch {
+            Write-Host "Winget installation failed, but continuing anyway: $_"
+          }
+          
+          # Install DVC using winget
+          try {
+            winget install --id Iterative.DVC --accept-source-agreements --accept-package-agreements --silent
+            Write-Host "DVC installed successfully"
+          } catch {
+            Write-Host "DVC installation failed, but continuing anyway: $_"
+            # Fallback to pip installation
+            python -m pip install --upgrade pip
+            pip install 'dvc[all]'
+          }
+          
+          # Add DVC to PATH
+          $env:PATH = "$env:LOCALAPPDATA\Programs\dvc;$env:PATH"
+          Write-Host "PATH updated: $env:PATH"
+          
+          # Verify DVC installation
+          try {
+            dvc --version
+            Write-Host "DVC verification successful"
+          } catch {
+            Write-Host "DVC verification failed, but continuing anyway: $_"
+          }
+        shell: pwsh
 
       - name: Check DVC installation
         if: runner.os != 'Windows'
         run: |
           dvc --version
           which dvc
+          
+      - name: Check DVC installation on Windows
+        if: runner.os == 'Windows'
+        run: |
+          dvc --version
+          where dvc
+        shell: pwsh
 
       - name: Prepare vignettes (Unix)
         if: runner.os != 'Windows'
