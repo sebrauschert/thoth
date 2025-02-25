@@ -65,14 +65,17 @@ dvc_track <- function(path, message = NULL) {
     }
   }
   
-  # Add file to DVC
-  result <- suppressWarnings(
-    system2("dvc", args = c("add", "--quiet", path), stdout = TRUE, stderr = TRUE)
+  # Add file to DVC with better error handling
+  dvc_result <- suppressWarnings(
+    system2("dvc", args = c("add", path), stdout = TRUE, stderr = TRUE)
   )
   
-  # Check if the command failed and emit a message
-  if (is.character(result) && length(result) > 0) {
-    message(sprintf("Failed to add %s to DVC tracking", path))
+  # Check if DVC add was successful
+  if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+    cli::cli_alert_warning("Failed to add {path} to DVC tracking")
+    cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+  } else {
+    cli::cli_alert_success("Added {path} to DVC tracking")
   }
   
   # Create .dvc file if it doesn't exist
@@ -83,21 +86,32 @@ dvc_track <- function(path, message = NULL) {
   
   # If message is provided, commit the changes
   if (!is.null(message)) {
-    # First stage the .dvc file
+    # First stage the .dvc file with force flag
     if (file.exists(dvc_file)) {
       git_result <- suppressWarnings(
-        system2("git", args = c("add", dvc_file), stdout = TRUE, stderr = TRUE)
+        system2("git", args = c("add", "-f", dvc_file), stdout = TRUE, stderr = TRUE)
       )
-      if (is.character(git_result) && length(git_result) > 0) {
-        message("Failed to add files to Git")
+      
+      # Check if Git add was successful
+      if (!is.null(attr(git_result, "status")) && attr(git_result, "status") != 0) {
+        cli::cli_alert_warning("Failed to add {dvc_file} to Git")
+        cli::cli_alert_info("Git output: {paste(git_result, collapse = '\n')}")
+      } else {
+        cli::cli_alert_success("Added {dvc_file} to Git staging area")
       }
     }
-    # Then commit with DVC
-    dvc_commit_result <- suppressWarnings(
-      system2("dvc", args = c("commit", "--force", "--quiet", path), stdout = TRUE, stderr = TRUE)
+    
+    # Then commit with Git
+    git_commit_result <- suppressWarnings(
+      system2("git", args = c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
     )
-    if (is.character(dvc_commit_result) && length(dvc_commit_result) > 0) {
-      message("Failed to commit changes to Git")
+    
+    # Check if Git commit was successful
+    if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to commit changes to Git")
+      cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
+    } else {
+      cli::cli_alert_success("Committed changes to Git")
     }
   }
   
@@ -153,20 +167,55 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    tryCatch({
-      dvc_add(path)
-      git_add(path)
-      git_commit(message)
-    }, error = function(e) {
-      cli::cli_abort(
-        c("Failed to track file with DVC",
-          "i" = "Error message: {conditionMessage(e)}"),
-        call = NULL
+    # Use direct system2 calls with better error handling
+    # Add file to DVC
+    dvc_result <- suppressWarnings(
+      system2("dvc", args = c("add", path), stdout = TRUE, stderr = TRUE)
+    )
+    
+    # Check if DVC add was successful
+    if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to add {path} to DVC tracking")
+      cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+    } else {
+      cli::cli_alert_success("Added {path} to DVC tracking")
+    }
+    
+    # Add .dvc file to Git (force add in case it's in a gitignored directory)
+    dvc_file <- paste0(path, ".dvc")
+    if (file.exists(dvc_file)) {
+      git_result <- suppressWarnings(
+        system2("git", args = c("add", "-f", dvc_file), stdout = TRUE, stderr = TRUE)
       )
-    })
+      
+      # Check if Git add was successful
+      if (!is.null(attr(git_result, "status")) && attr(git_result, "status") != 0) {
+        cli::cli_alert_warning("Failed to add {dvc_file} to Git")
+        cli::cli_alert_info("Git output: {paste(git_result, collapse = '\n')}")
+      } else {
+        cli::cli_alert_success("Added {dvc_file} to Git staging area")
+      }
+    }
+    
+    # Commit changes if requested
+    if (!is.null(message)) {
+      git_commit_result <- suppressWarnings(
+        system2("git", args = c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
+      )
+      
+      # Check if Git commit was successful
+      if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
+        cli::cli_alert_warning("Failed to commit changes to Git")
+        cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
+      } else {
+        cli::cli_alert_success("Committed changes to Git")
+      }
+    }
+    
     return(invisible(x))  # Return input data for piping
   }
   
+  # Rest of the function for stage_name case remains unchanged
   # Prepare DVC stage command
   temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
   writeLines(sprintf('readr::write_csv(x, "%s")', path), temp_script)
@@ -196,17 +245,36 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # Execute DVC command with better error handling
   result <- tryCatch({
-    system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
-    git_add(c(path, "dvc.yaml", "dvc.lock"))
-    git_commit(message)
-    cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
+    dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
+    
+    # Check if DVC stage add was successful
+    if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to create DVC stage: {stage_name}")
+      cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+    } else {
+      # Add files to Git with force flag for .dvc files
+      git_add_result <- suppressWarnings(
+        system2("git", args = c("add", "-f", "dvc.yaml", "dvc.lock"), stdout = TRUE, stderr = TRUE)
+      )
+      
+      # Commit changes if requested
+      if (!is.null(message)) {
+        git_commit_result <- suppressWarnings(
+          system2("git", args = c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
+        )
+        
+        if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
+          cli::cli_alert_warning("Failed to commit changes to Git")
+          cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
+        } else {
+          cli::cli_alert_success("Committed changes to Git")
+        }
+      }
+      
+      cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
+    }
   }, error = function(e) {
-    unlink(temp_script)
-    cli::cli_abort(
-      c("Failed to create DVC stage: {stage_name}",
-        "i" = "DVC output: {paste(result, collapse = '\n')}"),
-      call = NULL
-    )
+    cli::cli_alert_error("Error creating DVC stage: {conditionMessage(e)}")
   }, finally = {
     unlink(temp_script)
   })

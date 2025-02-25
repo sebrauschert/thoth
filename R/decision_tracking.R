@@ -135,26 +135,52 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
     output_path <- paste0(base_name, ".", format)
   }
   
+  # Create output directory if it doesn't exist
+  output_dir <- dirname(output_path)
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  # Get absolute paths
+  output_path <- normalizePath(output_path, mustWork = FALSE)
+  output_dir <- dirname(output_path)
+  
   # Write output based on format
   switch(format,
          "md" = writeLines(methods, output_path),
          "html" = {
-           # Create temporary Rmd file
-           temp_rmd <- tempfile(fileext = ".Rmd")
+           # Create temporary directory for intermediates
+           temp_dir <- tempfile("rmd_")
+           dir.create(temp_dir)
+           on.exit(unlink(temp_dir, recursive = TRUE))
+           
+           # Create temporary Rmd file in temp directory
+           temp_rmd <- file.path(temp_dir, "temp.Rmd")
            writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
-           rmarkdown::render(temp_rmd, output_file = output_path, 
+           
+           # Render with explicit intermediate directory
+           rmarkdown::render(temp_rmd, 
+                           output_file = output_path,
                            output_format = "html_document",
+                           intermediates_dir = temp_dir,
                            quiet = TRUE)
-           unlink(temp_rmd)  # Clean up temp file
          },
          "pdf" = {
-           # Create temporary Rmd file
-           temp_rmd <- tempfile(fileext = ".Rmd")
+           # Create temporary directory for intermediates
+           temp_dir <- tempfile("rmd_")
+           dir.create(temp_dir)
+           on.exit(unlink(temp_dir, recursive = TRUE))
+           
+           # Create temporary Rmd file in temp directory
+           temp_rmd <- file.path(temp_dir, "temp.Rmd")
            writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
-           rmarkdown::render(temp_rmd, output_file = output_path, 
+           
+           # Render with explicit intermediate directory
+           rmarkdown::render(temp_rmd, 
+                           output_file = output_path,
                            output_format = "pdf_document",
+                           intermediates_dir = temp_dir,
                            quiet = TRUE)
-           unlink(temp_rmd)  # Clean up temp file
          },
          stop("Unsupported format. Use 'md', 'html', or 'pdf'.")
   )

@@ -18,28 +18,51 @@ dvc_add <- function(path, message = NULL, recursive = FALSE, git_add = TRUE) {
   # Ensure DVC is installed
   check_dvc()
   
-  # Handle multiple paths
-  paths <- normalizePath(path, mustWork = TRUE)
+  # Handle paths more safely
+  paths <- path
   
   for (p in paths) {
+    # Check if file exists
+    if (!file.exists(p)) {
+      cli::cli_alert_warning("File {p} does not exist, skipping")
+      next
+    }
+    
+    # Add to DVC with better error handling
     args <- c("add", if(recursive) "--recursive" else NULL, p)
     result <- system2("dvc", args, stdout = TRUE, stderr = TRUE)
     
-    if (!is.null(attr(result, "status"))) {
+    if (!is.null(attr(result, "status")) && attr(result, "status") != 0) {
       cli::cli_alert_warning("Failed to add {p} to DVC tracking")
+      cli::cli_alert_info("DVC output: {paste(result, collapse = '\n')}")
       next
     }
     
     dvc_file <- paste0(p, ".dvc")
     if (git_add && file.exists(dvc_file)) {
-      git_add(dvc_file)
+      # Force add the .dvc file to Git (in case it's in a gitignored directory)
+      git_result <- system2("git", c("add", "-f", dvc_file), stdout = TRUE, stderr = TRUE)
+      
+      if (!is.null(attr(git_result, "status")) && attr(git_result, "status") != 0) {
+        cli::cli_alert_warning("Failed to add {dvc_file} to Git")
+        cli::cli_alert_info("Git output: {paste(git_result, collapse = '\n')}")
+      } else {
+        cli::cli_alert_success("Added {dvc_file} to Git staging area")
+      }
     }
     
     cli::cli_alert_success("Added {p} to DVC tracking")
   }
   
   if (!is.null(message)) {
-    dvc_commit(paths, message)
+    git_commit_result <- system2("git", c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
+    
+    if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to commit changes to Git")
+      cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
+    } else {
+      cli::cli_alert_success("Committed changes to Git")
+    }
   }
   
   invisible(paths)
@@ -141,15 +164,19 @@ git_add <- function(path, force = FALSE) {
     force <- TRUE
   }
   
-  args <- c("add", if(force) "-f" else NULL, path)
-  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
-  
-  if (!is.null(attr(result, "status"))) {
-    cli::cli_alert_warning("Failed to add files to Git")
-    return(invisible(FALSE))
+  # Handle paths more safely
+  for (p in path) {
+    args <- c("add", if(force) "-f" else NULL, p)
+    result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+    
+    if (!is.null(attr(result, "status")) && attr(result, "status") != 0) {
+      cli::cli_alert_warning("Failed to add {p} to Git")
+      cli::cli_alert_info("Git output: {paste(result, collapse = '\n')}")
+    } else {
+      cli::cli_alert_success("Added {p} to Git staging area")
+    }
   }
   
-  cli::cli_alert_success("Added files to Git staging area")
   invisible(path)
 }
 
