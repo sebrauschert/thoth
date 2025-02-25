@@ -1,0 +1,6 @@
+outs:
+- md5: ed9d9d88260064c27a045836bca0b42d
+  path: model.rds
+
+  size: 27523
+  hash: md5
