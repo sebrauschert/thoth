@@ -1,6 +1,6 @@
 outs:
-- md5: 3e99e90972845d2c977d1efa3900167e
+- md5: 0e62d138ed68d431daad47609f4b58d0
   path: model.rds
 
-  size: 27519
+  size: 27481
   hash: md5
