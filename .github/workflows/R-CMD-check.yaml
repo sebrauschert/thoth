@@ -51,6 +51,17 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-tinytex@v2
+        env:
+          TINYTEX_INSTALLER: TinyTeX
+
+      - name: Install LaTeX packages
+        run: |
+          tlmgr install ae parskip listings xcolor booktabs amsmath hyperref url
+          tlmgr path add
+          tlmgr update --self --all
+        shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
