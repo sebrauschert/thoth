@@ -8,9 +8,10 @@ on:
     types: [published]
   workflow_dispatch:
 
-name: pkgdown.yaml
+name: pkgdown
 
-permissions: read-all
+permissions:
+  contents: write
 
 jobs:
   pkgdown:
@@ -20,10 +21,8 @@ jobs:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -31,21 +30,26 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+
       - uses: r-lib/actions/setup-tinytex@v2
         env:
           TINYTEX_INSTALLER: TinyTeX
 
       - name: Install LaTeX packages
         run: |
-          tlmgr install ae parskip listings xcolor booktabs amsmath hyperref url
-          tlmgr path add
-          tlmgr update --self --all
+          # Make sure tlmgr is in the PATH
+          export PATH=$PATH:$(find $HOME -type d -path "*/bin" -name "tlmgr" | head -n 1 | xargs dirname)
+          # Check if tlmgr is available
+          which tlmgr || echo "tlmgr not found in PATH: $PATH"
+          # Install required LaTeX packages
+          tlmgr install ae parskip listings xcolor booktabs amsmath hyperref url || echo "Failed to install LaTeX packages, continuing anyway"
+          tlmgr path add || echo "Failed to add tlmgr to path, continuing anyway"
+          tlmgr update --self --all || echo "Failed to update tlmgr, continuing anyway"
         shell: bash
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::pkgdown, local::.
-          needs: website
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)

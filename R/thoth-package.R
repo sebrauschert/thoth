@@ -69,10 +69,11 @@
   # Select a random fact
   random_fact <- sample(thoth_facts, 1)
   
-  # Create a stylish startup message
-  cli::cli_div(theme = list(span.emph = list(color = "cyan", font_style = "italic")))
-  cli::cli_alert_success("Welcome to {.emph thoth}! The reproducible analytics framework")
-  cli::cli_alert_info("Did you know? {random_fact}")
-  cli::cli_text("{.emph *} For help, see: {.url https://sebrauschert.github.io/thoth/}")
-  cli::cli_end()
+  # Create a stylish startup message that is suppressible
+  packageStartupMessage(cli::col_green(cli::symbol$tick), " Welcome to ", 
+                       cli::col_cyan("thoth"), "! The reproducible analytics framework")
+  packageStartupMessage(cli::col_blue(cli::symbol$info), " Did you know? ", random_fact)
+  packageStartupMessage(cli::col_cyan("*"), " For help, see: ", 
+                       cli::style_hyperlink("https://sebrauschert.github.io/thoth/", 
+                                           "https://sebrauschert.github.io/thoth/"))
 } 
