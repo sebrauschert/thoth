@@ -14,16 +14,20 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup}
+library(thoth)
+```
+
 ## Introduction
 
-Quarto templates help maintain consistent branding and styling across your organization's reports. `toth` provides tools to create and manage custom Quarto templates with your organization's branding, colors, and styling preferences.
+Quarto templates help maintain consistent branding and styling across your organization's reports. `thoth` provides tools to create and manage custom Quarto templates with your organization's branding, colors, and styling preferences.
 
 ## Basic Template Creation
 
 Create a new template with your organization's branding:
 
 ```{r eval=FALSE}
-library(toth)
+library(thoth)
 
 create_quarto_template(
   template_name = "company_template",

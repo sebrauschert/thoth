@@ -1,4 +1,4 @@
-# toth 0.0.0.9000
+# thoth 0.0.0.9000
 
 ## New features
 
@@ -17,4 +17,15 @@
 
 ## Bug fixes
 
-* None (initial release) 
+* None (initial release)
+
+## Initial development version
+
+* Added core functionality for creating reproducible analytics projects
+* Implemented data version control with DVC integration
+* Added Git integration for version control
+* Implemented Docker containerization
+* Added dependency management with renv
+* Implemented decision tracking functionality
+* Added customizable reporting with Quarto
+* Added metrics functions for model evaluation 

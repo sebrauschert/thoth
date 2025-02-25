@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This vignette provides a complete end-to-end example of using `toth` with the classic iris dataset. We'll cover:
+This vignette provides a complete end-to-end example of using `thoth` with the classic iris dataset. We'll cover:
 
 1. Setting up a new analytics project
 2. Versioning the raw data
@@ -31,7 +31,7 @@ This vignette provides a complete end-to-end example of using `toth` with the cl
 First, let's create a new analytics project with DVC enabled:
 
 ```{r setup}
-library(toth)
+library(thoth)
 library(tidyverse)
 library(tidymodels)
 
@@ -253,7 +253,7 @@ dvc push
 ## Conclusion
 
 This example demonstrated how to:
-- Set up a complete analytics project with `toth`
+- Set up a complete analytics project with `thoth`
 - Version data and models with DVC
 - Create reproducible pipelines
 - Track analysis decisions

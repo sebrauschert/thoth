@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This vignette demonstrates how to use `toth` for a typical RNA-seq analysis workflow using edgeR and limma. We'll:
+This vignette demonstrates how to use `thoth` for a typical RNA-seq analysis workflow using edgeR and limma. We'll:
 
 1. Set up a reproducible project structure
 2. Track raw count data with DVC
@@ -31,7 +31,7 @@ This vignette demonstrates how to use `toth` for a typical RNA-seq analysis work
 First, let's create a new project with DVC enabled:
 
 ```{r setup}
-library(toth)
+library(thoth)
 library(tidyverse)
 library(edgeR)
 library(limma)

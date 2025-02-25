@@ -1,50 +1,24 @@
-url: https://sebrauschert.github.io/toth/
+url: https://sebrauschert.github.io/thoth/
 template:
   bootstrap: 5
-  light-switch: yes
-  theme: arrow-light
-  theme-dark: arrow-dark
-  includes:
-    in_header: |
-      <style>
-      code .op, pre .op {
-        unicode-bidi: normal !important;
-        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-      }
-      .sourceCode .op {
-        content: "|>" !important;
-        font-family: "JetBrains Mono", Consolas, Monaco, "Andale Mono", monospace !important;
-      }
-      </style>
+  bootswatch: flatly
   bslib:
-    primary: '#C471ED'
-    bg: '#ffffff'
-    fg: '#000000'
-    bg-dark: '#202123'
-    fg-dark: '#ffffff'
-    base_font:
-      google: Source Sans Pro
-    heading_font:
-      google: Source Sans Pro
-    code_font:
-      google: JetBrains Mono
+    primary: "#0054AD"
     border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+development:
+  mode: auto
+  version_label: info
+  version_tooltip: "Version"
+
 navbar:
-  bg: primary
-  type: light
   structure:
-    left:
-    - intro
-    - getting-started
-    - reference
-    - articles
-    right:
-    - search
-    - github
-    - lightswitch
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
   components:
-    getting-started:
-      text: Getting Started
+    intro:
+      text: Get started
       href: articles/getting-started.html
     reference:
       text: Reference
@@ -52,30 +26,28 @@ navbar:
     articles:
       text: Articles
       menu:
-      - text: Getting Started
-        href: articles/getting-started.html
-      - text: '-------'
-      - text: Features
-      - text: Data Version Control
+      - text: "Core Functionality"
+      - text: DVC Tracking
         href: articles/dvc-tracking.html
       - text: Git Integration
         href: articles/git-integration.html
       - text: Docker Setup
         href: articles/docker-setup.html
-      - text: Custom Templates
-        href: articles/custom-templates.html
       - text: Decision Tracking
         href: articles/decision-tracking.html
-      - text: '-------'
-      - text: Examples
+      - text: Custom Templates
+        href: articles/custom-templates.html
+      - text: -------
+      - text: "Examples"
       - text: End-to-End Example
         href: articles/end-to-end-example.html
-      - text: RNA-seq Analysis
+      - text: Bioinformatics Example
         href: articles/bioinformatics-example.html
     github:
       icon: fab fa-github
-      href: https://github.com/sebrauschert/toth
-      aria-label: GitHub Repository
+      href: https://github.com/sebrauschert/thoth
+      aria-label: GitHub
+
 footer:
   structure:
     left:
@@ -83,12 +55,13 @@ footer:
     - built_with
     right: attribution
   components:
-    attribution: Toth icon design by [Freepik](https://www.freepik.com)
+    attribution: Thoth icon design by [Freepik](https://www.freepik.com)
+
 reference:
 - title: Package Overview
   desc: Package documentation and data
   contents:
-  - toth-package
+  - thoth-package
   - example_projects
   - decision_tracking
 - title: Project Setup
@@ -140,6 +113,12 @@ reference:
   - create_template_yaml
   - create_custom_css
   - setup_quarto_template
+- title: Metrics
+  desc: Functions for model evaluation
+  contents:
+  - metrics
+  - conf_mat
+
 articles:
 - title: Getting Started
   contents: getting-started
@@ -154,8 +133,9 @@ articles:
   contents:
   - end-to-end-example
   - bioinformatics-example
+
 news:
   releases:
-  - text: Version 0.0.0.9000
-    href: https://github.com/sebrauschert/toth/releases/tag/v0.0.0.9000
+  - text: "Version 0.0.0.9000"
+    href: https://github.com/sebrauschert/thoth/releases/tag/v0.0.0.9000
 

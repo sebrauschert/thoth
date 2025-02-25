@@ -1,15 +1,15 @@
-# toth: Reproducible Analytics Framework with Data Version Control
+# thoth: Reproducible Analytics Framework with Data Version Control
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml)
-[![test-coverage](https://github.com/sebrauschert/toth/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/test-coverage.yaml)
-[![pkgdown](https://github.com/sebrauschert/toth/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/pkgdown.yaml)
+[![R-CMD-check](https://github.com/sebrauschert/thoth/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sebrauschert/thoth/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/sebrauschert/thoth/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/sebrauschert/thoth/actions/workflows/test-coverage.yaml)
+[![pkgdown](https://github.com/sebrauschert/thoth/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/sebrauschert/thoth/actions/workflows/pkgdown.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 ## Overview
 
-`toth` is a comprehensive R package that provides a framework for setting up and managing reproducible analytics projects. It integrates several key components:
+`thoth` is a comprehensive R package that provides a framework for setting up and managing reproducible analytics projects. It integrates several key components:
 
 - Data Version Control (DVC) for managing large data files
 - Git integration for code version control
@@ -22,11 +22,11 @@ This package is still in active development and should be used with caution.
 
 ```r
 # Install from GitHub
-remotes::install_github("sebrauschert/toth")
+remotes::install_github("sebrauschert/thoth")
 ```
 
-# Why is this package called "`toth`"?
-`toth` is named after the ancient Egyptian deity of wisdom and writing and embodies the essence of preserving and documenting knowledge. Just as Toth was revered for recording the deeds of the living and maintaining cosmic order, this R package ensures analytical integrity through comprehensive version control of code, data and analytical decisions. By seamlessly integrating DVC, Git, and Docker, Toth aims to create a robust framework for reproducible analytics, making it effortless to track data lineage, manage dependencies, and share reproducible environments. Whether you're collaborating on a team project or maintaining consistency in your solo analyses, `toth` serves as your faithful scribe, ensuring that every step of your analytical journey is documented, reproducible, and trustworthy.
+# Why "`thoth`"?
+`thoth` is named after the ancient Egyptian deity of wisdom and writing and embodies the essence of preserving and documenting knowledge. Just as Thoth was revered for recording the deeds of the living and maintaining cosmic order, this R package ensures analytical integrity through comprehensive version control of code, data and analytical decisions. By seamlessly integrating DVC, Git, and Docker, Thoth aims to create a robust framework for reproducible analytics, making it effortless to track data lineage, manage dependencies, and share reproducible environments. Whether you're collaborating on a team project or maintaining consistency in your solo analyses, `thoth` serves as your faithful scribe, ensuring that every step of your analytical journey is documented, reproducible, and trustworthy.
 
 ### System Requirements
 
@@ -39,7 +39,7 @@ remotes::install_github("sebrauschert/toth")
 ## Quick Start
 
 ```r
-library(toth)
+library(thoth)
 
 # Create a new analytics project
 create_analytics_project(
@@ -167,14 +167,14 @@ apply_template_to_report("analysis.qmd")
 
 ## Documentation
 
-Visit our [website](https://sebrauschert.github.io/toth/) for comprehensive documentation:
+Visit our [website](https://sebrauschert.github.io/thoth/) for comprehensive documentation:
 
-- [Getting Started Guide](https://sebrauschert.github.io/toth/articles/getting-started.html)
-- [Data Version Control](https://sebrauschert.github.io/toth/articles/dvc-tracking.html)
-- [Git Integration](https://sebrauschert.github.io/toth/articles/git-integration.html)
-- [Decision Tracking](https://sebrauschert.github.io/toth/articles/decision-tracking.html)
-- [Docker Setup](https://sebrauschert.github.io/toth/articles/docker-setup.html)
-- [End-to-End Example](https://sebrauschert.github.io/toth/articles/end-to-end-example.html)
+- [Getting Started Guide](https://sebrauschert.github.io/thoth/articles/getting-started.html)
+- [Data Version Control](https://sebrauschert.github.io/thoth/articles/dvc-tracking.html)
+- [Git Integration](https://sebrauschert.github.io/thoth/articles/git-integration.html)
+- [Decision Tracking](https://sebrauschert.github.io/thoth/articles/decision-tracking.html)
+- [Docker Setup](https://sebrauschert.github.io/thoth/articles/docker-setup.html)
+- [End-to-End Example](https://sebrauschert.github.io/thoth/articles/end-to-end-example.html)
 
 ## Contributing
 
@@ -185,4 +185,4 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
-<sub>Toth icon by [Freepik](https://www.freepik.com)</sub>
+<sub>Thoth icon by [Freepik](https://www.freepik.com)</sub>

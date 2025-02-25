@@ -1,8 +1,8 @@
 ---
-title: "Data Version Control with toth"
+title: "Data Version Control with thoth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Data Version Control with toth}
+  %\VignetteIndexEntry{Data Version Control with thoth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,16 +15,20 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup}
+library(thoth)
+```
+
 ## Introduction
 
-Data Version Control (DVC) is a powerful tool for managing data science workflows. While DVC is written in Python, `toth` provides seamless integration with R, allowing you to:
+Data Version Control (DVC) is a powerful tool for managing data science workflows. While DVC is written in Python, `thoth` provides seamless integration with R, allowing you to:
 
 1. Track large data files without storing them in Git
 2. Create reproducible pipelines
 3. Track metrics and plots
 4. Share data across team members
 
-This guide will walk you through setting up DVC and using it effectively with `toth`.
+This guide will walk you through setting up DVC and using it effectively with `thoth`.
 
 ## Prerequisites
 
@@ -40,17 +44,17 @@ Before starting, ensure you have:
    git init
    ```
 
-3. toth installed:
+3. thoth installed:
    ```r
-   remotes::install_github("sebrauschert/toth")
+   remotes::install_github("sebrauschert/thoth")
    ```
 
 ## Project Setup
 
-When you create a new analytics project with `toth`, DVC is automatically set up:
+When you create a new analytics project with `thoth`, DVC is automatically set up:
 
 ```r
-library(toth)
+library(thoth)
 create_analytics_project(
   "my_analysis",
   use_dvc = TRUE  # DVC is enabled by default
@@ -161,7 +165,7 @@ plot_data |> write_csv_dvc(
 Here's a complete example of a machine learning pipeline:
 
 ```r
-library(toth)
+library(thoth)
 
 # 1. Data Preprocessing
 raw_data |> write_csv_dvc(
@@ -283,7 +287,7 @@ Common issues and solutions:
 
 ## Conclusion
 
-DVC integration in `toth` provides a seamless way to:
+DVC integration in `thoth` provides a seamless way to:
 - Track large data files
 - Create reproducible pipelines
 - Share data across team members

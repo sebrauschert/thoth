@@ -1,9 +1,9 @@
-# Example configuration for toth analytics project
+# Example configuration for thoth analytics project
 
 project:
-  name: example_analysis
-  description: Example analytics project using toth framework
-  version: 1.0.0
+  name: example_project
+  description: Example analytics project using thoth framework
+  version: 0.1.0
 
 dvc:
   remote: s3://example-bucket/

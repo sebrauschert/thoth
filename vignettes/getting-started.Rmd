@@ -1,8 +1,8 @@
 ---
-title: "Getting Started with toth"
+title: "Getting Started with thoth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with toth}
+  %\VignetteIndexEntry{Getting Started with thoth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,27 +17,27 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-`toth` is a comprehensive framework for setting up reproducible analytics projects in R. It integrates several best practices and tools:
+`thoth` is a comprehensive framework for setting up reproducible analytics projects in R. It integrates several best practices and tools:
 
 - Data version control with DVC (through R functions)
 - Containerization with Docker
 - Dependency management with renv
 - Customizable reporting with Quarto
 
-This guide will help you get started with the basic features of `toth`.
+This guide will help you get started with the basic features of `thoth`.
 
 ## Installation
 
-You can install the development version of `toth` from GitHub:
+You can install the development version of `thoth` from GitHub:
 
 ```{r}
 # install.packages("devtools")
-devtools::install_github("sebrauschert/toth")
+devtools::install_github("sebrauschert/thoth")
 ```
 
 ### Prerequisites
 
-Before using `toth`, ensure you have:
+Before using `thoth`, ensure you have:
 
 1. [DVC](https://dvc.org/doc/install) installed
 2. [Docker](https://docs.docker.com/get-docker/) installed
@@ -49,7 +49,7 @@ Before using `toth`, ensure you have:
 Create a new analytics project with all the necessary setup:
 
 ```{r}
-library(toth)
+library(thoth)
 library(tidyverse)
 
 # Create a new project with all features enabled
@@ -79,9 +79,9 @@ my_project/
 └── README.md         # Project documentation
 ```
 
-## Data Version Control with toth
+## Data Version Control with thoth
 
-`toth` provides seamless integration with DVC through tidyverse-style functions. Here's how to use it in your data science workflow:
+`thoth` provides seamless integration with DVC through tidyverse-style functions. Here's how to use it in your data science workflow:
 
 ### Reading and Processing Data
 
@@ -170,7 +170,7 @@ final_model |>
 
 ## Docker Integration
 
-`toth` sets up a Docker environment with R, RStudio Server, and all necessary tools:
+`thoth` sets up a Docker environment with R, RStudio Server, and all necessary tools:
 
 ```bash
 # Build and start the container
@@ -189,7 +189,7 @@ The Docker setup includes:
 
 ## Dependency Management
 
-`toth` uses `renv` for dependency management:
+`thoth` uses `renv` for dependency management:
 
 ```{r}
 # Install a new package
@@ -289,6 +289,6 @@ apply_template_to_report(
 
 If you encounter issues or have questions:
 
-1. Check the [package documentation](https://sebrauschert.github.io/toth/)
-2. File issues on [GitHub](https://github.com/sebrauschert/toth/issues)
+1. Check the [package documentation](https://sebrauschert.github.io/thoth/)
+2. File issues on [GitHub](https://github.com/sebrauschert/thoth/issues)
 3. Read the function documentation with `?function_name` 

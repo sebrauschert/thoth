@@ -1,8 +1,8 @@
 ---
-title: "Docker Setup with toth"
+title: "Docker Setup with thoth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Docker Setup with toth}
+  %\VignetteIndexEntry{Docker Setup with thoth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,18 +17,18 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Docker containerization is essential for reproducible analytics. `toth` automatically sets up a Docker environment that matches your local R setup, ensuring that your analysis can be easily shared and reproduced by others.
+Docker containerization is essential for reproducible analytics. `thoth` automatically sets up a Docker environment that matches your local R setup, ensuring that your analysis can be easily shared and reproduced by others.
 
 ## Automatic Docker Configuration
 
-When you create a new analytics project with `toth`, it automatically:
+When you create a new analytics project with `thoth`, it automatically:
 
 1. Detects your current R version
 2. Creates a Dockerfile based on the matching `rocker/rstudio` image
 3. Sets up a docker-compose configuration for easy deployment
 
 ```r
-library(toth)
+library(thoth)
 
 # Create new project with Docker enabled
 create_analytics_project(
@@ -39,7 +39,7 @@ create_analytics_project(
 
 ## Version Matching
 
-One of the key features of `toth`'s Docker integration is automatic R version matching:
+One of the key features of `thoth`'s Docker integration is automatic R version matching:
 
 - The Dockerfile uses exactly the same R version as your local installation
 - This ensures that your analysis environment can be perfectly replicated
@@ -204,10 +204,10 @@ You can customize the Docker setup by modifying:
 
 ## Conclusion
 
-`toth`'s Docker integration with automatic R version matching ensures that your analytics projects are:
+`thoth`'s Docker integration with automatic R version matching ensures that your analytics projects are:
 - Perfectly reproducible
 - Easy to share
 - Future-proof
 - Collaboration-ready
 
-By automatically creating a Docker environment that matches your development setup, `toth` removes the complexity of environment management while ensuring your analysis can be reproduced exactly as intended. 
+By automatically creating a Docker environment that matches your development setup, `thoth` removes the complexity of environment management while ensuring your analysis can be reproduced exactly as intended. 

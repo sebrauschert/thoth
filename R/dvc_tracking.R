@@ -51,6 +51,11 @@ dvc_track <- function(path, message = NULL) {
     system2("dvc", args = c("add", "--quiet", path), stdout = TRUE, stderr = TRUE)
   )
   
+  # Check if the command failed and emit a message
+  if (is.character(result) && length(result) > 0) {
+    message(sprintf("Failed to add %s to DVC tracking", path))
+  }
+  
   # Create .dvc file if it doesn't exist
   dvc_file <- paste0(path, ".dvc")
   if (!file.exists(dvc_file)) {
@@ -61,14 +66,20 @@ dvc_track <- function(path, message = NULL) {
   if (!is.null(message)) {
     # First stage the .dvc file
     if (file.exists(dvc_file)) {
-      suppressWarnings(
+      git_result <- suppressWarnings(
         system2("git", args = c("add", dvc_file), stdout = TRUE, stderr = TRUE)
       )
+      if (is.character(git_result) && length(git_result) > 0) {
+        message("Failed to add files to Git")
+      }
     }
     # Then commit with DVC
-    suppressWarnings(
+    dvc_commit_result <- suppressWarnings(
       system2("dvc", args = c("commit", "--force", "--quiet", path), stdout = TRUE, stderr = TRUE)
     )
+    if (is.character(dvc_commit_result) && length(dvc_commit_result) > 0) {
+      message("Failed to commit changes to Git")
+    }
   }
   
   # Return the path invisibly for piping
@@ -84,6 +95,7 @@ dvc_track <- function(path, message = NULL) {
 #' @param deps Optional vector of dependency files
 #' @param params Optional list of parameters
 #' @param metrics Logical, whether to track as DVC metrics (default: FALSE)
+#' @return The input data frame (invisibly) to allow for further piping
 #' @export
 write_csv_dvc <- function(x, path, message, stage_name = NULL,
                          deps = NULL, params = NULL, metrics = FALSE) {
@@ -109,7 +121,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
         call = NULL
       )
     })
-    return(invisible(NULL))
+    return(invisible(x))  # Return input data for piping
   }
   
   # Prepare DVC stage command
@@ -156,7 +168,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     unlink(temp_script)
   })
   
-  invisible(NULL)
+  invisible(x)  # Return input data for piping
 }
 
 #' Write RDS with DVC tracking
@@ -217,7 +229,7 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
     dvc_track(file, message)
   }
   
-  invisible(object)
+  invisible(object)  # Return input object for piping
 }
 
 #' Create a DVC Pipeline Stage

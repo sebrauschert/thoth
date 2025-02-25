@@ -1,8 +1,8 @@
 ---
-title: "Git Integration with toth"
+title: "Git Integration with thoth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Git Integration with toth}
+  %\VignetteIndexEntry{Git Integration with thoth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Version control is essential for reproducible analytics. While Git commands can be run directly from the terminal, `toth` provides convenient R functions for common Git operations. This integration allows you to manage your version control directly from your R scripts or console.
+Version control is essential for reproducible analytics. While Git commands can be run directly from the terminal, `thoth` provides convenient R functions for common Git operations. This integration allows you to manage your version control directly from your R scripts or console.
 
 ## Basic Git Operations
 
@@ -26,7 +26,7 @@ Version control is essential for reproducible analytics. While Git commands can 
 Use `git_status()` to see which files have been modified:
 
 ```r
-library(toth)
+library(thoth)
 
 # Check status (short format)
 git_status()
@@ -116,7 +116,7 @@ git_log(oneline = FALSE)
 
 ## Integration with DVC
 
-The Git functions in `toth` work seamlessly with DVC tracking:
+The Git functions in `thoth` work seamlessly with DVC tracking:
 
 ```r
 # Add and track a data file with DVC
@@ -153,7 +153,7 @@ dvc_push()
 4. **Integration with Analysis Workflow**
    ```r
    # Example workflow
-   library(toth)
+   library(thoth)
    
    # Start new feature
    git_checkout("feature/analysis", create = TRUE)
@@ -206,4 +206,12 @@ git_push()
 
 ## Conclusion
 
-The Git integration in `toth` provides a convenient way to manage version control directly from R. By combining these functions with your analysis workflow, you can maintain a clean and traceable project history. 
+The Git integration in `thoth` provides a convenient way to manage version control directly from R. By combining these functions with your analysis workflow, you can maintain a clean and traceable project history. 
+
+```{r setup}
+library(thoth)
+```
+
+```{r example, eval=FALSE}
+library(thoth)
+``` 
