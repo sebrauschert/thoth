@@ -1,7 +1,5 @@
 # toth: Reproducible Analytics Framework with Data Version Control
 
-<img src="man/figures/logo.png" align="right" height="139" alt="toth logo"/>
-
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/sebrauschert/toth/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/sebrauschert/toth/actions/workflows/test-coverage.yaml)
