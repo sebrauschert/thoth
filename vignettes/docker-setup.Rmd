@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Introduction
 
 Docker containerization is essential for reproducible analytics. `thoth` automatically sets up a Docker environment that matches your local R setup, ensuring that your analysis can be easily shared and reproduced by others.

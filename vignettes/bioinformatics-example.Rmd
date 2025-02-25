@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Introduction
 
 This vignette demonstrates how to use `thoth` for a typical RNA-seq analysis workflow using edgeR and limma. We'll:

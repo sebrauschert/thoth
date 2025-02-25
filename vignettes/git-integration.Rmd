@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Introduction
 
 Version control is essential for reproducible analytics. While Git commands can be run directly from the terminal, `thoth` provides convenient R functions for common Git operations. This integration allows you to manage your version control directly from your R scripts or console.

@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Introduction
 
 `thoth` is a comprehensive framework for setting up reproducible analytics projects in R. It integrates several best practices and tools:

@@ -21,12 +21,12 @@
 /check/
 *.tar.gz
 
-# Vignette files
-vignettes/*.html
-vignettes/*.R
+# Vignette files - commented out to allow vignette outputs to be included
+# vignettes/*.html
+# vignettes/*.R
 !vignettes/*.Rmd
-inst/doc/
-doc/
+# inst/doc/
+# doc/
 
 # Test artifacts
 tests/testthat/*.csv
@@ -37,4 +37,5 @@ tests/testthat/Rplots.pdf
 tests/testthat/*.png
 tests/testthat/*.html
 tests/testthat/.dvc/
+# /doc/
 /doc/

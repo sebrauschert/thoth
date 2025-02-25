@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Introduction
 
 This vignette provides a complete end-to-end example of using `thoth` with the classic iris dataset. We'll cover:
