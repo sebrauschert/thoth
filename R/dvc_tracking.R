@@ -48,7 +48,7 @@ dvc_track <- function(path, message = NULL, push = FALSE) {
   
   # Add file to DVC
   result <- system2("dvc", 
-                    c("add", path), 
+                    c("add", "-f", path), 
                     stdout = TRUE, 
                     stderr = TRUE)
   
@@ -62,11 +62,11 @@ dvc_track <- function(path, message = NULL, push = FALSE) {
   # Format output
   format_cmd_output(result, success = TRUE, cmd = "dvc add")
   
-  # Add .dvc file to Git
+  # Add .dvc file to Git with force flag
   dvc_file <- fs::path(paste0(path, ".dvc"))
   if (file.exists(dvc_file)) {
     git_result <- system2("git", 
-                         c("add", dvc_file),
+                         c("add", "-f", dvc_file),
                          stdout = TRUE,
                          stderr = TRUE)
     

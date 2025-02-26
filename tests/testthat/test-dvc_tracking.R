@@ -16,10 +16,12 @@ mock_system2 <- function(cmd, args, ...) {
   if (cmd == "dvc") {
     if (args[1] == "add") {
       # Create mock .dvc file
-      dvc_file <- paste0(args[2], ".dvc")
+      # Find the actual file path (after any flags)
+      file_path <- args[length(args)]  # Get the last argument which should be the file path
+      dvc_file <- paste0(file_path, ".dvc")
       writeLines(sprintf("outs:\n- md5: %s\n  path: %s\n", 
-                        digest::digest(args[2]), 
-                        args[2]), dvc_file)
+                        digest::digest(file_path), 
+                        file_path), dvc_file)
     }
   }
   result

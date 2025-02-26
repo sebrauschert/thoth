@@ -39,3 +39,6 @@ tests/testthat/*.html
 tests/testthat/.dvc/
 # /doc/
 /doc/
+
+# R package check directory
+*.Rcheck
