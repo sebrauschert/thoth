@@ -120,6 +120,8 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   dir_path <- dirname(path)
   if (!dir.exists(dir_path)) {
     dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
+    # Track newly created directory
+    git_add(dir_path)
   }
   
   # Write the CSV file
@@ -153,6 +155,33 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   if (is.null(stage_name)) {
     # Normal case - just track the file
     dvc_track(path, message = message, push = push)
+    
+    # Check git status and add any untracked files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get list of untracked files (those starting with '??')
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        # Extract file paths and add them to git
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        git_add(untracked_files)
+        if (!is.null(message)) {
+          git_commit(message)
+        }
+      }
+      
+      # Also check for modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        # Extract file paths and add them to git
+        modified_files <- sub("^ M ", "", modified)
+        git_add(modified_files)
+        if (!is.null(message)) {
+          git_commit(message)
+        }
+      }
+    }
+    
     return(invisible(x))
   }
   
@@ -209,8 +238,28 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Add DVC files to Git
-    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local"), force = TRUE)
+    # Add DVC files to Git using our git functions
+    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local", dir_path), force = TRUE)
+    
+    # Check git status and add any remaining untracked files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get list of untracked files (those starting with '??')
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        # Extract file paths and add them to git
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        git_add(untracked_files)
+      }
+      
+      # Also check for modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        # Extract file paths and add them to git
+        modified_files <- sub("^ M ", "", modified)
+        git_add(modified_files)
+      }
+    }
     
     # Commit if message provided
     if (!is.null(message)) {
@@ -275,7 +324,12 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
                          deps = NULL, metrics = FALSE, plots = FALSE,
                          params = NULL, push = FALSE, ...) {
   # Create directory if it doesn't exist
-  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  dir_path <- dirname(file)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
+    # Track newly created directory
+    git_add(dir_path)
+  }
   
   # Save the object
   saveRDS(object, file, ...)
@@ -308,6 +362,33 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   if (is.null(stage_name)) {
     # Normal case - just track the file
     dvc_track(file, message = message, push = push)
+    
+    # Check git status and add any untracked files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get list of untracked files (those starting with '??')
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        # Extract file paths and add them to git
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        git_add(untracked_files)
+        if (!is.null(message)) {
+          git_commit(message)
+        }
+      }
+      
+      # Also check for modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        # Extract file paths and add them to git
+        modified_files <- sub("^ M ", "", modified)
+        git_add(modified_files)
+        if (!is.null(message)) {
+          git_commit(message)
+        }
+      }
+    }
+    
     return(invisible(object))
   }
   
@@ -367,8 +448,28 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
       return(invisible(object))
     }
     
-    # Add DVC files to Git
-    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local"), force = TRUE)
+    # Add DVC files to Git using our git functions
+    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local", dir_path), force = TRUE)
+    
+    # Check git status and add any remaining untracked files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get list of untracked files (those starting with '??')
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        # Extract file paths and add them to git
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        git_add(untracked_files)
+      }
+      
+      # Also check for modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        # Extract file paths and add them to git
+        modified_files <- sub("^ M ", "", modified)
+        git_add(modified_files)
+      }
+    }
     
     # Commit if message provided
     if (!is.null(message)) {
@@ -430,9 +531,9 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
   
   # Add plots
   if (is.character(plots)) {
-    args <- c(args, unlist(lapply(plots, function(p) c("-p", p))))
+    args <- c(args, unlist(lapply(plots, function(p) c("--plots", p))))
   } else if (isTRUE(plots) && !is.null(outs)) {
-    args <- c(args, unlist(lapply(outs, function(o) c("-p", o))))
+    args <- c(args, unlist(lapply(outs, function(o) c("--plots", o))))
   }
   
   # Add parameters with proper formatting
@@ -480,7 +581,7 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
     return(invisible(FALSE))
   }
   
-  # Add DVC files to Git
+  # Add DVC files to Git using our git functions
   git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
   
   cli::cli_alert_success("Created DVC stage: {name}")

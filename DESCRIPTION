@@ -16,7 +16,7 @@ Description: A comprehensive framework for setting up reproducible analytics pro
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Depends:
     R (>= 4.1.0)

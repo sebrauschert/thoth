@@ -6,29 +6,80 @@
 \alias{thoth}
 \title{thoth: Reproducible Analytics Framework with Data Version Control}
 \description{
-A comprehensive framework for setting up reproducible analytics projects with
-integrated version control for data using 'DVC' (Data Version Control),
-containerization using 'Docker', dependency management using 'renv', and
-customizable reporting using 'Quarto'.
+Provides a framework for setting up reproducible analytics projects with integrated
+version control for data using DVC (Data Version Control), containerization using
+Docker, dependency management using renv, and customizable reporting using Quarto.
+Implements best practices for project organization, workflow management, and
+reproducible research.
 }
-\section{Key Features}{
+\section{System Requirements}{
+
+This package requires several external tools to be installed:
+\itemize{
+\item DVC (Data Version Control) >= 2.0.0
+\itemize{
+\item Required for data version control features
+\item Installation: Visit https://dvc.org/doc/install
+\item Note: The package will work without DVC installed, but will create mock .dvc
+files instead of actual version control
+}
+\item Python >= 3.7
+\itemize{
+\item Required for DVC
+\item Installation: Visit https://www.python.org/downloads/
+}
+\item Docker >= 20.10.0
+\itemize{
+\item Required for containerization features
+\item Installation: Visit https://docs.docker.com/get-docker/
+\item Note: Docker features are optional
+}
+}
+}
+
+\section{Package Features}{
 
 \itemize{
-\item Project organization and structure
-\item Data version control with DVC
-\item Containerization with Docker
-\item Dependency management with renv
-\item Customizable reporting with Quarto
-}
-}
-
-\section{Main Functions}{
-
+\item Project Setup
 \itemize{
-\item \code{\link{create_analytics_project}}: Create a new analytics project
-\item \code{\link{dvc_track}}: Track files with DVC
-\item \code{\link{write_csv_dvc}}: Write and track CSV files
-\item \code{\link{write_rds_dvc}}: Write and track RDS files
+\item Create standardized project structures
+\item Initialize version control
+\item Set up dependency management
+}
+\item Data Version Control
+\itemize{
+\item Track large data files
+\item Create reproducible pipelines
+\item Track metrics and plots
+}
+\item Containerization
+\itemize{
+\item Create reproducible environments
+\item Package analyses for distribution
+}
+\item Reporting
+\itemize{
+\item Customizable report templates
+\item Decision tracking
+\item Methods section generation
+}
+}
+}
+
+\section{Getting Started}{
+
+To get started with thoth:
+\enumerate{
+\item Install system requirements (DVC, Python, Docker)
+\item Create a new project:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{library(thoth)
+create_analytics_project("my_analysis")
+}\if{html}{\out{</div>}}
+\item Read the vignettes:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{browseVignettes("thoth")
+}\if{html}{\out{</div>}}
 }
 }
 
@@ -42,7 +93,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Sebastian Rauschert \email{seb.rauschert@gmail.com}
+\strong{Maintainer}: Sebastian Rauschert \email{sebastian.rauschert@telethonkids.org.au} (\href{https://orcid.org/0000-0003-2143-5069}{ORCID})
 
 }
 \keyword{internal}
