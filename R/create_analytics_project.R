@@ -131,8 +131,27 @@ create_analytics_project <- function(path,
   # Open the project if requested
   if (open) {
     if (rstudioapi::isAvailable()) {
-      rstudioapi::openProject(path, newSession = TRUE)
+      tryCatch({
+        rstudioapi::openProject(path, newSession = TRUE)
+        cli::cli_alert_success("Opened new project in RStudio")
+        
+        # Wait briefly for RStudio to create its files
+        Sys.sleep(2)
+        
+        # Add and commit RStudio-generated files if git is initialized
+        if (git_init) {
+          # Switch back to the project directory
+          setwd(path)
+          # Add .Rprofile and other RStudio files
+          git_add(".")
+          git_commit("Add RStudio project files")
+        }
+      }, error = function(e) {
+        cli::cli_alert_warning("Failed to open project in RStudio: {e$message}")
+        cli::cli_alert_info("You can manually open the project at: {.path {path}}")
+      })
     } else {
+      cli::cli_alert_warning("RStudio API not available. Setting working directory instead.")
       # Set working directory and active project
       setwd(path)
       usethis::proj_set(path)

@@ -37,6 +37,10 @@ initialize_decision_tree <- function(analysis_id, analyst, description, path = "
   # Save initial decision tree
   yaml::write_yaml(decision_tree, file = file_path)
   
+  # Add to Git and commit
+  git_add(".")
+  git_commit(description)
+  
   cli::cli_alert_success("Decision tree initialized at {file_path}")
   invisible(file_path)
 }
@@ -72,6 +76,10 @@ record_decision <- function(file_path, check, observation, decision, reasoning, 
   
   # Save updated decision tree
   yaml::write_yaml(decision_tree, file = file_path)
+  
+  # Add to Git and commit
+  git_add(file_path)
+  git_commit(sprintf("Record decision: %s", check))
   
   cli::cli_alert_success("Decision recorded successfully")
   invisible(decision_tree)

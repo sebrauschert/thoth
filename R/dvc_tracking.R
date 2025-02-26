@@ -48,7 +48,7 @@ dvc_track <- function(path, message = NULL, push = FALSE) {
   
   # Add file to DVC
   result <- system2("dvc", 
-                    c("add", "-f", path), 
+                    c("add", "-f", "-q", path), # Added -q for quiet mode
                     stdout = TRUE, 
                     stderr = TRUE)
   
@@ -59,8 +59,8 @@ dvc_track <- function(path, message = NULL, push = FALSE) {
                                   "Failed to add file to DVC tracking"))
   }
   
-  # Format output
-  format_cmd_output(result, success = TRUE, cmd = "dvc add")
+  # Success message for DVC tracking
+  cli::cli_alert_success("Successfully added {fs::path(path)} to DVC tracking")
   
   # Add .dvc file to Git with force flag
   dvc_file <- fs::path(paste0(path, ".dvc"))
