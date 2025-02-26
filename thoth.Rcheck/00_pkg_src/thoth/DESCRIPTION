@@ -1,0 +1,40 @@
+Package: thoth
+Title: Reproducible Analytics Framework with Data Version Control
+Version: 0.0.0.9000
+Authors@R: 
+    person("Sebastian", "Rauschert", , "sebastian.rauschert@telethonkids.org.au", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-2143-5069"))
+Author: Sebastian Rauschert [aut, cre]
+Maintainer: Sebastian Rauschert <seb.rauschert@gmail.com>
+Description: A comprehensive framework for setting up reproducible analytics projects
+    with integrated version control for data using DVC (Data Version Control),
+    containerization using Docker, dependency management using renv, and customizable
+    reporting using Quarto. While DVC is recommended for full functionality, the
+    package can operate without it installed by creating mock .dvc files. The package
+    implements best practices for project organization, workflow management, and
+    reproducible research.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+VignetteBuilder: knitr
+Depends: R (>= 4.1.0)
+Imports: cli (>= 3.0.0), digest (>= 0.6.25), readr (>= 2.0.0), renv (>=
+        1.0.0), rlang (>= 1.0.0), rstudioapi (>= 0.13), usethis (>=
+        2.0.0), yaml (>= 2.3.0), rmarkdown (>= 2.10), tools (>= 4.1.0),
+        magrittr (>= 2.0.0), janitor (>= 2.2.0), yardstick (>= 1.3.0),
+        fs, glue
+Suggests: covr (>= 3.5.0), devtools (>= 2.4.0), dplyr (>= 1.0.0), knitr
+        (>= 1.30), mockery (>= 0.4.3), pkgdown (>= 2.0.0), purrr (>=
+        1.0.0), testthat (>= 3.0.0), tibble (>= 3.0.0), withr (>=
+        2.4.0)
+Config/testthat/edition: 3
+URL: https://github.com/sebrauschert/thoth,
+        https://sebrauschert.github.io/thoth/
+BugReports: https://github.com/sebrauschert/thoth/issues
+SystemRequirements: DVC (>= 2.0.0) (https://dvc.org) [recommended],
+        Python (>= 3.7), Docker (>= 20.10.0) [optional]
+Language: en-US
+LazyData: true
+NeedsCompilation: no
+Packaged: 2025-02-26 02:34:21 UTC; srauschert

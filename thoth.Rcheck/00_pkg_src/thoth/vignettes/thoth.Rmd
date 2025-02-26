@@ -1,0 +1,38 @@
+---
+title: "Introduction to thoth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to thoth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+`thoth` is a comprehensive framework for setting up reproducible analytics projects in R.
+
+```{r setup}
+library(thoth)
+```
+
+## Basic Usage
+
+The main function to create a new analytics project is `create_analytics_project()`:
+
+```{r, eval=FALSE}
+create_analytics_project(
+  "my_analysis",
+  use_dvc = TRUE,
+  use_docker = TRUE,
+  git_init = TRUE
+)
+```
+
+This creates a structured project with all the necessary components for reproducible analytics. 

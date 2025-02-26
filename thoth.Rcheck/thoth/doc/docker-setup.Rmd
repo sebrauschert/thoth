@@ -1,0 +1,214 @@
+---
+title: "Docker Setup with thoth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Docker Setup with thoth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+
+## Introduction
+
+Docker containerization is essential for reproducible analytics. `thoth` automatically sets up a Docker environment that matches your local R setup, ensuring that your analysis can be easily shared and reproduced by others.
+
+## Automatic Docker Configuration
+
+When you create a new analytics project with `thoth`, it automatically:
+
+1. Detects your current R version
+2. Creates a Dockerfile based on the matching `rocker/rstudio` image
+3. Sets up a docker-compose configuration for easy deployment
+
+```r
+library(thoth)
+
+# Create new project with Docker enabled
+create_analytics_project(
+  "my_analysis",
+  use_docker = TRUE  # Docker is enabled by default
+)
+```
+
+## Version Matching
+
+One of the key features of `thoth`'s Docker integration is automatic R version matching:
+
+- The Dockerfile uses exactly the same R version as your local installation
+- This ensures that your analysis environment can be perfectly replicated
+- Makes it easy to share your complete analysis environment with collaborators
+
+For example, if you're using R 4.3.2, the generated Dockerfile will start with:
+
+```dockerfile
+FROM rocker/rstudio:4.3.2
+```
+
+## Docker Configuration
+
+The setup creates two key files:
+
+### 1. Dockerfile
+
+```dockerfile
+# Uses your exact R version
+FROM rocker/rstudio:${R_VERSION}
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install DVC
+RUN pip3 install dvc
+
+# Create working directory
+WORKDIR /project
+
+# Copy project files
+COPY . /project/
+
+# Install R packages
+RUN R -e 'install.packages("renv")'
+RUN R -e 'renv::restore()'
+
+# Set permissions for RStudio user
+RUN chown -R rstudio:rstudio /project
+
+# Command to keep the container running
+CMD ["/init"]
+```
+
+### 2. docker-compose.yml
+
+```yaml
+services:
+  rstudio:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      - PASSWORD=rstudio
+      - ROOT=TRUE
+    volumes:
+      - .:/project
+    user: rstudio
+```
+
+## Using the Docker Environment
+
+### Starting the Environment
+
+```bash
+# From your project directory
+docker-compose up -d
+```
+
+Then visit `http://localhost:8787` in your browser:
+- Username: rstudio
+- Password: rstudio
+
+### Stopping the Environment
+
+```bash
+docker-compose down
+```
+
+## Benefits of Version-Matched Containers
+
+1. **Perfect Reproducibility**
+   - Exact same R version as development
+   - All dependencies installed automatically
+   - System-level configurations matched
+
+2. **Easy Sharing**
+   - Share your complete analysis environment
+   - Recipients don't need to match your R setup
+   - Just need Docker installed
+
+3. **Collaboration**
+   - Team members can run identical environments
+   - No "works on my machine" problems
+   - Consistent results across systems
+
+4. **Long-term Preservation**
+   - Archive the exact environment with your analysis
+   - Future-proof your work
+   - Easy to spin up years later
+
+## Example Workflow
+
+1. **Development**
+   ```r
+   # Create project with Docker
+   create_analytics_project("analysis", use_docker = TRUE)
+   
+   # Work on your analysis locally
+   # All dependencies are tracked in renv.lock
+   ```
+
+2. **Sharing**
+   ```bash
+   # Share your project including docker/ directory
+   git push origin main
+   
+   # Recipients can simply:
+   git clone <repository>
+   cd <repository>
+   docker-compose up -d
+   ```
+
+3. **Collaboration**
+   ```r
+   # Team members can work in identical environments
+   # Regardless of their local R setup
+   ```
+
+## Best Practices
+
+1. **Version Control**
+   - Keep Dockerfile and docker-compose.yml in version control
+   - Update them when dependencies change
+   - Document any custom modifications
+
+2. **Testing**
+   - Regularly test the Docker build
+   - Verify that analysis runs in container
+   - Check for reproducibility
+
+3. **Documentation**
+   - Document any special setup requirements
+   - Include Docker-specific instructions in README
+   - Note system requirements
+
+## Customization
+
+You can customize the Docker setup by modifying:
+
+1. **Dockerfile**
+   - Add system dependencies
+   - Install additional tools
+   - Modify environment settings
+
+2. **docker-compose.yml**
+   - Change port mappings
+   - Add environment variables
+   - Configure volumes
+
+## Conclusion
+
+`thoth`'s Docker integration with automatic R version matching ensures that your analytics projects are:
+- Perfectly reproducible
+- Easy to share
+- Future-proof
+- Collaboration-ready
+
+By automatically creating a Docker environment that matches your development setup, `thoth` removes the complexity of environment management while ensuring your analysis can be reproduced exactly as intended. 

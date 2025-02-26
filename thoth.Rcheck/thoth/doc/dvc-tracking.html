@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Data Version Control with thoth</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Data Version Control with thoth</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(thoth)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Data Version Control (DVC) is a powerful tool for managing data
+science workflows. While DVC is written in Python, <code>thoth</code>
+provides seamless integration with R, allowing you to:</p>
+<ol style="list-style-type: decimal">
+<li>Track large data files without storing them in Git</li>
+<li>Create reproducible pipelines</li>
+<li>Track metrics and plots</li>
+<li>Share data across team members</li>
+</ol>
+<p>This guide will walk you through setting up DVC and using it
+effectively with <code>thoth</code>.</p>
+</div>
+<div id="prerequisites" class="section level2">
+<h2>Prerequisites</h2>
+<p>Before starting, you need to:</p>
+<ol style="list-style-type: decimal">
+<li><p>Install DVC:</p>
+<ul>
+<li><p>Using pip (recommended):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">pip</span> install dvc</span></code></pre></div></li>
+<li><p>Using conda:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> conda-forge dvc</span></code></pre></div></li>
+<li><p>Using Homebrew (macOS):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">brew</span> install dvc</span></code></pre></div></li>
+<li><p>For other installation methods, visit <a href="https://dvc.org/doc/install">DVC Installation Guide</a></p></li>
+</ul></li>
+<li><p>Have Git initialized in your project:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">git</span> init</span></code></pre></div></li>
+<li><p>Install thoth:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;sebrauschert/thoth&quot;</span>)</span></code></pre></div></li>
+<li><p>Verify DVC installation:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Check if DVC is available</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>dvc_available <span class="ot">&lt;-</span> <span class="fu">Sys.which</span>(<span class="st">&quot;dvc&quot;</span>) <span class="sc">!=</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span>dvc_available) {</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;DVC is not installed. Please install it first.&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;DVC is installed and ready to use!&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>}</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; DVC is installed and ready to use!</span></span></code></pre></div></li>
+</ol>
+</div>
+<div id="project-setup" class="section level2">
+<h2>Project Setup</h2>
+<p>When you create a new analytics project with <code>thoth</code>, DVC
+is automatically set up:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(thoth)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">create_analytics_project</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="st">&quot;my_analysis&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">use_dvc =</span> <span class="cn">TRUE</span>  <span class="co"># DVC is enabled by default</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span></code></pre></div>
+<p>This: - Initializes DVC - Creates data directories tracked by DVC -
+Sets up appropriate .gitignore rules - Creates a basic DVC pipeline
+structure</p>
+</div>
+<div id="simple-data-tracking" class="section level2">
+<h2>Simple Data Tracking</h2>
+<div id="tracking-csv-files" class="section level3">
+<h3>Tracking CSV Files</h3>
+<p>The simplest way to track data files is using the DVC-aware write
+functions:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Track a CSV file</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="st">&quot;data/processed/results.csv&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">message =</span> <span class="st">&quot;Add processed results&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># Track with additional readr::write_csv parameters</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="st">&quot;data/processed/results.csv&quot;</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">message =</span> <span class="st">&quot;Add processed results&quot;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">na =</span> <span class="st">&quot;NA&quot;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">quote =</span> <span class="st">&quot;needed&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="tracking-r-objects" class="section level3">
+<h3>Tracking R Objects</h3>
+<p>For R objects, use <code>write_rds_dvc</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Save and track a model</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>model <span class="sc">|&gt;</span> <span class="fu">write_rds_dvc</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">message =</span> <span class="st">&quot;Save trained random forest model&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="manual-tracking" class="section level3">
+<h3>Manual Tracking</h3>
+<p>You can also track files after they’ve been written:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Write file normally</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(data, <span class="st">&quot;data/processed/results.csv&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># Track with DVC</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">dvc_track</span>(<span class="st">&quot;data/processed/results.csv&quot;</span>, <span class="st">&quot;Add processed results&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="creating-dvc-pipelines" class="section level2">
+<h2>Creating DVC Pipelines</h2>
+<p>DVC pipelines help make your analysis reproducible by tracking: -
+Input dependencies - Output files - Parameters - Metrics and plots</p>
+<div id="basic-pipeline-stage" class="section level3">
+<h3>Basic Pipeline Stage</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Create a data processing stage</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="st">&quot;data/processed/results.csv&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;process_data&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;data/raw/input.csv&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">params =</span> <span class="fu">list</span>(<span class="at">threshold =</span> <span class="fl">0.5</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="tracking-metrics" class="section level3">
+<h3>Tracking Metrics</h3>
+<p>Track evaluation metrics automatically:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>metrics <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="st">&quot;metrics/evaluation.csv&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;evaluate_model&quot;</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">deps =</span> <span class="fu">c</span>(<span class="st">&quot;models/rf_model.rds&quot;</span>, <span class="st">&quot;data/test/test.csv&quot;</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="cn">TRUE</span>  <span class="co"># Mark as DVC metrics</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="tracking-plots" class="section level3">
+<h3>Tracking Plots</h3>
+<p>Track visualization files:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Save plot data with DVC tracking</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="st">&quot;plots/feature_importance.csv&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;create_plots&quot;</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="at">plots =</span> <span class="cn">TRUE</span>  <span class="co"># Mark as DVC plot</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="complete-pipeline-example" class="section level2">
+<h2>Complete Pipeline Example</h2>
+<p>Here’s a complete example of a machine learning pipeline:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">library</span>(thoth)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co"># 1. Data Preprocessing</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>raw_data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="st">&quot;data/processed/preprocessed.csv&quot;</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;preprocess&quot;</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;data/raw/input.csv&quot;</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>  <span class="at">params =</span> <span class="fu">list</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>    <span class="at">remove_na =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>    <span class="at">normalize =</span> <span class="cn">TRUE</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>  )</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>)</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co"># 2. Feature Engineering</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>features <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="st">&quot;data/processed/features.csv&quot;</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;feature_engineering&quot;</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;data/processed/preprocessed.csv&quot;</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>  <span class="at">params =</span> <span class="fu">list</span>(</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a>    <span class="at">n_components =</span> <span class="dv">10</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>  )</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a>)</span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co"># 3. Model Training</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>model <span class="sc">|&gt;</span> <span class="fu">write_rds_dvc</span>(</span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>  <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;train_model&quot;</span>,</span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;data/processed/features.csv&quot;</span>,</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a>  <span class="at">params =</span> <span class="fu">list</span>(</span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">500</span>,</span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a>    <span class="at">mtry =</span> <span class="dv">3</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a>  )</span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a>)</span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a></span>
+<span id="cb15-35"><a href="#cb15-35" tabindex="-1"></a><span class="co"># 4. Model Evaluation</span></span>
+<span id="cb15-36"><a href="#cb15-36" tabindex="-1"></a>metrics <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb15-37"><a href="#cb15-37" tabindex="-1"></a>  <span class="st">&quot;metrics/evaluation.csv&quot;</span>,</span>
+<span id="cb15-38"><a href="#cb15-38" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;evaluate&quot;</span>,</span>
+<span id="cb15-39"><a href="#cb15-39" tabindex="-1"></a>  <span class="at">deps =</span> <span class="fu">c</span>(</span>
+<span id="cb15-40"><a href="#cb15-40" tabindex="-1"></a>    <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb15-41"><a href="#cb15-41" tabindex="-1"></a>    <span class="st">&quot;data/processed/features.csv&quot;</span></span>
+<span id="cb15-42"><a href="#cb15-42" tabindex="-1"></a>  ),</span>
+<span id="cb15-43"><a href="#cb15-43" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="cn">TRUE</span></span>
+<span id="cb15-44"><a href="#cb15-44" tabindex="-1"></a>)</span>
+<span id="cb15-45"><a href="#cb15-45" tabindex="-1"></a></span>
+<span id="cb15-46"><a href="#cb15-46" tabindex="-1"></a><span class="co"># 5. Create Plots</span></span>
+<span id="cb15-47"><a href="#cb15-47" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span> <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb15-48"><a href="#cb15-48" tabindex="-1"></a>  <span class="st">&quot;plots/performance.csv&quot;</span>,</span>
+<span id="cb15-49"><a href="#cb15-49" tabindex="-1"></a>  <span class="at">stage_name =</span> <span class="st">&quot;visualize&quot;</span>,</span>
+<span id="cb15-50"><a href="#cb15-50" tabindex="-1"></a>  <span class="at">deps =</span> <span class="st">&quot;metrics/evaluation.csv&quot;</span>,</span>
+<span id="cb15-51"><a href="#cb15-51" tabindex="-1"></a>  <span class="at">plots =</span> <span class="cn">TRUE</span></span>
+<span id="cb15-52"><a href="#cb15-52" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="working-with-remote-storage" class="section level2">
+<h2>Working with Remote Storage</h2>
+<p>DVC supports various remote storage options (S3, GCS, etc.). Once
+configured, you can:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Pull data from remote</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">dvc_pull</span>()</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># Push data to remote</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">dvc_push</span>()</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co"># Pull specific files</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="fu">dvc_pull</span>(<span class="st">&quot;data/processed/features.csv&quot;</span>)</span></code></pre></div>
+</div>
+<div id="best-practices" class="section level2">
+<h2>Best Practices</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Organize Data</strong>:
+<ul>
+<li>Keep raw data in <code>data/raw/</code></li>
+<li>Store processed data in <code>data/processed/</code></li>
+<li>Save models in <code>models/</code></li>
+<li>Keep metrics in <code>metrics/</code></li>
+<li>Store plots in <code>plots/</code></li>
+</ul></li>
+<li><strong>Use Meaningful Stage Names</strong>:
+<ul>
+<li>Make stage names descriptive</li>
+<li>Use consistent naming conventions</li>
+<li>Include the purpose in the name</li>
+</ul></li>
+<li><strong>Track Dependencies</strong>:
+<ul>
+<li>Always specify input dependencies</li>
+<li>Include R scripts as dependencies</li>
+<li>Track configuration files</li>
+</ul></li>
+<li><strong>Use Parameters</strong>:
+<ul>
+<li>Track important hyperparameters</li>
+<li>Include preprocessing parameters</li>
+<li>Document parameter choices</li>
+</ul></li>
+<li><strong>Commit Regularly</strong>:
+<ul>
+<li>Commit .dvc files to Git</li>
+<li>Use meaningful commit messages</li>
+<li>Push data to remote storage</li>
+</ul></li>
+</ol>
+</div>
+<div id="troubleshooting" class="section level2">
+<h2>Troubleshooting</h2>
+<p>Common issues and solutions:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>DVC not initialized</strong>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Initialize DVC manually</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">system2</span>(<span class="st">&quot;dvc&quot;</span>, <span class="st">&quot;init&quot;</span>)</span></code></pre></div></li>
+<li><p><strong>File not tracked</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Check if file is tracked</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">system2</span>(<span class="st">&quot;dvc&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;status&quot;</span>, <span class="st">&quot;path/to/file&quot;</span>))</span></code></pre></div></li>
+<li><p><strong>Pipeline not updating</strong>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Force pipeline stage rerun</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">system2</span>(<span class="st">&quot;dvc&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;repro&quot;</span>, <span class="st">&quot;--force&quot;</span>))</span></code></pre></div></li>
+</ol>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>DVC integration in <code>thoth</code> provides a seamless way to: -
+Track large data files - Create reproducible pipelines - Share data
+across team members - Monitor experiments - Maintain data science
+workflows</p>
+<p>By following these practices, you can create reproducible analyses
+that are easy to share and collaborate on.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

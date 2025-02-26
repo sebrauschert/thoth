@@ -1,0 +1,22 @@
+# Example configuration for thoth analytics project
+
+project:
+  name: example_project
+  description: Example analytics project using thoth framework
+  version: 0.1.0
+
+dvc:
+  remote: s3://example-bucket/
+  auto_push: false
+
+docker:
+  image: rocker/verse:latest
+  ports:
+    - "8787:8787"
+  env_vars:
+    - DISABLE_AUTH=true
+
+quarto:
+  theme: cosmo
+  toc: true
+  code-fold: true 

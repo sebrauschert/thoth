@@ -1,0 +1,295 @@
+---
+title: "Getting Started with thoth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with thoth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+
+## Introduction
+
+`thoth` is a comprehensive framework for setting up reproducible analytics projects in R. It integrates several best practices and tools:
+
+- Data version control with DVC (through R functions)
+- Containerization with Docker
+- Dependency management with renv
+- Customizable reporting with Quarto
+
+This guide will help you get started with the basic features of `thoth`.
+
+## Installation
+
+You can install the development version of `thoth` from GitHub:
+
+```{r}
+# install.packages("devtools")
+devtools::install_github("sebrauschert/thoth")
+```
+
+### Prerequisites
+
+Before using `thoth`, ensure you have:
+
+1. [DVC](https://dvc.org/doc/install) installed
+2. [Docker](https://docs.docker.com/get-docker/) installed
+3. [R](https://www.r-project.org/) (>= 4.1.0)
+4. [Quarto](https://quarto.org/docs/get-started/) for report generation
+
+## Creating a New Project
+
+Create a new analytics project with all the necessary setup:
+
+```{r}
+library(thoth)
+library(tidyverse)
+
+# Create a new project with all features enabled
+create_analytics_project(
+  "my_project",
+  use_dvc = TRUE,
+  use_docker = TRUE,
+  use_quarto = TRUE
+)
+```
+
+This sets up a standardized project structure:
+
+```
+my_project/
+├── .dvc/               # DVC configuration
+├── .git/               # Git version control
+├── .gitignore         # Git ignore patterns
+├── .Rproj.user/      # RStudio project files
+├── data/             
+│   ├── raw/          # Raw data (tracked by DVC)
+│   └── processed/    # Processed data (tracked by DVC)
+├── R/                # R scripts
+├── reports/          # Quarto reports
+├── docker/           # Dockerfile and related files
+├── renv/             # renv library and lockfile
+└── README.md         # Project documentation
+```
+
+## Data Version Control with thoth
+
+`thoth` provides seamless integration with DVC through tidyverse-style functions. Here's how to use it in your data science workflow:
+
+### Reading and Processing Data
+
+```{r}
+# Example data processing pipeline
+raw_data <- read_csv("data/raw/dataset.csv")
+
+processed_data <- raw_data |>
+  mutate(
+    date = as.Date(date),
+    value = as.numeric(value)
+  ) |>
+  filter(!is.na(value)) |>
+  # Save processed data with DVC tracking
+  write_csv_dvc(
+    "data/processed/cleaned_data.csv",
+    "Cleaned and processed raw data"
+  )
+
+# Continue with analysis
+summary_stats <- processed_data |>
+  group_by(category) |>
+  summarise(
+    mean_value = mean(value),
+    sd_value = sd(value)
+  ) |>
+  # Save summary statistics with DVC tracking
+  write_csv_dvc(
+    "data/processed/summary_stats.csv",
+    "Generated summary statistics"
+  )
+```
+
+### Tracking Models and R Objects
+
+```{r}
+# Train a model
+model <- lm(value ~ date + category, data = processed_data)
+
+# Save model with DVC tracking
+model |>
+  write_rds_dvc(
+    "models/linear_model.rds",
+    "Trained linear regression model"
+  )
+
+# Make predictions and save results
+predictions <- model |>
+  predict(newdata = new_data) |>
+  as_tibble() |>
+  write_csv_dvc(
+    "results/model_predictions.csv",
+    "Generated model predictions"
+  )
+```
+
+### Best Practices for Data Organization
+
+```{r}
+# Raw data pipeline
+raw_survey_data |>
+  write_csv_dvc(
+    "data/raw/survey_2024.csv",
+    "Added raw survey data for 2024"
+  )
+
+# Processed data pipeline
+cleaned_survey_data |>
+  write_csv_dvc(
+    "data/processed/survey_2024_clean.csv",
+    "Added cleaned survey data"
+  ) |>
+  create_features() |>
+  write_csv_dvc(
+    "data/processed/survey_2024_features.csv",
+    "Added feature engineered dataset"
+  )
+
+# Model pipeline
+final_model |>
+  write_rds_dvc(
+    "models/survey_2024_model.rds",
+    "Final predictive model with accuracy: 0.92"
+  )
+```
+
+## Docker Integration
+
+`thoth` sets up a Docker environment with R, RStudio Server, and all necessary tools:
+
+```bash
+# Build and start the container
+docker compose up -d
+
+# Access RStudio Server at http://localhost:8787
+# Username: rstudio
+# Password: rstudio
+```
+
+The Docker setup includes:
+- R and RStudio Server
+- DVC for data version control
+- All system dependencies
+- Automatic package installation via renv
+
+## Dependency Management
+
+`thoth` uses `renv` for dependency management:
+
+```{r}
+# Install a new package
+renv::install("tidymodels")
+
+# Update lockfile
+renv::snapshot()
+
+# Restore project environment
+renv::restore()
+```
+
+## Quarto Reports
+
+Create beautiful reports with custom templates:
+
+```{r}
+# Create a new template
+create_quarto_template(
+  "company_template",
+  primary_color = "#0054AD",
+  secondary_color = "#00B4E0",
+  logo_path = "path/to/logo.png"
+)
+
+# Apply template to a report
+apply_template_to_report(
+  "reports/analysis.qmd",
+  "company_template"
+)
+```
+
+## Best Practices
+
+1. **Data Organization**
+   ```{r}
+   # Keep raw data separate
+   raw_data |>
+     write_csv_dvc(
+       "data/raw/experiment_data.csv",
+       "Raw experimental data"
+     )
+   
+   # Store processed data with clear naming
+   processed_data |>
+     write_csv_dvc(
+       "data/processed/experiment_cleaned.csv",
+       "Cleaned experimental data"
+     )
+   
+   # Save models with version info
+   model |>
+     write_rds_dvc(
+       "models/xgboost_v2.rds",
+       "XGBoost model v2 (accuracy: 0.92)"
+     )
+   ```
+
+2. **Error Handling**
+   ```{r}
+   # Safe writing function
+   safe_write <- function(data, path, message) {
+     tryCatch(
+       write_csv_dvc(data, path, message),
+       error = function(e) {
+         warning("Failed to save data: ", e$message)
+         NULL
+       }
+     )
+   }
+   
+   # Using purrr::safely
+   safe_write_dvc <- safely(write_csv_dvc)
+   result <- safe_write_dvc(data, "data/output.csv", "Saved output")
+   ```
+
+3. **Documentation**
+   - Document analysis steps in reports
+   - Keep README.md up to date
+   - Add comments to complex code
+   - Use descriptive commit messages
+
+4. **Reproducibility**
+   - Use Docker for environment consistency
+   - Track dependencies with renv
+   - Version control everything
+   - Write automated tests
+
+## Next Steps
+
+- Read the [DVC Integration Guide](dvc-integration.html) for advanced usage
+- Learn about [Docker Setup](docker-setup.html) for customizing your environment
+- Explore [Custom Templates](custom-templates.html) for report styling
+- Check out the [function reference](../reference/index.html) for detailed documentation
+
+## Getting Help
+
+If you encounter issues or have questions:
+
+1. Check the [package documentation](https://sebrauschert.github.io/thoth/)
+2. File issues on [GitHub](https://github.com/sebrauschert/thoth/issues)
+3. Read the function documentation with `?function_name` 

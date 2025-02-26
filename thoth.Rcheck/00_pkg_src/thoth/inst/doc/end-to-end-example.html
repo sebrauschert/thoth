@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>End-to-End Example with Iris Dataset</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">End-to-End Example with Iris Dataset</h1>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This vignette provides a complete end-to-end example of using
+<code>thoth</code> with the classic iris dataset. We’ll cover:</p>
+<ol style="list-style-type: decimal">
+<li>Setting up a new analytics project</li>
+<li>Versioning the raw data</li>
+<li>Processing and cleaning the data</li>
+<li>Training a model</li>
+<li>Evaluating results</li>
+<li>Creating a reproducible pipeline</li>
+</ol>
+</div>
+<div id="project-setup" class="section level2">
+<h2>Project Setup</h2>
+<p>First, let’s create a new analytics project with DVC enabled:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(thoth)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Create a new project</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">create_analytics_project</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="st">&quot;iris_analysis&quot;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">use_dvc =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="at">use_docker =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="at">git_init =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Change to the project directory</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;iris_analysis&quot;</span>)</span></code></pre></div>
+</div>
+<div id="save-and-version-raw-data" class="section level2">
+<h2>Save and Version Raw Data</h2>
+<p>Let’s save the iris dataset as our raw data and track it with
+DVC:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Save raw iris data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>iris <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="st">&quot;data/raw/iris.csv&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">message =</span> <span class="st">&quot;Add raw iris dataset&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="data-processing" class="section level2">
+<h2>Data Processing</h2>
+<p>Now let’s process the data by: 1. Converting column names to
+snake_case 2. Creating a train/test split 3. Scaling numeric
+features</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Read and process data</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>processed_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/raw/iris.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">species =</span> <span class="fu">as.factor</span>(species),</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="co"># Scale numeric columns properly</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(is.numeric), <span class="cf">function</span>(x) {</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>      <span class="fu">as.numeric</span>(<span class="fu">scale</span>(x))</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    })</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  )</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># Create train/test split</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(processed_data, <span class="at">prop =</span> <span class="fl">0.8</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(split)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(split)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># Save processed datasets with DVC</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>train_data <span class="sc">%&gt;%</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="st">&quot;data/processed/train.csv&quot;</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">message =</span> <span class="st">&quot;Add processed training data&quot;</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    <span class="at">stage_name =</span> <span class="st">&quot;prepare_data&quot;</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>    <span class="at">deps =</span> <span class="st">&quot;data/raw/iris.csv&quot;</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>    <span class="at">params =</span> <span class="fu">list</span>(</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>      <span class="at">train_prop =</span> <span class="fl">0.8</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>      <span class="at">seed =</span> <span class="dv">123</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    )</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  )</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>test_data <span class="sc">%&gt;%</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>  <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>    <span class="st">&quot;data/processed/test.csv&quot;</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>    <span class="at">message =</span> <span class="st">&quot;Add processed test data&quot;</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="model-training" class="section level2">
+<h2>Model Training</h2>
+<p>Let’s train a random forest model:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Train random forest model</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>rf_spec <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">500</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="dv">3</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">&quot;ranger&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">&quot;classification&quot;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> rf_spec <span class="sc">%&gt;%</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="fu">fit</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    species <span class="sc">~</span> .,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="at">data =</span> train_data</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  )</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co"># Save model with DVC</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>rf_fit <span class="sc">%&gt;%</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="fu">write_rds_dvc</span>(</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>    <span class="at">message =</span> <span class="st">&quot;Add trained random forest model&quot;</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    <span class="at">stage_name =</span> <span class="st">&quot;train_model&quot;</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    <span class="at">deps =</span> <span class="st">&quot;data/processed/train.csv&quot;</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    <span class="at">params =</span> <span class="fu">list</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>      <span class="at">n_trees =</span> <span class="dv">500</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>      <span class="at">mtry =</span> <span class="dv">3</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>    )</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="model-evaluation" class="section level2">
+<h2>Model Evaluation</h2>
+<p>Let’s evaluate our model and track the metrics:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Make predictions</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> rf_fit <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">predict</span>(test_data) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">bind_cols</span>(test_data)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Calculate metrics</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>metrics <span class="ot">&lt;-</span> predictions <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">metrics</span>(<span class="at">truth =</span> species, <span class="at">estimate =</span> .pred_class)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># Create and save confusion matrix plot</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>predictions <span class="sc">%&gt;%</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="fu">conf_mat</span>(<span class="at">truth =</span> species, <span class="at">estimate =</span> .pred_class) <span class="sc">%&gt;%</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="fu">autoplot</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    <span class="at">filename =</span> <span class="st">&quot;plots/confusion_matrix.png&quot;</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    <span class="at">plot =</span> .,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="at">height =</span> <span class="dv">6</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  )</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co"># Save metrics with DVC</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>metrics <span class="sc">%&gt;%</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="fu">write_csv_dvc</span>(</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    <span class="st">&quot;metrics/model_metrics.csv&quot;</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    <span class="at">message =</span> <span class="st">&quot;Add model evaluation metrics&quot;</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>    <span class="at">stage_name =</span> <span class="st">&quot;evaluate_model&quot;</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>    <span class="at">deps =</span> <span class="fu">c</span>(</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>      <span class="st">&quot;models/rf_model.rds&quot;</span>,</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>      <span class="st">&quot;data/processed/test.csv&quot;</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>    ),</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    <span class="at">metrics =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="creating-a-decision-tree" class="section level2">
+<h2>Creating a Decision Tree</h2>
+<p>Let’s track our analysis decisions:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Initialize decision tree</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>decision_file <span class="ot">&lt;-</span> <span class="fu">initialize_decision_tree</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">analysis_id =</span> <span class="st">&quot;iris_classification&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">analyst =</span> <span class="st">&quot;Data Scientist&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">description =</span> <span class="st">&quot;Classification of iris species using random forest&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co"># Record data processing decision</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">record_decision</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  decision_file,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="at">check =</span> <span class="st">&quot;Data preprocessing&quot;</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="at">observation =</span> <span class="st">&quot;All features are on different scales&quot;</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="at">decision =</span> <span class="st">&quot;Scale all numeric features&quot;</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="at">reasoning =</span> <span class="st">&quot;Random forest performance can be affected by feature scales&quot;</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="at">evidence =</span> <span class="st">&quot;data/processed/train.csv&quot;</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># Record model selection decision</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">record_decision</span>(</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  decision_file,</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="at">check =</span> <span class="st">&quot;Model selection&quot;</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  <span class="at">observation =</span> <span class="st">&quot;Non-linear relationships between features&quot;</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  <span class="at">decision =</span> <span class="st">&quot;Use random forest classifier&quot;</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="at">reasoning =</span> <span class="st">&quot;RF can capture non-linear relationships and feature interactions&quot;</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  <span class="at">evidence =</span> <span class="st">&quot;models/rf_model.rds&quot;</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>)</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co"># Create reports directory if it doesn&#39;t exist</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">&quot;reports&quot;</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co"># Export decision tree</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="fu">export_decision_tree</span>(</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  decision_file,</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="at">format =</span> <span class="st">&quot;html&quot;</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>  <span class="at">output_path =</span> <span class="st">&quot;reports/decisions.html&quot;</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="reproducible-pipeline" class="section level2">
+<h2>Reproducible Pipeline</h2>
+<p>Our complete DVC pipeline now includes: 1. Data preparation stage 2.
+Model training stage 3. Model evaluation stage</p>
+<p>You can reproduce the entire analysis with:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">system2</span>(<span class="st">&quot;dvc&quot;</span>, <span class="st">&quot;repro&quot;</span>)</span></code></pre></div>
+</div>
+<div id="sharing-results" class="section level2">
+<h2>Sharing Results</h2>
+<p>To share your work with collaborators:</p>
+<ol style="list-style-type: decimal">
+<li>Push code changes to Git:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">git</span> add .</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Complete iris analysis&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Push data and models to DVC remote:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">dvc</span> push</span></code></pre></div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This example demonstrated how to: - Set up a complete analytics
+project with <code>thoth</code> - Version data and models with DVC -
+Create reproducible pipelines - Track analysis decisions - Share results
+with collaborators</p>
+<p>The resulting project structure is:</p>
+<pre><code>iris_analysis/
+├── data/
+│   ├── raw/
+│   │   └── iris.csv
+│   └── processed/
+│       ├── train.csv
+│       └── test.csv
+├── models/
+│   └── rf_model.rds
+├── metrics/
+│   └── model_metrics.csv
+├── plots/
+│   └── confusion_matrix.png
+├── reports/
+│   └── decisions.html
+├── .dvc/
+└── .git/</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
