@@ -151,32 +151,8 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    # Check if this is the first commit
-    has_commits <- tryCatch({
-      system2("git", c("rev-parse", "--verify", "HEAD"), stdout = TRUE, stderr = TRUE)
-      TRUE
-    }, error = function(e) {
-      FALSE
-    })
-    
-    if (!has_commits) {
-      # This is the first commit, we need to add all files
-      dvc_track(path, message = NULL, push = FALSE)  # Track with DVC but don't commit yet
-      
-      # Add all files to git and commit
-      git_add(".")
-      git_commit(message)
-      
-      if (push) {
-        git_push()
-      }
-      
-      cli::cli_alert_success("Created initial commit")
-    } else {
-      # Normal case - just track the file
-      dvc_track(path, message = message, push = push)
-    }
-    
+    # Normal case - just track the file
+    dvc_track(path, message = message, push = push)
     return(invisible(x))
   }
   
@@ -486,6 +462,9 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
     cli::cli_alert_info("DVC output: {paste(result, collapse = '\n')}")
     return(invisible(FALSE))
   }
+  
+  # Add DVC files to Git
+  git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
   
   cli::cli_alert_success("Created DVC stage: {name}")
   invisible(TRUE)

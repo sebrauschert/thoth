@@ -140,44 +140,59 @@ dvc_push <- function(path = NULL, remote = NULL) {
   invisible(TRUE)
 }
 
-#' Add Files to Git
+#' Initialize a Git Repository
 #'
-#' Adds file contents to the index (staging area).
+#' Initializes a new Git repository in the current directory.
 #'
-#' @param path Character vector of file paths to add
-#' @param force Logical. Whether to force add ignored files. Default is FALSE.
-#'
-#' @return Invisibly returns the added paths
+#' @return Invisibly returns TRUE if successful
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' git_add("analysis.R")
-#' git_add(c("data/results.csv", "plots/figure1.png"))
-#' git_add(".", force = FALSE)  # add all changes
+#' git_init_repo()
 #' }
-git_add <- function(path, force = FALSE) {
+git_init_repo <- function() {
   check_git()
   
-  # Force add .dvc files
-  if (any(grepl("\\.dvc$", path))) {
-    force <- TRUE
+  result <- system2("git", args = c("init"), stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to initialize Git repository")
+    return(invisible(FALSE))
   }
   
-  # Handle paths more safely
-  for (p in path) {
-    args <- c("add", if(force) "-f" else NULL, p)
-    result <- system2("git", args, stdout = TRUE, stderr = TRUE)
-    
-    if (!is.null(attr(result, "status")) && attr(result, "status") != 0) {
-      cli::cli_alert_warning("Failed to add {p} to Git")
-      cli::cli_alert_info("Git output: {paste(result, collapse = '\n')}")
-    } else {
-      cli::cli_alert_success("Added {p} to Git staging area")
-    }
+  cli::cli_alert_success("Initialized empty Git repository")
+  invisible(TRUE)
+}
+
+#' Add Files to Git
+#'
+#' Adds files to Git staging area.
+#'
+#' @param paths Character vector of file paths to add
+#' @param force Logical. Whether to force add ignored files. Default is FALSE.
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_add("README.md")
+#' git_add(c("data/raw/iris.csv", "data/processed/features.csv"))
+#' }
+git_add <- function(paths, force = FALSE) {
+  check_git()
+  
+  args <- c("add", if(force) "-f" else NULL, paths)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to add files to Git")
+    return(invisible(FALSE))
   }
   
-  invisible(path)
+  cli::cli_alert_success("Added files to Git staging area")
+  invisible(TRUE)
 }
 
 #' Commit Changes to Git

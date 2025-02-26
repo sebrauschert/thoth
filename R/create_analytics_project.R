@@ -53,19 +53,36 @@ create_analytics_project <- function(path,
 
   # Initialize Git if requested (after project creation)
   if (git_init) {
-    system2("git", args = c("init"))
-    write_gitignore()
+    # Initialize git repository
+    git_init_repo()
+    
+    # Create initial .gitignore before any other files
+    if (use_dvc) {
+      setup_dvc_tracking()  # This now includes the initial git commit
+    } else {
+      write_gitignore()
+      # Create .gitkeep files
+      file.create("data/raw/.gitkeep")
+      file.create("data/processed/.gitkeep")
+      # Initial commit
+      git_add(".")
+      git_commit("Initial commit with project structure")
+    }
   }
 
-  # Initialize DVC if requested
+  # Initialize DVC if requested (after git setup)
   if (use_dvc) {
     system2("dvc", args = c("init"))
-    setup_dvc_tracking()
+    # No need to setup tracking again as it was done during git init
   }
 
   # Set up Docker if requested
   if (use_docker) {
     setup_docker()
+    if (git_init) {
+      git_add("docker")
+      git_commit("Add Docker configuration")
+    }
   }
   
   # Initialize renv if requested
@@ -87,13 +104,26 @@ create_analytics_project <- function(path,
     # Run the installation script in a new R session
     system2("Rscript", args = c(setup_script))
     unlink(setup_script)
+    
+    if (git_init) {
+      git_add(c("renv.lock", "renv"))
+      git_commit("Initialize renv and install dependencies")
+    }
   }
 
   # Create README
   write_readme(path)
+  if (git_init) {
+    git_add("README.md")
+    git_commit("Add README")
+  }
 
   # Set up Quarto template
   setup_quarto_template()
+  if (git_init) {
+    git_add("reports")
+    git_commit("Add Quarto template")
+  }
 
   # Success message
   cli::cli_alert_success("Analytics project successfully created at {.path {path}}")
@@ -120,15 +150,13 @@ create_analytics_project <- function(path,
 #' @keywords internal
 check_system_requirements <- function(use_dvc, use_docker) {
   if (use_dvc) {
-    dvc_exists <- system2("which", "dvc", stdout = NULL, stderr = NULL) == 0
-    if (!dvc_exists) {
+    if (!check_command("dvc")) {
       cli::cli_abort("DVC is not installed. Please install it first: https://dvc.org/doc/install")
     }
   }
   
   if (use_docker) {
-    docker_exists <- system2("which", "docker", stdout = NULL, stderr = NULL) == 0
-    if (!docker_exists) {
+    if (!check_command("docker")) {
       cli::cli_abort("Docker is not installed. Please install it first: https://docs.docker.com/get-docker/")
     }
   }
@@ -143,10 +171,12 @@ write_gitignore <- function() {
     ".RData",
     ".Ruserdata",
     "*.Rproj",
+    # Data directories
     "/data/raw/*",
     "/data/processed/*",
     "!/data/raw/.gitkeep",
     "!/data/processed/.gitkeep",
+    # R environment
     ".env",
     "renv/library/",
     "renv/python/",
@@ -166,35 +196,38 @@ setup_dvc_tracking <- function() {
   writeLines(dvcignore_content, ".dvcignore")
   
   # Create .gitignore if it doesn't exist
-  if (!file.exists(".gitignore")) {
-    gitignore_content <- c(
-      ".Rproj.user/",
-      ".Rhistory",
-      ".RData",
-      ".Ruserdata",
-      "*.Rproj",
-      # Data directories but allow .dvc files
-      "/data/raw/*",
-      "/data/processed/*",
-      "!/data/raw/.gitkeep",
-      "!/data/processed/.gitkeep",
-      "!/data/raw/**/*.dvc",     # Allow .dvc files in raw data directory
-      "!/data/processed/**/*.dvc", # Allow .dvc files in processed data directory
-      "!*.dvc",                  # Generally allow .dvc files
-      ".env",
-      "renv/library/",
-      "renv/python/",
-      "renv/staging/",
-      "/.dvc/cache"             # Ignore DVC cache
-    )
-    writeLines(gitignore_content, ".gitignore")
-  }
+  gitignore_content <- c(
+    ".Rproj.user/",
+    ".Rhistory",
+    ".RData",
+    ".Ruserdata",
+    "*.Rproj",
+    # Data directories but allow .dvc files
+    "/data/raw/*",
+    "/data/processed/*",
+    "!/data/raw/.gitkeep",
+    "!/data/processed/.gitkeep",
+    "!/data/raw/**/*.dvc",     # Allow .dvc files in raw data directory
+    "!/data/processed/**/*.dvc", # Allow .dvc files in processed data directory
+    "!*.dvc",                  # Generally allow .dvc files
+    "!.dvc/config",           # Allow DVC config
+    "!.dvc/cache",           # Allow DVC cache directory
+    ".env",
+    "renv/library/",
+    "renv/python/",
+    "renv/staging/"
+  )
+  writeLines(gitignore_content, ".gitignore")
   
   # Create .gitkeep files
   dir.create("data/raw", recursive = TRUE, showWarnings = FALSE)
   dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
   file.create("data/raw/.gitkeep")
   file.create("data/processed/.gitkeep")
+  
+  # Add and commit initial files
+  git_add(".")
+  git_commit("Initial commit with project structure")
 }
 
 #' Set up Docker Configuration

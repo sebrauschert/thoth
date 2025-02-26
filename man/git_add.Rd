@@ -4,23 +4,22 @@
 \alias{git_add}
 \title{Add Files to Git}
 \usage{
-git_add(path, force = FALSE)
+git_add(paths, force = FALSE)
 }
 \arguments{
-\item{path}{Character vector of file paths to add}
+\item{paths}{Character vector of file paths to add}
 
 \item{force}{Logical. Whether to force add ignored files. Default is FALSE.}
 }
 \value{
-Invisibly returns the added paths
+Invisibly returns TRUE if successful
 }
 \description{
-Adds file contents to the index (staging area).
+Adds files to Git staging area.
 }
 \examples{
 \dontrun{
-git_add("analysis.R")
-git_add(c("data/results.csv", "plots/figure1.png"))
-git_add(".", force = FALSE)  # add all changes
+git_add("README.md")
+git_add(c("data/raw/iris.csv", "data/processed/features.csv"))
 }
 }
