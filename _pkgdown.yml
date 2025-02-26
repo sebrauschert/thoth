@@ -126,6 +126,7 @@ reference:
 - title: Git Integration
   desc: Functions for managing Git version control
   contents:
+  - git_init_repo
   - git_status
   - git_add
   - git_commit
