@@ -65,43 +65,15 @@ dvc_track <- function(path, message = NULL, push = FALSE) {
   # Add .dvc file to Git with force flag
   dvc_file <- fs::path(paste0(path, ".dvc"))
   if (file.exists(dvc_file)) {
-    git_result <- system2("git", 
-                         c("add", "-f", dvc_file),
-                         stdout = TRUE,
-                         stderr = TRUE)
-    
-    if (!is.null(attr(git_result, "status")) && attr(git_result, "status") != 0) {
-      cli::cli_alert_warning(glue::glue("Failed to add {fs::path(dvc_file)} to Git"))
-      cli::cli_alert_info("You may need to add it manually")
-    } else {
-      cli::cli_alert_success(glue::glue("Added {fs::path(dvc_file)} to Git staging area"))
-    }
+    git_add(dvc_file, force = TRUE)
     
     # Commit if message provided
     if (!is.null(message)) {
-      commit_result <- system2("git",
-                             c("commit", "-m", message, dvc_file),
-                             stdout = TRUE,
-                             stderr = TRUE)
+      git_commit(message)
       
-      if (!is.null(attr(commit_result, "status")) && attr(commit_result, "status") == 0) {
-        cli::cli_alert_success("Committed changes to Git")
-        
-        # Push if requested
-        if (push) {
-          push_result <- system2("git",
-                               "push",
-                               stdout = TRUE,
-                               stderr = TRUE)
-          
-          if (!is.null(attr(push_result, "status")) && attr(push_result, "status") == 0) {
-            cli::cli_alert_success("Pushed changes to Git remote")
-          } else {
-            cli::cli_alert_warning("Failed to push changes to Git remote")
-          }
-        }
-      } else {
-        cli::cli_alert_warning("Failed to commit changes")
+      # Push if requested
+      if (push) {
+        git_push()
       }
     }
   }
@@ -179,8 +151,32 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    # Use dvc_track for simple tracking
-    dvc_track(path, message = message, push = push)
+    # Check if this is the first commit
+    has_commits <- tryCatch({
+      system2("git", c("rev-parse", "--verify", "HEAD"), stdout = TRUE, stderr = TRUE)
+      TRUE
+    }, error = function(e) {
+      FALSE
+    })
+    
+    if (!has_commits) {
+      # This is the first commit, we need to add all files
+      dvc_track(path, message = NULL, push = FALSE)  # Track with DVC but don't commit yet
+      
+      # Add all files to git and commit
+      git_add(".")
+      git_commit(message)
+      
+      if (push) {
+        git_push()
+      }
+      
+      cli::cli_alert_success("Created initial commit")
+    } else {
+      # Normal case - just track the file
+      dvc_track(path, message = message, push = push)
+    }
+    
     return(invisible(x))
   }
   
@@ -223,46 +219,16 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Add files to Git with force flag for .dvc files
-    git_add_result <- suppressWarnings(
-      system2("git", args = c("add", "-f", "dvc.yaml", "dvc.lock"), stdout = TRUE, stderr = TRUE)
-    )
+    # Add DVC files to Git
+    git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
     
-    if (!is.null(attr(git_add_result, "status")) && attr(git_add_result, "status") != 0) {
-      cli::cli_alert_warning("Failed to add DVC files to Git")
-      cli::cli_alert_info("Git output: {paste(git_add_result, collapse = '\n')}")
-      return(invisible(x))
-    }
-    
-    cli::cli_alert_success("Added DVC files to Git staging area")
-    
-    # Commit changes if requested
+    # Commit if message provided
     if (!is.null(message)) {
-      git_commit_result <- suppressWarnings(
-        system2("git", args = c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
-      )
-      
-      if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
-        cli::cli_alert_warning("Failed to commit changes to Git")
-        cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
-        return(invisible(x))
-      }
-      
-      cli::cli_alert_success("Committed changes to Git")
+      git_commit(message)
       
       # Push if requested
       if (push) {
-        git_push_result <- suppressWarnings(
-          system2("git", args = c("push"), stdout = TRUE, stderr = TRUE)
-        )
-        
-        if (!is.null(attr(git_push_result, "status")) && attr(git_push_result, "status") != 0) {
-          cli::cli_alert_warning("Failed to push changes to Git remote")
-          cli::cli_alert_info("Git output: {paste(git_push_result, collapse = '\n')}")
-          return(invisible(x))
-        }
-        
-        cli::cli_alert_success("Pushed changes to Git remote")
+        git_push()
       }
     }
     
@@ -405,45 +371,15 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
       }
       
       # Add DVC files to Git
-      git_add_result <- suppressWarnings(
-        system2("git", args = c("add", "-f", "dvc.yaml", "dvc.lock"), stdout = TRUE, stderr = TRUE)
-      )
-      
-      if (!is.null(attr(git_add_result, "status")) && attr(git_add_result, "status") != 0) {
-        cli::cli_alert_warning("Failed to add DVC files to Git")
-        cli::cli_alert_info("Git output: {paste(git_add_result, collapse = '\n')}")
-        return(invisible(object))
-      }
-      
-      cli::cli_alert_success("Added DVC files to Git staging area")
+      git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
       
       # Commit if message provided
       if (!is.null(message)) {
-        git_commit_result <- suppressWarnings(
-          system2("git", args = c("commit", "-m", shQuote(message)), stdout = TRUE, stderr = TRUE)
-        )
-        
-        if (!is.null(attr(git_commit_result, "status")) && attr(git_commit_result, "status") != 0) {
-          cli::cli_alert_warning("Failed to commit changes to Git")
-          cli::cli_alert_info("Git output: {paste(git_commit_result, collapse = '\n')}")
-          return(invisible(object))
-        }
-        
-        cli::cli_alert_success("Committed changes to Git")
+        git_commit(message)
         
         # Push if requested
         if (push) {
-          git_push_result <- suppressWarnings(
-            system2("git", args = c("push"), stdout = TRUE, stderr = TRUE)
-          )
-          
-          if (!is.null(attr(git_push_result, "status")) && attr(git_push_result, "status") != 0) {
-            cli::cli_alert_warning("Failed to push changes to Git remote")
-            cli::cli_alert_info("Git output: {paste(git_push_result, collapse = '\n')}")
-            return(invisible(object))
-          }
-          
-          cli::cli_alert_success("Pushed changes to Git remote")
+          git_push()
         }
       }
       

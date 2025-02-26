@@ -27,6 +27,19 @@ mock_system2 <- function(cmd, args, ...) {
   result
 }
 
+# Mock git functions
+mock_git_add <- function(path, force = FALSE) {
+  invisible(path)
+}
+
+mock_git_commit <- function(message, all = FALSE) {
+  invisible(TRUE)
+}
+
+mock_git_push <- function() {
+  invisible(TRUE)
+}
+
 # Helper function to create temporary test environment
 setup_test_env <- function() {
   # Create temp directory
@@ -52,6 +65,11 @@ test_that("dvc_track handles missing DVC gracefully", {
   # Mock check_command to simulate missing DVC
   mockery::stub(dvc_track, "check_command", FALSE)
   
+  # Mock git functions
+  mockery::stub(dvc_track, "git_add", mock_git_add)
+  mockery::stub(dvc_track, "git_commit", mock_git_commit)
+  mockery::stub(dvc_track, "git_push", mock_git_push)
+  
   # Test DVC installation check
   withr::with_options(list(cli.num_colors = 1), {
     output <- capture.output({
@@ -76,6 +94,9 @@ test_that("dvc_track works when DVC is available", {
   # Mock check_command and system2
   mockery::stub(dvc_track, "check_command", TRUE)
   mockery::stub(dvc_track, "system2", mock_system2)
+  mockery::stub(dvc_track, "git_add", mock_git_add)
+  mockery::stub(dvc_track, "git_commit", mock_git_commit)
+  mockery::stub(dvc_track, "git_push", mock_git_push)
   
   # Test tracking with message
   withr::with_options(list(cli.num_colors = 1), {
@@ -96,7 +117,7 @@ test_that("write_csv_dvc writes and tracks files correctly", {
   # Test data
   test_data <- data.frame(a = 1:3, b = letters[1:3])
   
-  # Mock dvc_track
+  # Mock dvc_track and git functions
   mockery::stub(write_csv_dvc, "dvc_track", function(path, message = NULL, push = FALSE) {
     # Create mock .dvc file
     dvc_file <- paste0(path, ".dvc")
@@ -105,6 +126,9 @@ test_that("write_csv_dvc writes and tracks files correctly", {
                       path), dvc_file)
     invisible(path)
   })
+  mockery::stub(write_csv_dvc, "git_add", mock_git_add)
+  mockery::stub(write_csv_dvc, "git_commit", mock_git_commit)
+  mockery::stub(write_csv_dvc, "git_push", mock_git_push)
   
   # Test writing and tracking
   result <- write_csv_dvc(test_data, "test.csv", message = "Test commit")
@@ -126,7 +150,7 @@ test_that("write functions maintain tidyverse pipe chain", {
   # Test data
   test_data <- data.frame(a = 1:3, b = letters[1:3])
   
-  # Mock dvc_track
+  # Mock dvc_track and git functions
   mockery::stub(write_csv_dvc, "dvc_track", function(path, message = NULL, push = FALSE) {
     # Create mock .dvc file
     dvc_file <- paste0(path, ".dvc")
@@ -135,6 +159,9 @@ test_that("write functions maintain tidyverse pipe chain", {
                       path), dvc_file)
     invisible(path)
   })
+  mockery::stub(write_csv_dvc, "git_add", mock_git_add)
+  mockery::stub(write_csv_dvc, "git_commit", mock_git_commit)
+  mockery::stub(write_csv_dvc, "git_push", mock_git_push)
   
   # Test pipe chain
   result <- dplyr::mutate(test_data, c = a * 2) %>%
@@ -153,7 +180,7 @@ test_that("write_rds_dvc writes and tracks files correctly", {
   # Test data
   test_data <- list(a = 1:3, b = letters[1:3])
   
-  # Mock dvc_track
+  # Mock dvc_track and git functions
   mockery::stub(write_rds_dvc, "dvc_track", function(path, message = NULL, push = FALSE) {
     # Create mock .dvc file
     dvc_file <- paste0(path, ".dvc")
@@ -162,6 +189,9 @@ test_that("write_rds_dvc writes and tracks files correctly", {
                       path), dvc_file)
     invisible(path)
   })
+  mockery::stub(write_rds_dvc, "git_add", mock_git_add)
+  mockery::stub(write_rds_dvc, "git_commit", mock_git_commit)
+  mockery::stub(write_rds_dvc, "git_push", mock_git_push)
   
   # Test writing and tracking
   result <- write_rds_dvc(test_data, "test.rds", message = "Test commit")
