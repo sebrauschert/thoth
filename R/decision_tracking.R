@@ -135,10 +135,6 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
     output_path <- paste0(base_name, ".", format)
   }
   
-  # Store current working directory
-  original_wd <- getwd()
-  on.exit(setwd(original_wd), add = TRUE)  # Ensure we restore the working directory
-  
   # Get absolute paths
   output_path <- normalizePath(output_path, mustWork = FALSE)
   output_dir <- dirname(output_path)
@@ -148,12 +144,9 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   }
   
-  # Change to the output directory
-  setwd(output_dir)
-  
   # Write output based on format
   switch(format,
-         "md" = writeLines(methods, basename(output_path)),
+         "md" = writeLines(methods, output_path),
          "html" = {
            # Create temporary directory for intermediates
            temp_dir <- tempfile("rmd_")
@@ -164,10 +157,10 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
            temp_rmd <- file.path(temp_dir, "temp.Rmd")
            writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
            
-           # Render with explicit intermediate directory
+           # Render with explicit output file path and intermediate directory
            rmarkdown::render(temp_rmd, 
                            output_file = basename(output_path),
-                           output_format = "html_document",
+                           output_dir = output_dir,
                            intermediates_dir = temp_dir,
                            quiet = TRUE)
          },
@@ -181,10 +174,10 @@ export_decision_tree <- function(file_path, format = "md", output_path = NULL) {
            temp_rmd <- file.path(temp_dir, "temp.Rmd")
            writeLines(c("---", "title: \"Decision Tree\"", "---", "", methods), temp_rmd)
            
-           # Render with explicit intermediate directory
+           # Render with explicit output file path and intermediate directory
            rmarkdown::render(temp_rmd, 
                            output_file = basename(output_path),
-                           output_format = "pdf_document",
+                           output_dir = output_dir,
                            intermediates_dir = temp_dir,
                            quiet = TRUE)
          },

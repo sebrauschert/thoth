@@ -165,7 +165,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   dvc_args <- c("stage", "add", "-n", stage_name)
   
   if (!is.null(deps)) {
-    dvc_args <- c(dvc_args, "-d", deps)
+    dvc_args <- c(dvc_args, unlist(lapply(deps, function(d) c("-d", d))))
   }
   
   # File can't be both output and metrics
@@ -176,19 +176,33 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   }
   
   if (!is.null(params)) {
-    param_args <- unlist(Map(function(name, value) {
-      c("-p", sprintf("%s=%s", name, as.character(value)))
-    }, names(params), params))
-    dvc_args <- c(dvc_args, param_args)
+    param_args <- mapply(
+      function(name, value) {
+        formatted_value <- if (is.character(value)) {
+          shQuote(value)
+        } else if (is.numeric(value)) {
+          as.character(value)
+        } else if (is.logical(value)) {
+          tolower(as.character(value))
+        } else {
+          as.character(value)
+        }
+        c("-p", paste(name, formatted_value, sep = "="))
+      },
+      names(params),
+      params,
+      SIMPLIFY = FALSE
+    )
+    dvc_args <- c(dvc_args, unlist(param_args))
   }
   
-  dvc_args <- c(dvc_args, sprintf("'Rscript %s'", temp_script))
+  # Add the command with proper quoting
+  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", temp_script)))
   
-  # Execute DVC command with better error handling
-  result <- tryCatch({
+  # Execute DVC command
+  tryCatch({
     dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
     
-    # Check if DVC stage add was successful
     if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
       cli::cli_alert_warning("Failed to create DVC stage: {stage_name}")
       cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
@@ -196,7 +210,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     }
     
     # Add DVC files to Git
-    git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
+    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local"), force = TRUE)
     
     # Commit if message provided
     if (!is.null(message)) {
@@ -215,7 +229,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     unlink(temp_script)
   })
   
-  invisible(x)  # Return input data for piping
+  invisible(x)
 }
 
 #' Write RDS with DVC tracking
@@ -290,85 +304,88 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
     return(invisible(object))
   }
   
-  # Create DVC stage if stage_name is provided
-  if (!is.null(stage_name)) {
-    # Build DVC command arguments
-    dvc_args <- c("stage", "add", "-n", stage_name)
-    
-    if (!is.null(deps)) {
-      dvc_args <- c(dvc_args, unlist(lapply(deps, function(d) c("-d", d))))
-    }
-    
-    # Handle outputs based on metrics and plots flags
-    if (metrics) {
-      dvc_args <- c(dvc_args, "-M", file)
-    } else if (plots) {
-      dvc_args <- c(dvc_args, "--plots", file)
-    } else {
-      dvc_args <- c(dvc_args, "-o", file)
-    }
-    
-    # Add parameters with proper formatting
-    if (!is.null(params)) {
-      param_args <- mapply(
-        function(name, value) {
-          formatted_value <- if (is.character(value)) {
-            shQuote(value)
-          } else if (is.numeric(value)) {
-            as.character(value)
-          } else if (is.logical(value)) {
-            tolower(as.character(value))
-          } else {
-            as.character(value)
-          }
-          c("-p", paste(name, formatted_value, sep = "="))
-        },
-        names(params),
-        params,
-        SIMPLIFY = FALSE
-      )
-      dvc_args <- c(dvc_args, unlist(param_args))
-    }
-    
-    # Create and add the R script command
-    temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
-    writeLines(sprintf('saveRDS(readRDS("%s"), "%s")', 
-                      if(!is.null(deps)) deps[1] else "NA", file), temp_script)
-    dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", temp_script)))
-    
-    # Execute DVC command
-    tryCatch({
-      dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
-      
-      if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
-        cli::cli_alert_warning("Failed to create DVC stage: {stage_name}")
-        cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
-        return(invisible(object))
-      }
-      
-      # Add DVC files to Git
-      git_add(c("dvc.yaml", "dvc.lock"), force = TRUE)
-      
-      # Commit if message provided
-      if (!is.null(message)) {
-        git_commit(message)
-        
-        # Push if requested
-        if (push) {
-          git_push()
-        }
-      }
-      
-      cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
-    }, error = function(e) {
-      cli::cli_alert_danger("Error creating DVC stage: {conditionMessage(e)}")
-    }, finally = {
-      unlink(temp_script)
-    })
-  } else {
-    # Just track the file with DVC
+  # If no stage name provided, just track with dvc add
+  if (is.null(stage_name)) {
+    # Normal case - just track the file
     dvc_track(file, message = message, push = push)
+    return(invisible(object))
   }
+  
+  # Rest of the function for stage_name case
+  # Prepare DVC stage command
+  temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
+  writeLines(sprintf('saveRDS(object, "%s")', file), temp_script)
+  
+  # Build DVC command arguments
+  dvc_args <- c("stage", "add", "-n", stage_name)
+  
+  if (!is.null(deps)) {
+    dvc_args <- c(dvc_args, unlist(lapply(deps, function(d) c("-d", d))))
+  }
+  
+  # Handle outputs based on metrics and plots flags
+  if (metrics) {
+    dvc_args <- c(dvc_args, "-M", file)
+  } else if (plots) {
+    dvc_args <- c(dvc_args, "--plots", file)
+  } else {
+    dvc_args <- c(dvc_args, "-o", file)
+  }
+  
+  # Add parameters with proper formatting
+  if (!is.null(params)) {
+    param_args <- mapply(
+      function(name, value) {
+        formatted_value <- if (is.character(value)) {
+          shQuote(value)
+        } else if (is.numeric(value)) {
+          as.character(value)
+        } else if (is.logical(value)) {
+          tolower(as.character(value))
+        } else {
+          as.character(value)
+        }
+        c("-p", paste(name, formatted_value, sep = "="))
+      },
+      names(params),
+      params,
+      SIMPLIFY = FALSE
+    )
+    dvc_args <- c(dvc_args, unlist(param_args))
+  }
+  
+  # Add the command with proper quoting
+  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", temp_script)))
+  
+  # Execute DVC command
+  tryCatch({
+    dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
+    
+    if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to create DVC stage: {stage_name}")
+      cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+      return(invisible(object))
+    }
+    
+    # Add DVC files to Git
+    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local"), force = TRUE)
+    
+    # Commit if message provided
+    if (!is.null(message)) {
+      git_commit(message)
+      
+      # Push if requested
+      if (push) {
+        git_push()
+      }
+    }
+    
+    cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
+  }, error = function(e) {
+    cli::cli_alert_danger("Error creating DVC stage: {conditionMessage(e)}")
+  }, finally = {
+    unlink(temp_script)
+  })
   
   invisible(object)
 }
