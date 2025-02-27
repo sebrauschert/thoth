@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>End-to-End Example with Iris Dataset • thoth</title>
+<title>End-to-End Example: Iris Classification Project • thoth</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_Pro-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="End-to-End Example with Iris Dataset">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="End-to-End Example: Iris Classification Project">
 <style>
 code .op, pre .op {
   unicode-bidi: normal !important;
@@ -42,7 +42,6 @@ code .op, pre .op {
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -87,7 +86,7 @@ code .op, pre .op {
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>End-to-End Example with Iris Dataset</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>End-to-End Example: Iris Classification Project</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sebrauschert/thoth/blob/main/vignettes/end-to-end-example.Rmd" class="external-link"><code>vignettes/end-to-end-example.Rmd</code></a></small>
@@ -99,83 +98,97 @@ code .op, pre .op {
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This vignette provides a complete end-to-end example of using
-<code>thoth</code> with the classic iris dataset. We’ll cover:</p>
-<ol style="list-style-type: decimal">
-<li>Setting up a new analytics project</li>
-<li>Versioning the raw data</li>
-<li>Processing and cleaning the data</li>
-<li>Training a model</li>
-<li>Evaluating results</li>
-<li>Creating a reproducible pipeline</li>
-</ol>
+<p>This guide walks you through a complete data science project using
+<code>thoth</code>. We’ll use the classic iris dataset to demonstrate
+how all the package’s features work together. By the end, you’ll
+understand how to:</p>
+<ul>
+<li>Set up a reproducible project structure<br>
+</li>
+<li>Track data and code changes<br>
+</li>
+<li>Document analytical decisions<br>
+</li>
+<li>Create reproducible workflows<br>
+</li>
+<li>Share your work with others</li>
+</ul>
 </div>
 <div class="section level2">
-<h2 id="project-setup">Project Setup<a class="anchor" aria-label="anchor" href="#project-setup"></a>
+<h2 id="project-setup">1. Project Setup<a class="anchor" aria-label="anchor" href="#project-setup"></a>
 </h2>
-<p>First, let’s create a new analytics project with DVC enabled:</p>
+<p>Let’s start by creating a new project with all the necessary
+components:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load required packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a new project</span></span>
+<span><span class="co"># Create a new project with all features enabled</span></span>
 <span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
-<span>  <span class="st">"iris_analysis"</span>,</span>
-<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="st">"iris_analysis"</span>,      <span class="co"># Project name</span></span>
+<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,       <span class="co"># Enable data version control</span></span>
+<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>,    <span class="co"># Enable containerization</span></span>
+<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span>       <span class="co"># Initialize Git repository</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Change to the project directory</span></span>
+<span><span class="co"># Move into the project directory</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"iris_analysis"</span><span class="op">)</span></span></code></pre></div>
+<p>This creates a structured project with:<br>
+- Version control (Git) for code<br>
+- Data version control (DVC) for large files<br>
+- Docker for reproducible environments<br>
+- Organized directories for data, code, and results</p>
 </div>
 <div class="section level2">
-<h2 id="save-and-version-raw-data">Save and Version Raw Data<a class="anchor" aria-label="anchor" href="#save-and-version-raw-data"></a>
+<h2 id="data-management">2. Data Management<a class="anchor" aria-label="anchor" href="#data-management"></a>
 </h2>
-<p>Let’s save the iris dataset as our raw data and track it with
-DVC:</p>
+<div class="section level3">
+<h3 id="save-raw-data">2.1 Save Raw Data<a class="anchor" aria-label="anchor" href="#save-raw-data"></a>
+</h3>
+<p>First, let’s save and track our raw data:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Save raw iris data</span></span>
+<code class="sourceCode R"><span><span class="co"># Save the iris dataset as our raw data</span></span>
+<span><span class="co"># The write_csv_dvc function combines saving and tracking in one step</span></span>
 <span><span class="va">iris</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/raw/iris.csv"</span>,</span>
-<span>    message <span class="op">=</span> <span class="st">"Add raw iris dataset"</span></span>
+<span>    message <span class="op">=</span> <span class="st">"Add original iris dataset"</span>,  <span class="co"># Descriptive message for tracking</span></span>
+<span>    stage_name <span class="op">=</span> <span class="st">"save_raw_data"</span>           <span class="co"># Name this step in our pipeline</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="data-processing">Data Processing<a class="anchor" aria-label="anchor" href="#data-processing"></a>
-</h2>
-<p>Now let’s process the data by: 1. Converting column names to
-snake_case 2. Creating a train/test split 3. Scaling numeric
-features</p>
+<div class="section level3">
+<h3 id="process-data">2.2 Process Data<a class="anchor" aria-label="anchor" href="#process-data"></a>
+</h3>
+<p>Now we’ll clean and prepare our data for analysis:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Read and process data</span></span>
+<code class="sourceCode R"><span><span class="co"># Read the raw data and process it</span></span>
 <span><span class="va">processed_data</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/raw/iris.csv"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="co"># Clean column names (e.g., Sepal.Length -&gt; sepal_length)</span></span>
 <span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/clean_names.html" class="external-link">clean_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="co"># Convert species to a factor (categorical) variable</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
-<span>    <span class="co"># Scale numeric columns properly</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="co"># Scale numeric features to have mean=0 and sd=1</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">scale</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create train/test split</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="co"># Create training (80%) and testing (20%) sets</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
 <span><span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">processed_data</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
 <span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Save processed datasets with DVC</span></span>
+<span><span class="co"># Save and track the processed datasets</span></span>
 <span><span class="va">train_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/processed/train.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add processed training data"</span>,</span>
-<span>    stage_name <span class="op">=</span> <span class="st">"prepare_data"</span>,</span>
-<span>    deps <span class="op">=</span> <span class="st">"data/raw/iris.csv"</span>,</span>
-<span>    params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    stage_name <span class="op">=</span> <span class="st">"prepare_data"</span>,           <span class="co"># Name this pipeline stage</span></span>
+<span>    deps <span class="op">=</span> <span class="st">"data/raw/iris.csv"</span>,           <span class="co"># Declare dependencies</span></span>
+<span>    params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>                        <span class="co"># Track important parameters</span></span>
 <span>      train_prop <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>      seed <span class="op">=</span> <span class="fl">123</span></span>
 <span>    <span class="op">)</span></span>
@@ -187,167 +200,213 @@ features</p>
 <span>    message <span class="op">=</span> <span class="st">"Add processed test data"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
+</div>
 <div class="section level2">
-<h2 id="model-training">Model Training<a class="anchor" aria-label="anchor" href="#model-training"></a>
+<h2 id="model-development">3. Model Development<a class="anchor" aria-label="anchor" href="#model-development"></a>
 </h2>
-<p>Let’s train a random forest model:</p>
+<div class="section level3">
+<h3 id="train-model">3.1 Train Model<a class="anchor" aria-label="anchor" href="#train-model"></a>
+</h3>
+<p>Let’s train a random forest classifier:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Train random forest model</span></span>
+<code class="sourceCode R"><span><span class="co"># Define the model specification</span></span>
 <span><span class="va">rf_spec</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
-<span>  trees <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fl">3</span></span>
+<span>  trees <span class="op">=</span> <span class="fl">500</span>,    <span class="co"># Number of trees</span></span>
+<span>  mtry <span class="op">=</span> <span class="fl">3</span>        <span class="co"># Number of variables to consider at each split</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>           <span class="co"># Use ranger implementation</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span>         <span class="co"># Set for classification task</span></span>
 <span></span>
+<span><span class="co"># Train the model</span></span>
 <span><span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="va">rf_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">fit</span><span class="op">(</span></span>
-<span>    <span class="va">species</span> <span class="op">~</span> <span class="va">.</span>,</span>
+<span>    <span class="va">species</span> <span class="op">~</span> <span class="va">.</span>,    <span class="co"># Predict species using all other variables</span></span>
 <span>    data <span class="op">=</span> <span class="va">train_data</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Save model with DVC</span></span>
+<span><span class="co"># Save and track the trained model</span></span>
 <span><span class="va">rf_fit</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"models/rf_model.rds"</span>,</span>
-<span>    message <span class="op">=</span> <span class="st">"Add trained random forest model"</span>,</span>
+<span>    message <span class="op">=</span> <span class="st">"Save trained random forest model"</span>,</span>
 <span>    stage_name <span class="op">=</span> <span class="st">"train_model"</span>,</span>
-<span>    deps <span class="op">=</span> <span class="st">"data/processed/train.csv"</span>,</span>
-<span>    params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    deps <span class="op">=</span> <span class="st">"data/processed/train.csv"</span>,    <span class="co"># Model depends on training data</span></span>
+<span>    params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>                        <span class="co"># Track model parameters</span></span>
 <span>      n_trees <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>      mtry <span class="op">=</span> <span class="fl">3</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="model-evaluation">Model Evaluation<a class="anchor" aria-label="anchor" href="#model-evaluation"></a>
-</h2>
-<p>Let’s evaluate our model and track the metrics:</p>
+<div class="section level3">
+<h3 id="evaluate-model">3.2 Evaluate Model<a class="anchor" aria-label="anchor" href="#evaluate-model"></a>
+</h3>
+<p>Let’s assess how well our model performs:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Make predictions</span></span>
+<code class="sourceCode R"><span><span class="co"># Make predictions on test data</span></span>
 <span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="va">rf_fit</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">bind_cols</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Calculate metrics</span></span>
+<span><span class="co"># Calculate performance metrics</span></span>
 <span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/metrics.html">metrics</a></span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create and save confusion matrix plot</span></span>
-<span><span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="co"># Create visualization</span></span>
+<span><span class="va">conf_matrix_plot</span> <span class="op">&lt;-</span> <span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/conf_mat.html">conf_mat</a></span><span class="op">(</span>truth <span class="op">=</span> <span class="va">species</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">autoplot</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu">ggsave</span><span class="op">(</span></span>
-<span>    filename <span class="op">=</span> <span class="st">"plots/confusion_matrix.png"</span>,</span>
-<span>    plot <span class="op">=</span> <span class="va">.</span>,</span>
-<span>    width <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>    height <span class="op">=</span> <span class="fl">6</span></span>
-<span>  <span class="op">)</span></span>
+<span>  <span class="fu">autoplot</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Save metrics with DVC</span></span>
+<span><span class="co"># Save confusion matrix plot</span></span>
+<span><span class="fu">ggsave</span><span class="op">(</span></span>
+<span>  <span class="st">"plots/confusion_matrix.png"</span>,</span>
+<span>  plot <span class="op">=</span> <span class="va">conf_matrix_plot</span>,</span>
+<span>  width <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>  height <span class="op">=</span> <span class="fl">6</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Track metrics with DVC</span></span>
 <span><span class="va">metrics</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"metrics/model_metrics.csv"</span>,</span>
 <span>    message <span class="op">=</span> <span class="st">"Add model evaluation metrics"</span>,</span>
 <span>    stage_name <span class="op">=</span> <span class="st">"evaluate_model"</span>,</span>
-<span>    deps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"models/rf_model.rds"</span>,</span>
-<span>      <span class="st">"data/processed/test.csv"</span></span>
+<span>    deps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>                              <span class="co"># This stage depends on:</span></span>
+<span>      <span class="st">"models/rf_model.rds"</span>,              <span class="co"># - The trained model</span></span>
+<span>      <span class="st">"data/processed/test.csv"</span>           <span class="co"># - The test data</span></span>
 <span>    <span class="op">)</span>,</span>
-<span>    metrics <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    metrics <span class="op">=</span> <span class="cn">TRUE</span>                        <span class="co"># Mark as metrics for tracking</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
+</div>
 <div class="section level2">
-<h2 id="creating-a-decision-tree">Creating a Decision Tree<a class="anchor" aria-label="anchor" href="#creating-a-decision-tree"></a>
+<h2 id="decision-tracking">4. Decision Tracking<a class="anchor" aria-label="anchor" href="#decision-tracking"></a>
 </h2>
-<p>Let’s track our analysis decisions:</p>
+<p>Let’s document our analytical decisions:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Initialize decision tree</span></span>
-<span><span class="va">decision_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Start tracking decisions</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
 <span>  analysis_id <span class="op">=</span> <span class="st">"iris_classification"</span>,</span>
 <span>  analyst <span class="op">=</span> <span class="st">"Data Scientist"</span>,</span>
 <span>  description <span class="op">=</span> <span class="st">"Classification of iris species using random forest"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Record data processing decision</span></span>
+<span><span class="co"># Record data processing decisions</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
-<span>  <span class="va">decision_file</span>,</span>
-<span>  check <span class="op">=</span> <span class="st">"Data preprocessing"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"All features are on different scales"</span>,</span>
-<span>  decision <span class="op">=</span> <span class="st">"Scale all numeric features"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Random forest performance can be affected by feature scales"</span>,</span>
+<span>  <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Feature scaling"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Features are on different scales (e.g., length vs width)"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Scale all numeric features to mean=0, sd=1"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Standardized features ensure equal importance in the model"</span>,</span>
 <span>  evidence <span class="op">=</span> <span class="st">"data/processed/train.csv"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Record model selection decision</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
-<span>  <span class="va">decision_file</span>,</span>
-<span>  check <span class="op">=</span> <span class="st">"Model selection"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"Non-linear relationships between features"</span>,</span>
+<span>  <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Train/Test Split"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Need to assess model performance on unseen data"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Use 80/20 split with random sampling"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Standard split ratio, enough data in both sets"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"scripts/prepare_data.R"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Record modeling decisions</span></span>
+<span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
+<span>  <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Model Selection"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Relationships between features may be non-linear"</span>,</span>
 <span>  decision <span class="op">=</span> <span class="st">"Use random forest classifier"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"RF can capture non-linear relationships and feature interactions"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Can capture complex patterns, handles feature interactions well"</span>,</span>
 <span>  evidence <span class="op">=</span> <span class="st">"models/rf_model.rds"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create reports directory if it doesn't exist</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"reports"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Export decision tree</span></span>
+<span><span class="co"># Export decisions for documentation</span></span>
 <span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span></span>
-<span>  <span class="va">decision_file</span>,</span>
+<span>  <span class="va">tree</span>,</span>
 <span>  format <span class="op">=</span> <span class="st">"html"</span>,</span>
-<span>  output_path <span class="op">=</span> <span class="st">"reports/decisions.html"</span></span>
+<span>  output_path <span class="op">=</span> <span class="st">"reports/analysis_decisions.html"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="reproducible-pipeline">Reproducible Pipeline<a class="anchor" aria-label="anchor" href="#reproducible-pipeline"></a>
+<h2 id="reproducible-pipeline">5. Reproducible Pipeline<a class="anchor" aria-label="anchor" href="#reproducible-pipeline"></a>
 </h2>
-<p>Our complete DVC pipeline now includes: 1. Data preparation stage 2.
-Model training stage 3. Model evaluation stage</p>
-<p>You can reproduce the entire analysis with:</p>
+<p>Our complete analysis pipeline now includes:<br>
+1. Raw data saving<br>
+2. Data preprocessing<br>
+3. Model training<br>
+4. Model evaluation<br>
+5. Decision documentation</p>
+<p>To reproduce the entire analysis:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span><span class="st">"dvc"</span>, <span class="st">"repro"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Reproduce all pipeline stages</span></span>
+<span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check pipeline status</span></span>
+<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="sharing-results">Sharing Results<a class="anchor" aria-label="anchor" href="#sharing-results"></a>
+<h2 id="sharing-your-work">6. Sharing Your Work<a class="anchor" aria-label="anchor" href="#sharing-your-work"></a>
 </h2>
-<p>To share your work with collaborators:</p>
-<ol style="list-style-type: decimal">
-<li>Push code changes to Git:</li>
-</ol>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">git</span> add .</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Complete iris analysis"</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li>Push data and models to DVC remote:</li>
-</ol>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">dvc</span> push</span></code></pre></div>
+<div class="section level3">
+<h3 id="share-code">6.1 Share Code<a class="anchor" aria-label="anchor" href="#share-code"></a>
+</h3>
+<p>Push your code to the remote repository:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Stage all changes</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"."</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Commit changes</span></span>
+<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Complete iris species classification analysis"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Push to remote repository</span></span>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"main"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="share-data-and-models">6.2 Share Data and Models<a class="anchor" aria-label="anchor" href="#share-data-and-models"></a>
+</h3>
+<p>Push data and models to your DVC remote:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Push all tracked data and models</span></span>
+<span><span class="fu"><a href="../reference/dvc_push.html">dvc_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="share-environment">6.3 Share Environment<a class="anchor" aria-label="anchor" href="#share-environment"></a>
+</h3>
+<p>Others can reproduce your environment using these steps:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Clone the repository (one-time setup)</span></span>
+<span><span class="fu"><a href="../reference/git_clone.html">git_clone</a></span><span class="op">(</span><span class="st">"&lt;repository-url&gt;"</span>, <span class="st">"iris_analysis"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Change to project directory</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"iris_analysis"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Pull the latest code</span></span>
+<span><span class="fu"><a href="../reference/git_pull.html">git_pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Pull data and models</span></span>
+<span><span class="fu"><a href="../reference/dvc_pull.html">dvc_pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. Reproduce the analysis</span></span>
+<span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Note: For Docker setup, use the functions from the Docker
+integration:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Start the Docker environment</span></span>
+<span><span class="fu"><a href="../reference/setup_docker.html">setup_docker</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
-<p>This example demonstrated how to: - Set up a complete analytics
-project with <code>thoth</code> - Version data and models with DVC -
-Create reproducible pipelines - Track analysis decisions - Share results
-with collaborators</p>
-<p>The resulting project structure is:</p>
-<pre><code>iris_analysis/
-├── data/
-│   ├── raw/
-│   │   └── iris.csv
-│   └── processed/
-│       ├── train.csv
-│       └── test.csv
-├── models/
-│   └── rf_model.rds
-├── metrics/
-│   └── model_metrics.csv
-├── plots/
-│   └── confusion_matrix.png
-├── reports/
-│   └── decisions.html
-├── .dvc/
-└── .git/</code></pre>
+<ul>
+<li>Try adapting this workflow to your own data<br>
+</li>
+<li>Explore more advanced features in
+<code><a href="../articles/dvc-tracking.html">vignette("dvc-tracking")</a></code><br>
+</li>
+<li>Learn about custom templates in
+<code><a href="../articles/custom-templates.html">vignette("custom-templates")</a></code>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -45,7 +45,6 @@ code .op, pre .op {
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/getting-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="articles/getting-started.html">Getting Started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -93,21 +92,36 @@ code .op, pre .op {
 <!-- badges: start -->
 
 <div class="section level2">
+<h2 id="why-thoth">Why Thoth?<a class="anchor" aria-label="anchor" href="#why-thoth"></a>
+</h2>
+<p>In ancient Egyptian mythology, Thoth was the god of wisdom, writing, and knowledge. As the divine scribe, he was said to have documented everything, maintaining perfect records of all actions and their consequences. This package embodies these principles by providing a framework that meticulously tracks every aspect of your analytical work - from data to decisions.</p>
+</div>
+<div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>thoth is a comprehensive framework for setting up reproducible analytics projects in R. It integrates data version control (DVC), containerization (Docker), dependency management (renv), and customizable reporting (Quarto) to implement best practices for project organization, workflow management, and reproducible research.</p>
+<p><code>thoth</code> is a comprehensive framework for creating reproducible analytics projects in R. Modern data analysis requires more than just code version control; it demands reproducible environments, tracked data, and documented decision-making. <code>thoth</code> addresses these challenges by seamlessly integrating data version control (DVC), containerization (Docker), dependency management (renv), and customizable reporting (Quarto).</p>
+<p>The framework provides a standardized project structure while remaining flexible enough to accommodate various analytical workflows. It automatically tracks large data files, creates reproducible pipelines, and maintains a clear record of analytical decisions. This systematic approach ensures that your research is not only reproducible but also transparent and well-documented.</p>
+</div>
+<div class="section level2">
+<h2 id="core-features">Core Features<a class="anchor" aria-label="anchor" href="#core-features"></a>
+</h2>
+<p>The framework enhances reproducibility through four key components:</p>
+<p>Data Version Control enables tracking of large data files and creates reproducible pipelines with metrics and plot versioning. This ensures that your data transformations are traceable and reproducible.</p>
+<p>Containerization through Docker guarantees that your analysis runs in a consistent environment, making it easier to share and reproduce results across different systems.</p>
+<p>Project Organization provides a standardized yet flexible structure for your analytics projects, with integrated version control and dependency management through renv.</p>
+<p>Documentation and Reporting offers customizable report templates and automated tracking of analytical decisions, making it easier to generate comprehensive methods sections for publications.</p>
 </div>
 <div class="section level2">
 <h2 id="system-requirements">System Requirements<a class="anchor" aria-label="anchor" href="#system-requirements"></a>
 </h2>
-<p>The package requires several external tools:</p>
+<p>To use <code>thoth</code>, you’ll need:</p>
 <ul>
 <li>
 <strong>DVC (Data Version Control)</strong> &gt;= 2.0.0
 <ul>
 <li>Required for data version control features</li>
 <li><a href="https://dvc.org/doc/install" class="external-link">Installation instructions</a></li>
-<li>Note: The package will work without DVC installed, creating mock .dvc files instead</li>
+<li>Note: The package will work without DVC, creating mock .dvc files instead</li>
 </ul>
 </li>
 <li>
@@ -129,92 +143,46 @@ code .op, pre .op {
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of thoth from GitHub:</p>
+<p>You can install the development version of <code>thoth</code> directly from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/thoth"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<ul>
-<li>
-<strong>Project Setup</strong>
-<ul>
-<li>Standardized project structures</li>
-<li>Version control initialization</li>
-<li>Dependency management setup</li>
-</ul>
-</li>
-<li>
-<strong>Data Version Control</strong>
-<ul>
-<li>Track large data files</li>
-<li>Create reproducible pipelines</li>
-<li>Track metrics and plots</li>
-</ul>
-</li>
-<li>
-<strong>Containerization</strong>
-<ul>
-<li>Reproducible environments</li>
-<li>Package analyses for distribution</li>
-</ul>
-</li>
-<li>
-<strong>Reporting</strong>
-<ul>
-<li>Customizable report templates</li>
-<li>Decision tracking</li>
-<li>Methods section generation</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li><p>Install system requirements (DVC, Python, Docker)</p></li>
-<li>
-<p>Install thoth:</p>
+<p>Getting started with <code>thoth</code> is straightforward. After installing the package, you can create a new analytics project with a single command:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/thoth"</span><span class="op">)</span></span></code></pre></div>
-</li>
-<li>
-<p>Create a new project:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span><span class="st">"my_analysis"</span><span class="op">)</span></span></code></pre></div>
-</li>
-<li>
-<p>Read the vignettes:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/browseVignettes.html" class="external-link">browseVignettes</a></span><span class="op">(</span><span class="st">"thoth"</span><span class="op">)</span></span></code></pre></div>
-</li>
-</ol>
-</div>
-<div class="section level2">
-<h2 id="usage-example">Usage Example<a class="anchor" aria-label="anchor" href="#usage-example"></a>
-</h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a new analytics project</span></span>
-<span><span class="fu"><a href="reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span><span class="st">"my_analysis"</span><span class="op">)</span></span>
+<span><span class="co"># Create a new project with all features enabled</span></span>
+<span><span class="fu"><a href="reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
+<span>  <span class="st">"my_analysis"</span>,</span>
+<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,      <span class="co"># Enable data version control</span></span>
+<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>    <span class="co"># Enable containerization</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Track data files with DVC</span></span>
+<span><span class="co"># Track your data files</span></span>
 <span><span class="fu"><a href="reference/dvc_track.html">dvc_track</a></span><span class="op">(</span><span class="st">"data/raw/dataset.csv"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Write and track CSV files</span></span>
-<span><span class="fu"><a href="reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"data/processed/mtcars.csv"</span><span class="op">)</span></span>
+<span><span class="co"># Save and track processed data</span></span>
+<span><span class="fu"><a href="reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="va">processed_data</span>,</span>
+<span>  <span class="st">"data/processed/results.csv"</span>,</span>
+<span>  message <span class="op">=</span> <span class="st">"Add processed results"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Write and track RDS files</span></span>
-<span><span class="fu"><a href="reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span><span class="va">model</span>, <span class="st">"models/random_forest.rds"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Track your trained models</span></span>
+<span><span class="fu"><a href="reference/write_rds_dvc.html">write_rds_dvc</a></span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  <span class="st">"models/random_forest.rds"</span>,</span>
+<span>  message <span class="op">=</span> <span class="st">"Add trained model"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
+<p>Comprehensive documentation is available to help you get started:</p>
 <ul>
 <li><a href="https://sebrauschert.github.io/thoth/">Package website</a></li>
 <li><a href="https://sebrauschert.github.io/thoth/articles/thoth.html">Getting started guide</a></li>
@@ -225,7 +193,7 @@ code .op, pre .op {
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
-<p>Please see <a href="CONTRIBUTING.html">CONTRIBUTING.md</a> for guidelines on how to contribute to this project.</p>
+<p>We welcome contributions! Whether it’s bug reports, feature requests, or code contributions, please see our <a href="CONTRIBUTING.html">contribution guidelines</a> for details on how to get involved.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -268,7 +236,7 @@ code .op, pre .op {
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Sebastian Rauschert <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-2143-5069" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Sebastian Rauschert <br><small class="roles"> Author, maintainer </small>  </li>
 </ul>
 </div>
 

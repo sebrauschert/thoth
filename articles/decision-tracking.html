@@ -42,7 +42,6 @@ code .op, pre .op {
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -99,150 +98,165 @@ code .op, pre .op {
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>One of the challenges in bioinformatics and data analysis is
-documenting and tracking human decisions made during the analysis
-process. While code and data can be version controlled, the reasoning
-behind key analytical decisions often remains undocumented. The
-<code>thoth</code> package provides functionality to track these
-decisions in a structured way.</p>
+<p><code>thoth</code> provides a structured way to document and track
+human decisions made during data analysis. While code and data can be
+version controlled, the reasoning behind analytical choices often
+remains undocumented. The decision tracking functionality helps make
+these choices explicit and traceable.</p>
 </div>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="core-functions">Core Functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>
 </h2>
-<p>To install the package from GitHub, first ensure you have all the
-required dependencies:</p>
+<div class="section level3">
+<h3 id="initialize-tracking">Initialize Tracking<a class="anchor" aria-label="anchor" href="#initialize-tracking"></a>
+</h3>
+<p>Start tracking decisions in your analysis:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install required dependencies if not already installed</span></span>
-<span><span class="va">required_packages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"usethis"</span>, <span class="st">"yaml"</span>, <span class="st">"cli"</span>, <span class="st">"digest"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"tools"</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">pkg</span> <span class="kw">in</span> <span class="va">required_packages</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="va">pkg</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Install thoth from GitHub</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"devtools"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sebrauschert/thoth"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
-<p>First, let’s load the package:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="creating-a-decision-tree">Creating a Decision Tree<a class="anchor" aria-label="anchor" href="#creating-a-decision-tree"></a>
-</h2>
-<p>When starting a new analysis, initialize a decision tree to track
-your decisions:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">decision_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
-<span>  analysis_id <span class="op">=</span> <span class="st">"RNA_seq_2024_01"</span>,</span>
+<span><span class="co"># Create a new decision tree</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
+<span>  analysis_id <span class="op">=</span> <span class="st">"RNA_seq_2024"</span>,</span>
 <span>  analyst <span class="op">=</span> <span class="st">"Jane Smith"</span>,</span>
-<span>  description <span class="op">=</span> <span class="st">"Differential expression analysis of treatment vs control samples"</span></span>
+<span>  description <span class="op">=</span> <span class="st">"Differential expression analysis"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="recording-decisions">Recording Decisions<a class="anchor" aria-label="anchor" href="#recording-decisions"></a>
-</h2>
-<p>As you progress through your analysis, record key decisions and
-observations:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Record a quality control decision</span></span>
+<div class="section level3">
+<h3 id="record-decisions">Record Decisions<a class="anchor" aria-label="anchor" href="#record-decisions"></a>
+</h3>
+<p>Document key analytical choices as you make them:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Quality control decision</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
-<span>  file_path <span class="op">=</span> <span class="va">decision_file</span>,</span>
-<span>  check <span class="op">=</span> <span class="st">"Sample-wise PCA clustering"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"Treatment samples cluster together except for sample T3"</span>,</span>
-<span>  decision <span class="op">=</span> <span class="st">"Exclude sample T3"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"T3 clusters with controls, likely sample swap"</span>,</span>
-<span>  evidence <span class="op">=</span> <span class="st">"plots/PCA_pre_filtering.pdf"</span></span>
+<span>  file_path <span class="op">=</span> <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Sample QC"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Sample T3 clusters with controls in PCA"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Remove sample T3"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Likely sample swap or contamination"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"plots/pca_plot.pdf"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Record a biological validation step</span></span>
+<span><span class="co"># Analysis parameter decision</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
-<span>  file_path <span class="op">=</span> <span class="va">decision_file</span>,</span>
-<span>  check <span class="op">=</span> <span class="st">"Known pathway markers"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"Expected stress response genes upregulated"</span>,</span>
-<span>  decision <span class="op">=</span> <span class="st">"Results biologically plausible"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Key marker genes show expected direction of change"</span>,</span>
-<span>  evidence <span class="op">=</span> <span class="st">"tables/marker_genes_expression.csv"</span></span>
+<span>  file_path <span class="op">=</span> <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Differential Expression"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"High biological variability in controls"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Use DESeq2 with LRT test"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Better handles overdispersion"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"tables/variance_analysis.csv"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="generating-methods-documentation">Generating Methods Documentation<a class="anchor" aria-label="anchor" href="#generating-methods-documentation"></a>
-</h2>
-<p>You can automatically generate a methods section from your decision
-tree:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="section level3">
+<h3 id="generate-documentation">Generate Documentation<a class="anchor" aria-label="anchor" href="#generate-documentation"></a>
+</h3>
+<p>Automatically create documentation from your decisions:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate methods section</span></span>
-<span><span class="va">methods_text</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_methods_section.html">generate_methods_section</a></span><span class="op">(</span><span class="va">decision_file</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">methods_text</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="exporting-decision-trees">Exporting Decision Trees<a class="anchor" aria-label="anchor" href="#exporting-decision-trees"></a>
-</h2>
-<p>Export your decision tree to various formats for sharing or
-documentation:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Export to markdown</span></span>
-<span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span><span class="va">decision_file</span>, format <span class="op">=</span> <span class="st">"md"</span><span class="op">)</span></span>
+<span><span class="va">methods_text</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_methods_section.html">generate_methods_section</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Export to HTML (requires rmarkdown)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rmarkdown"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span><span class="va">decision_file</span>, format <span class="op">=</span> <span class="st">"html"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="co"># Export decision tree</span></span>
+<span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span><span class="va">tree</span>, format <span class="op">=</span> <span class="st">"md"</span><span class="op">)</span>    <span class="co"># Markdown</span></span>
+<span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span><span class="va">tree</span>, format <span class="op">=</span> <span class="st">"html"</span><span class="op">)</span>   <span class="co"># HTML report</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="integration-with-project-workflow">Integration with Project Workflow<a class="anchor" aria-label="anchor" href="#integration-with-project-workflow"></a>
-</h2>
-<p>The decision tracking functionality integrates seamlessly with your
-analysis workflow:</p>
-<ol style="list-style-type: decimal">
-<li>Initialize a decision tree at the start of your analysis</li>
-<li>Record decisions as you make them</li>
-<li>Use the exported documentation for methods sections in papers</li>
-<li>Keep the decision tree under version control</li>
-</ol>
 </div>
 <div class="section level2">
 <h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
 </h2>
-<p>Here are some recommended practices for using the decision tracking
-functionality:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Be Consistent</strong>: Record decisions as you make them,
-not after the fact</li>
-<li>
-<strong>Be Specific</strong>: Include clear observations and
-reasoning</li>
-<li>
-<strong>Link Evidence</strong>: Always link to supporting plots,
-tables, or other evidence</li>
-<li>
-<strong>Version Control</strong>: Keep decision trees under version
-control</li>
-<li>
-<strong>Review</strong>: Regularly review decisions with team
-members</li>
-</ol>
+<div class="section level3">
+<h3 id="recording-decisions">1. Recording Decisions<a class="anchor" aria-label="anchor" href="#recording-decisions"></a>
+</h3>
+<ul>
+<li>Document decisions as they happen<br>
+</li>
+<li>Include clear observations and reasoning<br>
+</li>
+<li>Link to supporting evidence<br>
+</li>
+<li>Use consistent terminology</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="organization">2. Organization<a class="anchor" aria-label="anchor" href="#organization"></a>
+</h3>
+<ul>
+<li>One decision tree per analysis<br>
+</li>
+<li>Keep trees under version control<br>
+</li>
+<li>Review decisions with team members<br>
+</li>
+<li>Update as analysis evolves</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="documentation">3. Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example workflow</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
+<span>  analysis_id <span class="op">=</span> <span class="st">"project_2024"</span>,</span>
+<span>  description <span class="op">=</span> <span class="st">"Analysis workflow"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Record initial choices</span></span>
+<span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
+<span>  file_path <span class="op">=</span> <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Data Processing"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Raw data contains outliers"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Apply robust normalization"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Reduce impact of extreme values"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"scripts/normalize.R"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate documentation</span></span>
+<span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_methods_section.html">generate_methods_section</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<h2 id="common-patterns">Common Patterns<a class="anchor" aria-label="anchor" href="#common-patterns"></a>
 </h2>
-<p>By tracking analytical decisions in a structured way, we can:</p>
+<div class="section level3">
+<h3 id="quality-control-decisions">Quality Control Decisions<a class="anchor" aria-label="anchor" href="#quality-control-decisions"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Document QC steps</span></span>
+<span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
+<span>  file_path <span class="op">=</span> <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Data Quality"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"10% missing values in variable X"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Impute using KNN"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Data appears MCAR"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"reports/missing_analysis.html"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="parameter-selection">Parameter Selection<a class="anchor" aria-label="anchor" href="#parameter-selection"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Document parameter choices</span></span>
+<span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
+<span>  file_path <span class="op">=</span> <span class="va">tree</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Model Parameters"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Cross-validation shows overfitting"</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Increase regularization to 0.1"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Reduces test error by 15%"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="st">"plots/cv_results.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
 <ul>
-<li>Make the analysis process more transparent</li>
-<li>Facilitate knowledge transfer within teams</li>
-<li>Improve reproducibility</li>
-<li>Generate better documentation</li>
+<li>Try the end-to-end example:
+<code><a href="../articles/end-to-end-example.html">vignette("end-to-end-example")</a></code><br>
+</li>
+<li>Learn about Git integration:
+<code><a href="../articles/git-integration.html">vignette("git-integration")</a></code><br>
+</li>
+<li>Check out DVC tracking: <code><a href="../articles/dvc-tracking.html">vignette("dvc-tracking")</a></code>
+</li>
 </ul>
-<p>The decision tracking functionality in <code>thoth</code> helps make
-human expertise as trackable as code, breaking free from the “90%
-automation trap” where crucial human judgment remains hidden.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
