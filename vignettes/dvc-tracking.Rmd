@@ -11,314 +11,154 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = Sys.which("dvc") != ""  # Only evaluate if DVC is installed
+  eval = FALSE
 )
-
-has_dvc <- Sys.which("dvc") != ""
-if (!has_dvc) {
-  message("Note: Code chunks in this vignette require DVC to be installed.")
-  message("Visit https://dvc.org/doc/install for installation instructions.")
-}
-```
-
-```{r setup}
-library(thoth)
 ```
 
 ## Introduction
 
-Data Version Control (DVC) is a powerful tool for managing data science workflows. While DVC is written in Python, `thoth` provides seamless integration with R, allowing you to:
-
-1. Track large data files without storing them in Git
-2. Create reproducible pipelines
-3. Track metrics and plots
-4. Share data across team members
-
-This guide will walk you through setting up DVC and using it effectively with `thoth`.
+Data Version Control (DVC) is essential for managing data science workflows, particularly when dealing with large files that shouldn't be stored in Git. `thoth` provides a seamless integration between R and DVC, offering tidyverse-style functions that make data versioning intuitive for R users.
 
 ## Prerequisites
 
-Before starting, you need to:
+Before using the DVC functionality in `thoth`, ensure you have:
 
-1. Install DVC:
-   - Using pip (recommended):
-     ```bash
-     pip install dvc
-     ```
-   - Using conda:
-     ```bash
-     conda install -c conda-forge dvc
-     ```
-   - Using Homebrew (macOS):
-     ```bash
-     brew install dvc
-     ```
-   - For other installation methods, visit [DVC Installation Guide](https://dvc.org/doc/install)
+1. DVC installed (visit [DVC Installation Guide](https://dvc.org/doc/install))  
+2. Git initialized in your project  
+3. `thoth` package installed  
 
-2. Have Git initialized in your project:
-   ```bash
-   git init
-   ```
+You can verify your setup using:
 
-3. Install thoth:
-   ```r
-   remotes::install_github("sebrauschert/thoth")
-   ```
-
-4. Verify DVC installation:
-   ```{r}
-   # Check if DVC is available
-   dvc_available <- Sys.which("dvc") != ""
-   if (!dvc_available) {
-     message("DVC is not installed. Please install it first.")
-   } else {
-     message("DVC is installed and ready to use!")
-   }
-   ```
-
-## Project Setup
-
-When you create a new analytics project with `thoth`, DVC is automatically set up:
-
-```{r, eval=FALSE}
+```{r}
 library(thoth)
-create_analytics_project(
-  "my_analysis",
-  use_dvc = TRUE  # DVC is enabled by default
-)
+check_system_requirements()
 ```
 
-This:
-- Initializes DVC
-- Creates data directories tracked by DVC
-- Sets up appropriate .gitignore rules
-- Creates a basic DVC pipeline structure
+## Core DVC Functions
 
-## Simple Data Tracking
+### Basic Data Tracking
 
-### Tracking CSV Files
+Track data files and R objects with simple, pipe-friendly functions:
 
-The simplest way to track data files is using the DVC-aware write functions:
-
-```r
-# Track a CSV file
-data |> write_csv_dvc(
-  "data/processed/results.csv",
-  message = "Add processed results"
-)
-
-# Track with additional readr::write_csv parameters
-data |> write_csv_dvc(
-  "data/processed/results.csv",
-  message = "Add processed results",
-  na = "NA",
-  quote = "needed"
-)
-```
-
-### Tracking R Objects
-
-For R objects, use `write_rds_dvc`:
-
-```r
-# Save and track a model
-model |> write_rds_dvc(
-  "models/rf_model.rds",
-  message = "Save trained random forest model"
-)
-```
-
-### Manual Tracking
-
-You can also track files after they've been written:
-
-```r
-# Write file normally
-readr::write_csv(data, "data/processed/results.csv")
-
-# Track with DVC
-dvc_track("data/processed/results.csv", "Add processed results")
-```
-
-## Creating DVC Pipelines
-
-DVC pipelines help make your analysis reproducible by tracking:
-- Input dependencies
-- Output files
-- Parameters
-- Metrics and plots
-
-### Basic Pipeline Stage
-
-```r
-# Create a data processing stage
-data |> write_csv_dvc(
-  "data/processed/results.csv",
-  stage_name = "process_data",
-  deps = "data/raw/input.csv",
-  params = list(threshold = 0.5)
-)
-```
-
-### Tracking Metrics
-
-Track evaluation metrics automatically:
-
-```r
-metrics |> write_csv_dvc(
-  "metrics/evaluation.csv",
-  stage_name = "evaluate_model",
-  deps = c("models/rf_model.rds", "data/test/test.csv"),
-  metrics = TRUE  # Mark as DVC metrics
-)
-```
-
-### Tracking Plots
-
-Track visualization files:
-
-```r
-# Save plot data with DVC tracking
-plot_data |> write_csv_dvc(
-  "plots/feature_importance.csv",
-  stage_name = "create_plots",
-  deps = "models/rf_model.rds",
-  plots = TRUE  # Mark as DVC plot
-)
-```
-
-## Complete Pipeline Example
-
-Here's a complete example of a machine learning pipeline:
-
-```r
-library(thoth)
-
-# 1. Data Preprocessing
-raw_data |> write_csv_dvc(
-  "data/processed/preprocessed.csv",
-  stage_name = "preprocess",
-  deps = "data/raw/input.csv",
-  params = list(
-    remove_na = TRUE,
-    normalize = TRUE
+```{r}
+# Track CSV files
+processed_data |> 
+  write_csv_dvc(
+    "data/processed/results.csv",
+    message = "Added processed analysis results"
   )
-)
 
-# 2. Feature Engineering
-features |> write_csv_dvc(
-  "data/processed/features.csv",
-  stage_name = "feature_engineering",
-  deps = "data/processed/preprocessed.csv",
-  params = list(
-    n_components = 10
+# Track R objects
+model |> 
+  write_rds_dvc(
+    "models/final_model.rds",
+    message = "Saved trained model"
   )
-)
-
-# 3. Model Training
-model |> write_rds_dvc(
-  "models/rf_model.rds",
-  stage_name = "train_model",
-  deps = "data/processed/features.csv",
-  params = list(
-    ntree = 500,
-    mtry = 3
-  )
-)
-
-# 4. Model Evaluation
-metrics |> write_csv_dvc(
-  "metrics/evaluation.csv",
-  stage_name = "evaluate",
-  deps = c(
-    "models/rf_model.rds",
-    "data/processed/features.csv"
-  ),
-  metrics = TRUE
-)
-
-# 5. Create Plots
-plot_data |> write_csv_dvc(
-  "plots/performance.csv",
-  stage_name = "visualize",
-  deps = "metrics/evaluation.csv",
-  plots = TRUE
-)
 ```
 
-## Working with Remote Storage
+### Pipeline Management
 
-DVC supports various remote storage options (S3, GCS, etc.). Once configured, you can:
+Create reproducible pipelines by tracking dependencies, outputs, and parameters:
 
-```r
-# Pull data from remote
-dvc_pull()
+```{r}
+# Data preprocessing stage
+raw_data |> 
+  write_csv_dvc(
+    "data/processed/clean_data.csv",
+    stage_name = "preprocess",
+    deps = "data/raw/input.csv",
+    params = list(
+      remove_na = TRUE,
+      normalize = TRUE
+    )
+  )
 
-# Push data to remote
-dvc_push()
+# Model training stage
+model |> 
+  write_rds_dvc(
+    "models/model.rds",
+    stage_name = "train",
+    deps = "data/processed/clean_data.csv",
+    params = list(
+      n_trees = 500,
+      learning_rate = 0.01
+    )
+  )
+```
 
-# Pull specific files
-dvc_pull("data/processed/features.csv")
+### Metrics and Plots
+
+Track model performance metrics and visualizations:
+
+```{r}
+# Track evaluation metrics
+metrics |> 
+  write_csv_dvc(
+    "metrics/evaluation.csv",
+    stage_name = "evaluate",
+    deps = c("models/model.rds", "data/test.csv"),
+    metrics = TRUE
+  )
+
+# Track visualization data
+plot_data |> 
+  write_csv_dvc(
+    "plots/performance.csv",
+    stage_name = "visualize",
+    deps = "metrics/evaluation.csv",
+    plots = TRUE
+  )
 ```
 
 ## Best Practices
 
-1. **Organize Data**:
-   - Keep raw data in `data/raw/`
-   - Store processed data in `data/processed/`
-   - Save models in `models/`
-   - Keep metrics in `metrics/`
-   - Store plots in `plots/`
+1. **Organized Data Structure**  
+   - Keep raw data in `data/raw/`  
+   - Store processed data in `data/processed/`  
+   - Save models in `models/`  
+   - Track metrics in `metrics/`  
+   - Store plots in `plots/`  
 
-2. **Use Meaningful Stage Names**:
-   - Make stage names descriptive
-   - Use consistent naming conventions
-   - Include the purpose in the name
+2. **Meaningful Messages**  
+   - Include descriptive commit messages  
+   - Document parameter choices  
+   - Note important data transformations  
 
-3. **Track Dependencies**:
-   - Always specify input dependencies
-   - Include R scripts as dependencies
-   - Track configuration files
+3. **Pipeline Design**  
+   - Create modular pipeline stages  
+   - Track all dependencies explicitly  
+   - Version control parameters  
+   - Include evaluation metrics  
 
-4. **Use Parameters**:
-   - Track important hyperparameters
-   - Include preprocessing parameters
-   - Document parameter choices
+## Common Operations
 
-5. **Commit Regularly**:
-   - Commit .dvc files to Git
-   - Use meaningful commit messages
-   - Push data to remote storage
+### Pulling and Pushing Data
 
-## Troubleshooting
+```{r}
+# Pull data from remote storage
+dvc_pull()
 
-Common issues and solutions:
+# Push data to remote storage
+dvc_push()
+```
 
-1. **DVC not initialized**:
-   ```r
-   # Initialize DVC manually
-   system2("dvc", "init")
-   ```
+### Managing Stages
 
-2. **File not tracked**:
-   ```r
-   # Check if file is tracked
-   system2("dvc", c("status", "path/to/file"))
-   ```
+```{r}
+# Add a new stage
+dvc_stage(
+  name = "feature_engineering",
+  deps = "data/processed/clean_data.csv",
+  outputs = "data/processed/features.csv",
+  params = list(n_features = 10)
+)
 
-3. **Pipeline not updating**:
-   ```r
-   # Force pipeline stage rerun
-   system2("dvc", c("repro", "--force"))
-   ```
+# Commit changes
+dvc_commit()
+```
 
-## Conclusion
+## Next Steps
 
-DVC integration in `thoth` provides a seamless way to:
-- Track large data files
-- Create reproducible pipelines
-- Share data across team members
-- Monitor experiments
-- Maintain data science workflows
-
-By following these practices, you can create reproducible analyses that are easy to share and collaborate on. 
+- Explore the [DVC documentation](https://dvc.org/doc) for advanced features  
+- Check out the end-to-end example: `vignette("end-to-end-example")`  
+- Learn about Git integration: `vignette("git-integration")`  

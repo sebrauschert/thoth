@@ -41,7 +41,6 @@ navbar:
   structure:
     left:
     - intro
-    - getting-started
     - reference
     - articles
     right:
@@ -51,9 +50,6 @@ navbar:
   components:
     intro:
       text: Get started
-      href: articles/getting-started.html
-    getting-started:
-      text: Getting Started
       href: articles/getting-started.html
     reference:
       text: Reference
@@ -119,6 +115,8 @@ reference:
   - dvc_commit
   - dvc_pull
   - dvc_push
+  - dvc_repro
+  - dvc_status
   - write_csv_dvc
   - write_rds_dvc
   - dvc_stage
@@ -136,6 +134,7 @@ reference:
   - git_checkout
   - git_branch_list
   - git_log
+  - git_clone
 - title: Decision Tracking
   desc: Functions for tracking human decisions in analyses
   contents:

@@ -30,7 +30,9 @@
 <url><loc>https://sebrauschert.github.io/thoth/reference/dvc_commit.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/dvc_pull.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/dvc_push.html</loc></url>
+<url><loc>https://sebrauschert.github.io/thoth/reference/dvc_repro.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/dvc_stage.html</loc></url>
+<url><loc>https://sebrauschert.github.io/thoth/reference/dvc_status.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/dvc_track.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/example_projects.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/export_decision_tree.html</loc></url>
@@ -41,6 +43,7 @@
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_branch.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_branch_list.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_checkout.html</loc></url>
+<url><loc>https://sebrauschert.github.io/thoth/reference/git_clone.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_commit.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_init_repo.html</loc></url>
 <url><loc>https://sebrauschert.github.io/thoth/reference/git_log.html</loc></url>

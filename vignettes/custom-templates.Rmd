@@ -1,8 +1,8 @@
 ---
-title: "Custom Templates"
+title: "Custom Templates with thoth"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Custom Templates}
+  %\VignetteIndexEntry{Custom Templates with thoth}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,43 +10,65 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
-```
-
-
-```{r setup}
-library(thoth)
 ```
 
 ## Introduction
 
-Quarto templates help maintain consistent branding and styling across your organization's reports. `thoth` provides tools to create and manage custom Quarto templates with your organization's branding, colors, and styling preferences.
+`thoth` provides tools to create and manage custom Quarto templates that maintain consistent branding and styling across your organization's reports. These templates can be easily created, customized, and applied to any Quarto document.
 
-## Basic Template Creation
+## Creating Templates
+
+### Basic Template
 
 Create a new template with your organization's branding:
 
-```{r eval=FALSE}
+```{r}
 library(thoth)
 
 create_quarto_template(
   template_name = "company_template",
   primary_color = "#0054AD",
   secondary_color = "#00B4E0",
-  logo_path = "path/to/logo.png",
-  font_family = "Arial"
+  font_family = "Source Sans Pro"
 )
+```
+
+### Template Structure
+
+The template generator creates a complete set of files:
+
+```
+reports/
+└── templates/
+    └── company_template/
+        ├── _template.yml     # Quarto configuration
+        ├── custom.css       # Styling
+        └── assets/         # Images and resources
 ```
 
 ## Template Components
 
-### CSS Customization
+### 1. YAML Configuration
 
-The template generates a custom CSS file with your branding:
+```yaml
+format:
+  html:
+    theme: cosmo
+    css: custom.css
+    toc: true
+    code-fold: true
+    code-tools: true
+    fig-width: 8
+    fig-height: 6
+    fig-dpi: 300
+```
+
+### 2. CSS Styling
 
 ```css
-/* Custom styles for Quarto template */
 :root {
   --primary-color: #0054AD;
   --secondary-color: #00B4E0;
@@ -60,204 +82,102 @@ The template generates a custom CSS file with your branding:
   color: var(--primary-color);
 }
 
-a {
-  color: var(--secondary-color);
-}
-
 body {
-  font-family: Arial;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 ```
 
-### YAML Configuration
+## Using Templates
 
-The template includes a YAML configuration:
+### Applying to Reports
 
-```yaml
-format:
-  html:
-    theme: cosmo
-    css: custom.css
-    toc: true
-    code-fold: true
-    code-tools: true
-    df-print: paged
-    fig-width: 8
-    fig-height: 6
-    fig-format: png
-    fig-dpi: 300
-```
+```{r}
+# Apply template to a single report
+apply_template_to_report(
+  "reports/analysis.qmd",
+  "company_template"
+)
 
-## Applying Templates
-
-Apply your template to a Quarto document:
-
-```{r eval=FALSE}
-apply_template_to_report("reports/analysis.qmd", "company_template")
-```
-
-## Advanced Customization
-
-### Custom Fonts
-
-Use web fonts in your template:
-
-```{r eval=FALSE}
-create_quarto_template(
-  template_name = "modern_template",
-  font_family = "'Source Sans Pro', sans-serif",
-  primary_color = "#2E5EAA"
+# Apply to multiple reports
+apply_template_to_report(
+  c("reports/analysis.qmd", "reports/summary.qmd"),
+  "company_template"
 )
 ```
 
-Add the font link to your template:
+### Customizing Templates
 
-```yaml
-format:
-  html:
-    css: custom.css
-    include-in-header:
-      text: |
-        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-```
-
-### Custom Layouts
-
-Create custom layouts with CSS Grid:
-
-```css
-.custom-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 2rem;
-}
-
-.sidebar {
-  background: var(--primary-color);
-  padding: 1rem;
-  color: white;
-}
-
-.main-content {
-  padding: 1rem;
-}
-```
-
-### Interactive Elements
-
-Add custom JavaScript for interactivity:
-
-```js
-// custom.js
-document.addEventListener('DOMContentLoaded', function() {
-  // Add custom behaviors
-});
-```
-
-Include in your template:
-
-```yaml
-format:
-  html:
-    include-after-body:
-      file: custom.js
+```{r}
+# Create template with custom settings
+create_quarto_template(
+  template_name = "technical_report",
+  primary_color = "#2E5EAA",
+  secondary_color = "#30B8BE",
+  font_family = "JetBrains Mono",
+  code_font = "Fira Code",
+  toc_depth = 3,
+  code_fold = "show"
+)
 ```
 
 ## Best Practices
 
-1. **Color Usage**
-   - Use consistent color palette
-   - Ensure sufficient contrast
-   - Consider color blindness accessibility
+### 1. Design Principles
 
-2. **Typography**
-   - Choose readable fonts
-   - Maintain consistent hierarchy
-   - Use appropriate font sizes
+- Use consistent color schemes  
+- Choose readable fonts  
+- Maintain clear hierarchy  
+- Ensure accessibility  
 
-3. **Layout**
-   - Keep layouts clean and consistent
-   - Use white space effectively
-   - Make navigation intuitive
+### 2. Organization
 
-4. **Responsive Design**
-   - Test on different screen sizes
-   - Use flexible layouts
-   - Optimize images
+- Keep templates in version control  
+- Document customizations  
+- Use meaningful template names  
+- Share templates across team  
 
-## Template Organization
+### 3. Usage
+```{r}
+# Create project with template
+create_analytics_project(
+  "analysis",
+  use_quarto = TRUE,
+  template = "company_template"
+)
 
-Recommended structure for template files:
-
-```
-reports/
-└── templates/
-    └── company_template/
-        ├── _template.yml
-        ├── custom.css
-        ├── custom.js
-        └── assets/
-            └── logo.png
+# Apply template to existing report
+apply_template_to_report(
+  "report.qmd",
+  "company_template",
+  overwrite = FALSE  # Preview changes first
+)
 ```
 
-## Example Templates
+## Template Types
 
-### Executive Summary Template
-
+### 1. Executive Summary
 ```yaml
-# _template.yml
 format:
   html:
-    theme: cosmo
-    css: custom.css
     toc: false
     code-fold: true
     code-tools: false
     fig-width: 10
-    fig-height: 6
-    fig-format: png
-    fig-dpi: 300
-    include-in-header:
-      file: header.html
 ```
 
-### Technical Report Template
-
+### 2. Technical Report
 ```yaml
-# _template.yml
 format:
   html:
-    theme: cosmo
-    css: custom.css
     toc: true
     toc-depth: 3
     code-fold: show
     code-tools: true
     df-print: paged
-    fig-width: 8
-    fig-height: 6
-    fig-format: png
-    fig-dpi: 300
-    include-in-header:
-      file: header.html
-```
-
-## Integration with R Markdown
-
-While Quarto is the preferred format, the templates can be adapted for R Markdown:
-
-```yaml
-output:
-  html_document:
-    theme: cosmo
-    css: templates/company_template/custom.css
-    toc: true
-    code_folding: hide
 ```
 
 ## Next Steps
 
-- Create templates for different report types
-- Add custom JavaScript functionality
-- Implement accessibility features
-- Share templates across your organization 
+- Try the end-to-end example: `vignette("end-to-end-example")`  
+- Learn about Docker setup: `vignette("docker-setup")`  
+- Check [Quarto documentation](https://quarto.org/) for advanced features  

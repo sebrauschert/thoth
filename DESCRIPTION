@@ -2,8 +2,7 @@ Package: thoth
 Title: Reproducible Analytics Framework with Data Version Control
 Version: 0.0.0.9000
 Authors@R: 
-    person("Sebastian", "Rauschert", , "sebastian.rauschert@telethonkids.org.au", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-2143-5069"))
+    person("Sebastian", "Rauschert", , "sebastian.rauschert@telethonkids.org.au", role = c("aut", "cre"))
 Author: Sebastian Rauschert [aut, cre]
 Maintainer: Sebastian Rauschert <seb.rauschert@gmail.com>
 Description: A comprehensive framework for setting up reproducible analytics projects

@@ -93,7 +93,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Sebastian Rauschert \email{sebastian.rauschert@telethonkids.org.au} (\href{https://orcid.org/0000-0003-2143-5069}{ORCID})
+\strong{Maintainer}: Sebastian Rauschert \email{sebastian.rauschert@telethonkids.org.au}
 
 }
 \keyword{internal}

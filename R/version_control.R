@@ -619,4 +619,99 @@ dvc_stage <- function(name, cmd, deps = NULL, outs = NULL,
   
   cli::cli_alert_success("Created DVC stage: {name}")
   invisible(TRUE)
+}
+
+#' Clone a Git Repository
+#'
+#' Clones a Git repository into a new directory.
+#'
+#' @param url URL of the repository to clone
+#' @param path Path where to clone the repository
+#' @param branch Name of the branch to clone. Default is NULL (clones default branch).
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' git_clone("https://github.com/user/repo.git", "my_analysis")
+#' git_clone("https://github.com/user/repo.git", "my_analysis", branch = "develop")
+#' }
+git_clone <- function(url, path, branch = NULL) {
+  check_git()
+  
+  args <- c("clone", if(!is.null(branch)) c("-b", branch) else NULL, url, path)
+  result <- system2("git", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to clone repository")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Successfully cloned repository to {path}")
+  invisible(TRUE)
+}
+
+#' Reproduce DVC Pipeline
+#'
+#' Reproduces a DVC pipeline by executing all stages in the correct order.
+#'
+#' @param targets Optional character vector of specific stages to reproduce
+#' @param force Logical. Whether to reproduce even if dependencies haven't changed
+#'
+#' @return Invisibly returns TRUE if successful
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' dvc_repro()  # reproduce entire pipeline
+#' dvc_repro("train_model")  # reproduce specific stage
+#' }
+dvc_repro <- function(targets = NULL, force = FALSE) {
+  check_dvc()
+  
+  args <- c("repro",
+            if(force) "--force" else NULL,
+            targets)
+  
+  result <- system2("dvc", args, stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to reproduce DVC pipeline")
+    return(invisible(FALSE))
+  }
+  
+  cli::cli_alert_success("Successfully reproduced DVC pipeline")
+  invisible(TRUE)
+}
+
+#' Check DVC Pipeline Status
+#'
+#' Shows the status of the DVC pipeline, indicating which stages are up-to-date
+#' and which need to be reproduced.
+#'
+#' @return Character vector containing status output
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' dvc_status()
+#' }
+dvc_status <- function() {
+  check_dvc()
+  
+  result <- system2("dvc", "status", stdout = TRUE, stderr = TRUE)
+  
+  if (!is.null(attr(result, "status"))) {
+    cli::cli_alert_warning("Failed to get DVC status")
+    return(invisible(NULL))
+  }
+  
+  if (length(result) == 0) {
+    cli::cli_alert_info("Pipeline is up to date")
+  } else {
+    cat(paste(result, collapse = "\n"), "\n")
+  }
+  
+  invisible(result)
 } 

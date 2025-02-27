@@ -48,7 +48,6 @@ code .op, pre .op {
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -106,121 +105,164 @@ code .op, pre .op {
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>This vignette demonstrates how to use <code>thoth</code> for a
-typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
+typical RNA-seq analysis workflow using edgeR and limma. We’ll walk
+through:</p>
 <ol style="list-style-type: decimal">
-<li>Set up a reproducible project structure</li>
-<li>Track raw count data with DVC</li>
-<li>Perform quality control</li>
-<li>Run differential expression analysis</li>
-<li>Track decisions and results</li>
-<li>Create a reproducible pipeline</li>
+<li>Setting up a reproducible project structure</li>
+<li>Tracking raw count data with DVC</li>
+<li>Performing quality control with documented decisions</li>
+<li>Running differential expression analysis</li>
+<li>Creating publication-ready visualizations</li>
+<li>Building a reproducible pipeline</li>
 </ol>
 </div>
 <div class="section level2">
 <h2 id="project-setup">Project Setup<a class="anchor" aria-label="anchor" href="#project-setup"></a>
 </h2>
-<p>First, let’s create a new project with DVC enabled:</p>
+<p>First, let’s create a new project with all reproducibility features
+enabled:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load required packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioinf.wehi.edu.au/edgeR/" class="external-link">edgeR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioinf.wehi.edu.au/limma/" class="external-link">limma</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">statmod</span><span class="op">)</span>  <span class="co"># Required for edgeR</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap" class="external-link">ComplexHeatmap</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create new project</span></span>
+<span><span class="co"># Create new project with reproducibility features</span></span>
 <span><span class="fu"><a href="../reference/create_analytics_project.html">create_analytics_project</a></span><span class="op">(</span></span>
 <span>  <span class="st">"rnaseq_analysis"</span>,</span>
-<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  use_dvc <span class="op">=</span> <span class="cn">TRUE</span>,      <span class="co"># Enable data version control</span></span>
+<span>  use_docker <span class="op">=</span> <span class="cn">TRUE</span>,   <span class="co"># Enable containerization</span></span>
+<span>  git_init <span class="op">=</span> <span class="cn">TRUE</span>      <span class="co"># Initialize Git repository</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Change to project directory</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"rnaseq_analysis"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="load-and-track-raw-data">Load and Track Raw Data<a class="anchor" aria-label="anchor" href="#load-and-track-raw-data"></a>
+<h2 id="data-management">Data Management<a class="anchor" aria-label="anchor" href="#data-management"></a>
 </h2>
-<p>Let’s start with a simulated RNA-seq dataset:</p>
+<div class="section level3">
+<h3 id="generate-example-dataset">Generate Example Dataset<a class="anchor" aria-label="anchor" href="#generate-example-dataset"></a>
+</h3>
+<p>For this example, we’ll create a simulated RNA-seq dataset:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Simulate count data</span></span>
+<code class="sourceCode R"><span><span class="co"># Set random seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Simulation parameters</span></span>
 <span><span class="va">n_genes</span> <span class="op">&lt;-</span> <span class="fl">10000</span></span>
 <span><span class="va">n_samples</span> <span class="op">&lt;-</span> <span class="fl">8</span></span>
 <span></span>
-<span><span class="co"># Create counts matrix</span></span>
+<span><span class="co"># Create counts matrix with negative binomial distribution</span></span>
 <span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="va">n_genes</span> <span class="op">*</span> <span class="va">n_samples</span>, mu <span class="op">=</span> <span class="fl">100</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  nrow <span class="op">=</span> <span class="va">n_genes</span>,</span>
 <span>  ncol <span class="op">=</span> <span class="va">n_samples</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add row and column names</span></span>
+<span><span class="co"># Add informative row and column names</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"gene_"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_genes</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sample_"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_samples</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create sample metadata</span></span>
+<span><span class="co"># Create sample metadata with treatment and batch information</span></span>
 <span><span class="va">sample_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>,</span>
 <span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"control"</span>, <span class="st">"treatment"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Save and track raw data with DVC</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="track-raw-data-with-dvc">Track Raw Data with DVC<a class="anchor" aria-label="anchor" href="#track-raw-data-with-dvc"></a>
+</h3>
+<p>Save and version our raw data:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Save and track count matrix</span></span>
 <span><span class="va">counts</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">rownames_to_column</a></span><span class="op">(</span><span class="st">"gene_id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/raw/counts.csv"</span>,</span>
-<span>    message <span class="op">=</span> <span class="st">"Add raw count data"</span></span>
+<span>    message <span class="op">=</span> <span class="st">"Add raw RNA-seq count data"</span>,</span>
+<span>    stage_name <span class="op">=</span> <span class="st">"save_raw_data"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Save and track sample metadata</span></span>
 <span><span class="va">sample_info</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/raw/sample_info.csv"</span>,</span>
-<span>    message <span class="op">=</span> <span class="st">"Add sample metadata"</span></span>
+<span>    message <span class="op">=</span> <span class="st">"Add sample metadata"</span>,</span>
+<span>    stage_name <span class="op">=</span> <span class="st">"save_metadata"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
+</div>
 <div class="section level2">
-<h2 id="initialize-decision-tree">Initialize Decision Tree<a class="anchor" aria-label="anchor" href="#initialize-decision-tree"></a>
+<h2 id="analysis-setup">Analysis Setup<a class="anchor" aria-label="anchor" href="#analysis-setup"></a>
 </h2>
-<p>Let’s track our analytical decisions:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="section level3">
+<h3 id="initialize-decision-tree">Initialize Decision Tree<a class="anchor" aria-label="anchor" href="#initialize-decision-tree"></a>
+</h3>
+<p>Create a structured way to track our analytical decisions:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Initialize decision tracking</span></span>
 <span><span class="va">decision_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/initialize_decision_tree.html">initialize_decision_tree</a></span><span class="op">(</span></span>
 <span>  analysis_id <span class="op">=</span> <span class="st">"rnaseq_2024"</span>,</span>
 <span>  analyst <span class="op">=</span> <span class="st">"Data Scientist"</span>,</span>
-<span>  description <span class="op">=</span> <span class="st">"Differential expression analysis of treatment vs control"</span></span>
+<span>  description <span class="op">=</span> <span class="st">"Differential expression analysis comparing treatment vs control"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="data-processing-and-qc">Data Processing and QC<a class="anchor" aria-label="anchor" href="#data-processing-and-qc"></a>
-</h2>
 <div class="section level3">
-<h3 id="create-dgelist-object">1. Create DGEList Object<a class="anchor" aria-label="anchor" href="#create-dgelist-object"></a>
+<h3 id="create-dgelist-object">Create DGEList Object<a class="anchor" aria-label="anchor" href="#create-dgelist-object"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Read data</span></span>
+<p>Set up our edgeR analysis object:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Read data using tracked files</span></span>
 <span><span class="va">counts_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">"data/raw/counts.csv"</span><span class="op">)</span></span>
 <span><span class="va">sample_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">"data/raw/sample_info.csv"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create DGEList</span></span>
+<span><span class="co"># Create DGEList object</span></span>
 <span><span class="va">dge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/DGEList.html" class="external-link">DGEList</a></span><span class="op">(</span></span>
 <span>  counts <span class="op">=</span> <span class="va">counts_df</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">column_to_rownames</a></span><span class="op">(</span><span class="st">"gene_id"</span><span class="op">)</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">sample_info</span><span class="op">$</span><span class="va">group</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add batch information</span></span>
-<span><span class="va">dge</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">sample_info</span><span class="op">$</span><span class="va">batch</span></span></code></pre></div>
+<span><span class="co"># Add batch information for later use</span></span>
+<span><span class="va">dge</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">sample_info</span><span class="op">$</span><span class="va">batch</span></span>
+<span></span>
+<span><span class="co"># Record initial data structure</span></span>
+<span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
+<span>  <span class="va">decision_file</span>,</span>
+<span>  check <span class="op">=</span> <span class="st">"Data import"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Dataset contains %d genes across %d samples"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">dge</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">dge</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  decision <span class="op">=</span> <span class="st">"Proceed with analysis"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Data structure matches experimental design"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
+</h2>
 <div class="section level3">
-<h3 id="quality-control">2. Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
+<h3 id="expression-filtering">1. Expression Filtering<a class="anchor" aria-label="anchor" href="#expression-filtering"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>Remove lowly expressed genes:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calculate library sizes and CPM</span></span>
 <span><span class="va">lib_sizes</span> <span class="op">&lt;-</span> <span class="va">dge</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">lib.size</span></span>
 <span><span class="va">cpms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/cpm.html" class="external-link">cpm</a></span><span class="op">(</span><span class="va">dge</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create expression density plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"plots/gene_expression_density.png"</span>, width <span class="op">=</span> <span class="fl">800</span>, height <span class="op">=</span> <span class="fl">600</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">cpms</span><span class="op">[</span><span class="va">cpms</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>     main <span class="op">=</span> <span class="st">"Gene Expression Distribution"</span>,</span>
+<span>     xlab <span class="op">=</span> <span class="st">"log2 CPM"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Filter low expression genes</span></span>
 <span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/filterByExpr.html" class="external-link">filterByExpr</a></span><span class="op">(</span><span class="va">dge</span>, group <span class="op">=</span> <span class="va">dge</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">group</span><span class="op">)</span></span>
@@ -231,15 +273,15 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>  <span class="va">decision_file</span>,</span>
 <span>  check <span class="op">=</span> <span class="st">"Gene filtering"</span>,</span>
 <span>  observation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
-<span>    <span class="st">"Removed %d low expression genes"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">!</span><span class="va">keep</span><span class="op">)</span></span>
+<span>    <span class="st">"Removed %d genes (%d%%) with consistently low counts"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">!</span><span class="va">keep</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">!</span><span class="va">keep</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">keep</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  decision <span class="op">=</span> <span class="st">"Filter using filterByExpr()"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Remove genes with consistently low counts"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Remove noise from lowly expressed genes"</span>,</span>
 <span>  evidence <span class="op">=</span> <span class="st">"plots/gene_expression_density.png"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Save filtered data</span></span>
+<span><span class="co"># Save filtered data with DVC</span></span>
 <span><span class="va">dge_filtered</span><span class="op">$</span><span class="va">counts</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">rownames_to_column</a></span><span class="op">(</span><span class="st">"gene_id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -255,40 +297,54 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>      min_cpm <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>      min_samples <span class="op">=</span> <span class="fl">4</span></span>
 <span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Normalization</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="normalization">2. Normalization<a class="anchor" aria-label="anchor" href="#normalization"></a>
+</h3>
+<p>Apply TMM normalization to account for composition bias:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate normalization factors</span></span>
 <span><span class="va">dge_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Record normalization decision</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
 <span>  <span class="va">decision_file</span>,</span>
 <span>  check <span class="op">=</span> <span class="st">"Normalization"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"Library sizes vary between samples"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Library sizes range from %s to %s million reads"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">lib_sizes</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1e6</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">lib_sizes</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1e6</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  decision <span class="op">=</span> <span class="st">"Apply TMM normalization"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Account for composition bias"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Account for composition bias between samples"</span>,</span>
 <span>  evidence <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="quality-control-plots">3. Quality Control Plots<a class="anchor" aria-label="anchor" href="#quality-control-plots"></a>
+<h3 id="sample-quality-assessment">3. Sample Quality Assessment<a class="anchor" aria-label="anchor" href="#sample-quality-assessment"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># MDS plot</span></span>
-<span><span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/plotMDS.html" class="external-link">plotMDS</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span></span>
-<span>    <span class="st">"plots/mds_plot.png"</span>,</span>
-<span>    width <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>    height <span class="op">=</span> <span class="fl">6</span></span>
-<span>  <span class="op">)</span></span>
+<p>Visualize sample relationships:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create MDS plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"plots/mds_plot.png"</span>, width <span class="op">=</span> <span class="fl">800</span>, height <span class="op">=</span> <span class="fl">600</span><span class="op">)</span></span>
+<span><span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/plotMDS.html" class="external-link">plotMDS</a></span><span class="op">(</span><span class="va">dge_filtered</span>,</span>
+<span>               col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>               pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">batch</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span>
+<span>       legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">batch</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>       col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>       pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Record MDS observation</span></span>
+<span><span class="co"># Record clustering observation</span></span>
 <span><span class="fu"><a href="../reference/record_decision.html">record_decision</a></span><span class="op">(</span></span>
 <span>  <span class="va">decision_file</span>,</span>
 <span>  check <span class="op">=</span> <span class="st">"Sample clustering"</span>,</span>
-<span>  observation <span class="op">=</span> <span class="st">"Samples cluster by treatment with some batch effect"</span>,</span>
+<span>  observation <span class="op">=</span> <span class="st">"Samples cluster primarily by treatment with visible batch effects"</span>,</span>
 <span>  decision <span class="op">=</span> <span class="st">"Include batch in design matrix"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Account for technical variation"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Account for technical variation while testing treatment effect"</span>,</span>
 <span>  evidence <span class="op">=</span> <span class="st">"plots/mds_plot.png"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -297,23 +353,27 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <h2 id="differential-expression-analysis">Differential Expression Analysis<a class="anchor" aria-label="anchor" href="#differential-expression-analysis"></a>
 </h2>
 <div class="section level3">
-<h3 id="design-matrix-and-model-fitting">1. Design Matrix and Model Fitting<a class="anchor" aria-label="anchor" href="#design-matrix-and-model-fitting"></a>
+<h3 id="model-fitting">1. Model Fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create design matrix</span></span>
+<p>Fit linear model accounting for batch effects:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create design matrix with batch effect</span></span>
 <span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">batch</span> <span class="op">+</span> <span class="va">group</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fit model</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">lmFit</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/limma/man/voom.html" class="external-link">voom</a></span><span class="op">(</span><span class="va">dge_filtered</span>, <span class="va">design</span><span class="op">)</span>,</span>
-<span>  <span class="va">design</span></span>
-<span><span class="op">)</span></span>
+<span><span class="co"># Apply voom transformation and fit model</span></span>
+<span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/voom.html" class="external-link">voom</a></span><span class="op">(</span><span class="va">dge_filtered</span>, <span class="va">design</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"plots/voom_plot.png"</span>, width <span class="op">=</span> <span class="fl">800</span>, height <span class="op">=</span> <span class="fl">600</span><span class="op">)</span></span>
+<span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/voom.html" class="external-link">voom</a></span><span class="op">(</span><span class="va">dge_filtered</span>, <span class="va">design</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit linear model</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">lmFit</a></span><span class="op">(</span><span class="va">v</span>, <span class="va">design</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">eBayes</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Get results</span></span>
+<span><span class="co"># Get results table</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/toptable.html" class="external-link">topTable</a></span><span class="op">(</span></span>
 <span>  <span class="va">fit</span>,</span>
 <span>  coef <span class="op">=</span> <span class="st">"grouptreatment"</span>,</span>
@@ -343,15 +403,16 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>    <span class="st">"Found %d DE genes (FDR &lt; 0.05, |logFC| &gt; 1)"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">adj.P.Val</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">logFC</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  decision <span class="op">=</span> <span class="st">"Use voom-limma pipeline"</span>,</span>
-<span>  reasoning <span class="op">=</span> <span class="st">"Account for mean-variance relationship"</span>,</span>
-<span>  evidence <span class="op">=</span> <span class="st">"data/processed/de_results.csv"</span></span>
+<span>  decision <span class="op">=</span> <span class="st">"Use voom-limma pipeline with batch correction"</span>,</span>
+<span>  reasoning <span class="op">=</span> <span class="st">"Account for mean-variance relationship and batch effects"</span>,</span>
+<span>  evidence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"plots/voom_plot.png"</span>, <span class="st">"data/processed/de_results.csv"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualization">2. Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>Create publication-ready figures:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create volcano plot</span></span>
 <span><span class="va">results</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">logFC</span>, y <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log10</a></span><span class="op">(</span><span class="va">adj.P.Val</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -359,12 +420,16 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">adj.P.Val</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">logFC</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    alpha <span class="op">=</span> <span class="fl">0.6</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span></span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"red"</span><span class="op">)</span>,</span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Non-significant"</span>, <span class="st">"DE genes"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Volcano Plot"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Differential Expression Analysis"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"log2 Fold Change"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"-log10 Adjusted P-value"</span></span>
+<span>    y <span class="op">=</span> <span class="st">"-log10 Adjusted P-value"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Significance"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span></span>
 <span>    <span class="st">"plots/volcano_plot.png"</span>,</span>
@@ -379,7 +444,7 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get normalized expression for top genes</span></span>
-<span><span class="va">expr_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/limma/man/voom.html" class="external-link">voom</a></span><span class="op">(</span><span class="va">dge_filtered</span>, <span class="va">design</span><span class="op">)</span><span class="op">$</span><span class="va">E</span><span class="op">[</span><span class="va">top_genes</span>, <span class="op">]</span></span>
+<span><span class="va">expr_mat</span> <span class="op">&lt;-</span> <span class="va">v</span><span class="op">$</span><span class="va">E</span><span class="op">[</span><span class="va">top_genes</span>, <span class="op">]</span></span>
 <span></span>
 <span><span class="co"># Save heatmap</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"plots/heatmap.png"</span>, width <span class="op">=</span> <span class="fl">800</span>, height <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
@@ -387,7 +452,8 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <span>  <span class="va">expr_mat</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"Expression"</span>,</span>
 <span>  column_split <span class="op">=</span> <span class="va">dge_filtered</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">group</span>,</span>
-<span>  show_row_names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  show_row_names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  column_title <span class="op">=</span> <span class="st">"Top 50 DE Genes"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -395,26 +461,32 @@ typical RNA-seq analysis workflow using edgeR and limma. We’ll:</p>
 <div class="section level2">
 <h2 id="export-analysis-documentation">Export Analysis Documentation<a class="anchor" aria-label="anchor" href="#export-analysis-documentation"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Generate comprehensive documentation:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Export decision tree</span></span>
 <span><span class="fu"><a href="../reference/export_decision_tree.html">export_decision_tree</a></span><span class="op">(</span></span>
 <span>  <span class="va">decision_file</span>,</span>
 <span>  format <span class="op">=</span> <span class="st">"html"</span>,</span>
 <span>  output_path <span class="op">=</span> <span class="st">"reports/analysis_decisions.html"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate methods section</span></span>
+<span><span class="va">methods_text</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_methods_section.html">generate_methods_section</a></span><span class="op">(</span><span class="va">decision_file</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="va">methods_text</span>, <span class="st">"reports/methods_section.md"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="complete-dvc-pipeline">Complete DVC Pipeline<a class="anchor" aria-label="anchor" href="#complete-dvc-pipeline"></a>
 </h2>
-<p>Our analysis is now tracked with DVC:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># View pipeline</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="ex">dvc</span> dag</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># Reproduce analysis</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="ex">dvc</span> repro</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># Push to remote</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="ex">dvc</span> push</span></code></pre></div>
+<p>Our analysis is now fully tracked and reproducible:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check pipeline status</span></span>
+<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reproduce entire analysis</span></span>
+<span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Push to remote storage</span></span>
+<span><span class="fu"><a href="../reference/dvc_push.html">dvc_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
@@ -427,6 +499,22 @@ methods</p>
 Raw data tracked by DVC - Code in Git - Dependencies managed by renv -
 Analysis decisions documented - Docker environment for
 reproducibility</p>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<ul>
+<li>Adapt this workflow to your own RNA-seq data</li>
+<li>Explore more advanced features in
+<code><a href="../articles/dvc-tracking.html">vignette("dvc-tracking")</a></code>
+</li>
+<li>Learn about custom templates in
+<code><a href="../articles/custom-templates.html">vignette("custom-templates")</a></code>
+</li>
+<li>Check out Git integration in
+<code><a href="../articles/git-integration.html">vignette("git-integration")</a></code>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

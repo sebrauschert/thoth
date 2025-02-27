@@ -15,204 +15,136 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ## Introduction
 
-Version control is essential for reproducible analytics. While Git commands can be run directly from the terminal, `thoth` provides convenient R functions for common Git operations. This integration allows you to manage your version control directly from your R scripts or console.
+`thoth` provides a tidyverse-friendly interface to Git operations, allowing you to manage version control directly from your R environment. This integration streamlines the version control workflow while maintaining the power and flexibility of Git.
 
-## Basic Git Operations
+## Core Git Functions
 
-### Checking Repository Status
+### Repository Status and Changes
 
-Use `git_status()` to see which files have been modified:
+Monitor and manage changes in your repository:
 
-```r
+```{r}
 library(thoth)
 
-# Check status (short format)
+# Check repository status
 git_status()
 
-# Check status with full details
-git_status(short = FALSE)
+# Stage changes
+git_add("analysis.R")                                    # Single file
+git_add(c("data/processed/results.csv", "README.md"))   # Multiple files
+git_add(".", force = FALSE)                             # All changes
+
+# Commit changes
+git_commit("Add initial analysis")                      # Commit staged changes
+git_commit("Update results", all = TRUE)                # Stage and commit all changes
 ```
 
-### Staging and Committing Changes
+### Branch Management
 
-Add files to the staging area and commit changes:
+Create and manage branches efficiently:
 
-```r
-# Stage specific files
-git_add("analysis.R")
-git_add(c("data/processed/results.csv", "plots/figure1.png"))
+```{r}
+# View branches
+git_branch_list()                    # Local branches
+git_branch_list(all = TRUE)          # Include remote branches
 
-# Stage all modified files
-git_add(".", force = FALSE)
-
-# Commit staged changes
-git_commit("Add initial analysis script")
-
-# Stage and commit in one step
-git_commit("Update results", all = TRUE)
+# Create and switch branches
+git_branch("feature/analysis")       # Create new branch
+git_checkout("main")                 # Switch branch
+git_checkout("feature/fix",          # Create and switch
+             create = TRUE)
 ```
 
-## Branch Management
+### Remote Operations
 
-### Working with Branches
+Synchronize with remote repositories:
 
-Create, switch, and manage branches:
+```{r}
+# Sync changes
+git_pull()                          # Get latest changes
+git_push()                          # Push local changes
 
-```r
-# List all branches
-git_branch_list()
-
-# Include remote branches
-git_branch_list(all = TRUE)
-
-# Create a new branch
-git_branch("feature/new-analysis")
-
-# Switch to existing branch
-git_checkout("main")
-
-# Create and switch to new branch
-git_checkout("feature/bugfix", create = TRUE)
-```
-
-## Remote Operations
-
-### Syncing with Remote Repository
-
-Push and pull changes:
-
-```r
-# Pull latest changes
-git_pull()
-
-# Pull from specific remote and branch
+# Work with specific remotes/branches
 git_pull("origin", "main")
-
-# Push changes
-git_push()
-
-# Push to specific remote and branch
-git_push("origin", "feature/new-analysis")
-```
-
-## Viewing History
-
-### Checking Commit History
-
-View repository history:
-
-```r
-# View recent commits
-git_log()
-
-# View more commits
-git_log(n = 20)
-
-# View detailed log
-git_log(oneline = FALSE)
+git_push("origin", "feature/analysis")
 ```
 
 ## Integration with DVC
 
-The Git functions in `thoth` work seamlessly with DVC tracking:
+`thoth`'s Git functions work seamlessly with DVC for complete version control:
 
-```r
-# Add and track a data file with DVC
-dvc_add("data/raw/large_dataset.csv")
+```{r}
+# Track data with DVC
+dvc_add("data/raw/dataset.csv")
 
-# Stage the .dvc file
-git_add("data/raw/large_dataset.csv.dvc")
+# Version control the tracking file
+git_add("data/raw/dataset.csv.dvc")
+git_commit("Add dataset tracking")
 
-# Commit the tracking file
-git_commit("Add large dataset tracking")
-
-# Push both Git changes and DVC data
-git_push()
-dvc_push()
+# Sync everything
+git_push()      # Push Git changes
+dvc_push()      # Push data to remote storage
 ```
 
 ## Best Practices
 
-1. **Regular Commits**
-   - Make small, focused commits
-   - Write clear commit messages
-   - Use present tense in commit messages
+### 1. Commit Structure  
 
-2. **Branch Management**
-   - Create feature branches for new work
-   - Keep main/master branch stable
-   - Delete merged feature branches
+- Make focused, single-purpose commits  
+- Write clear, present-tense commit messages  
+- Include context when necessary  
 
-3. **Syncing**
-   - Pull changes before starting new work
-   - Push changes regularly
-   - Handle conflicts promptly
+### 2. Branch Management  
 
-4. **Integration with Analysis Workflow**
-   ```r
-   # Example workflow
-   library(thoth)
-   
-   # Start new feature
-   git_checkout("feature/analysis", create = TRUE)
-   
-   # Do some work...
-   process_data()
-   
-   # Track changes
-   git_add("R/analysis.R")
-   git_commit("Add data processing function")
-   
-   # Push changes
-   git_push("origin", "feature/analysis")
-   ```
+- Use feature branches for new work  
+- Keep the main branch stable  
+- Clean up merged branches  
 
-## Common Patterns
+### 3. Workflow Integration
+```{r}
+# Example analysis workflow
+git_checkout("feature/new-analysis", create = TRUE)
+
+# Do analysis work...
+
+git_add("R/analysis.R")
+git_commit("Add data processing function")
+git_push()
+```
+
+## Common Workflows
 
 ### Feature Development
 
-```r
+```{r}
 # Start new feature
 git_checkout("main")
 git_pull()
-git_checkout("feature/new-analysis", create = TRUE)
+git_checkout("feature/analysis", create = TRUE)
 
 # Work on feature...
-
-# Commit changes
 git_add(".")
-git_commit("Complete new analysis")
-
-# Push to remote
-git_push("origin", "feature/new-analysis")
+git_commit("Implement new analysis")
+git_push()
 ```
 
-### Hotfix
+### Quick Fixes
 
-```r
-# Create hotfix branch
+```{r}
+# Create fix branch
 git_checkout("main")
-git_checkout("hotfix/bug-123", create = TRUE)
+git_checkout("fix/issue-123", create = TRUE)
 
-# Fix bug...
-
-# Commit and push
-git_add("R/bugfix.R")
+# Make changes...
+git_add("R/functions.R")
 git_commit("Fix calculation error")
 git_push()
 ```
 
-## Conclusion
+## Next Steps  
 
-The Git integration in `thoth` provides a convenient way to manage version control directly from R. By combining these functions with your analysis workflow, you can maintain a clean and traceable project history. 
-
-```{r setup}
-library(thoth)
-```
-
-```{r example, eval=FALSE}
-library(thoth)
-``` 
+- Explore the end-to-end example: `vignette("end-to-end-example")`  
+- Learn about DVC integration: `vignette("dvc-tracking")`  
+- Check the [Git documentation](https://git-scm.com/doc) for advanced features  

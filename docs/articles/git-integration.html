@@ -48,7 +48,6 @@ code .op, pre .op {
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/getting-started.html">Getting Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -105,227 +104,162 @@ code .op, pre .op {
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Version control is essential for reproducible analytics. While Git
-commands can be run directly from the terminal, <code>thoth</code>
-provides convenient R functions for common Git operations. This
-integration allows you to manage your version control directly from your
-R scripts or console.</p>
+<p><code>thoth</code> provides a tidyverse-friendly interface to Git
+operations, allowing you to manage version control directly from your R
+environment. This integration streamlines the version control workflow
+while maintaining the power and flexibility of Git.</p>
 </div>
 <div class="section level2">
-<h2 id="basic-git-operations">Basic Git Operations<a class="anchor" aria-label="anchor" href="#basic-git-operations"></a>
+<h2 id="core-git-functions">Core Git Functions<a class="anchor" aria-label="anchor" href="#core-git-functions"></a>
 </h2>
 <div class="section level3">
-<h3 id="checking-repository-status">Checking Repository Status<a class="anchor" aria-label="anchor" href="#checking-repository-status"></a>
+<h3 id="repository-status-and-changes">Repository Status and Changes<a class="anchor" aria-label="anchor" href="#repository-status-and-changes"></a>
 </h3>
-<p>Use <code><a href="../reference/git_status.html">git_status()</a></code> to see which files have been
-modified:</p>
+<p>Monitor and manage changes in your repository:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check status (short format)</span></span>
+<span><span class="co"># Check repository status</span></span>
 <span><span class="fu"><a href="../reference/git_status.html">git_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check status with full details</span></span>
-<span><span class="fu"><a href="../reference/git_status.html">git_status</a></span><span class="op">(</span>short <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Stage changes</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"analysis.R"</span><span class="op">)</span>                                    <span class="co"># Single file</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data/processed/results.csv"</span>, <span class="st">"README.md"</span><span class="op">)</span><span class="op">)</span>   <span class="co"># Multiple files</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"."</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>                             <span class="co"># All changes</span></span>
+<span></span>
+<span><span class="co"># Commit changes</span></span>
+<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Add initial analysis"</span><span class="op">)</span>                      <span class="co"># Commit staged changes</span></span>
+<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Update results"</span>, all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>                <span class="co"># Stage and commit all changes</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="staging-and-committing-changes">Staging and Committing Changes<a class="anchor" aria-label="anchor" href="#staging-and-committing-changes"></a>
+<h3 id="branch-management">Branch Management<a class="anchor" aria-label="anchor" href="#branch-management"></a>
 </h3>
-<p>Add files to the staging area and commit changes:</p>
+<p>Create and manage branches efficiently:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Stage specific files</span></span>
-<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"analysis.R"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data/processed/results.csv"</span>, <span class="st">"plots/figure1.png"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># View branches</span></span>
+<span><span class="fu"><a href="../reference/git_branch_list.html">git_branch_list</a></span><span class="op">(</span><span class="op">)</span>                    <span class="co"># Local branches</span></span>
+<span><span class="fu"><a href="../reference/git_branch_list.html">git_branch_list</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>          <span class="co"># Include remote branches</span></span>
 <span></span>
-<span><span class="co"># Stage all modified files</span></span>
-<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"."</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Commit staged changes</span></span>
-<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Add initial analysis script"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Stage and commit in one step</span></span>
-<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Update results"</span>, all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Create and switch branches</span></span>
+<span><span class="fu"><a href="../reference/git_branch.html">git_branch</a></span><span class="op">(</span><span class="st">"feature/analysis"</span><span class="op">)</span>       <span class="co"># Create new branch</span></span>
+<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"main"</span><span class="op">)</span>                 <span class="co"># Switch branch</span></span>
+<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/fix"</span>,          <span class="co"># Create and switch</span></span>
+<span>             create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="branch-management">Branch Management<a class="anchor" aria-label="anchor" href="#branch-management"></a>
-</h2>
 <div class="section level3">
-<h3 id="working-with-branches">Working with Branches<a class="anchor" aria-label="anchor" href="#working-with-branches"></a>
+<h3 id="remote-operations">Remote Operations<a class="anchor" aria-label="anchor" href="#remote-operations"></a>
 </h3>
-<p>Create, switch, and manage branches:</p>
+<p>Synchronize with remote repositories:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># List all branches</span></span>
-<span><span class="fu"><a href="../reference/git_branch_list.html">git_branch_list</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Sync changes</span></span>
+<span><span class="fu"><a href="../reference/git_pull.html">git_pull</a></span><span class="op">(</span><span class="op">)</span>                          <span class="co"># Get latest changes</span></span>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span>                          <span class="co"># Push local changes</span></span>
 <span></span>
-<span><span class="co"># Include remote branches</span></span>
-<span><span class="fu"><a href="../reference/git_branch_list.html">git_branch_list</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create a new branch</span></span>
-<span><span class="fu"><a href="../reference/git_branch.html">git_branch</a></span><span class="op">(</span><span class="st">"feature/new-analysis"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Switch to existing branch</span></span>
-<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"main"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create and switch to new branch</span></span>
-<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/bugfix"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="remote-operations">Remote Operations<a class="anchor" aria-label="anchor" href="#remote-operations"></a>
-</h2>
-<div class="section level3">
-<h3 id="syncing-with-remote-repository">Syncing with Remote Repository<a class="anchor" aria-label="anchor" href="#syncing-with-remote-repository"></a>
-</h3>
-<p>Push and pull changes:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Pull latest changes</span></span>
-<span><span class="fu"><a href="../reference/git_pull.html">git_pull</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Pull from specific remote and branch</span></span>
+<span><span class="co"># Work with specific remotes/branches</span></span>
 <span><span class="fu"><a href="../reference/git_pull.html">git_pull</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"main"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Push changes</span></span>
-<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Push to specific remote and branch</span></span>
-<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"feature/new-analysis"</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="viewing-history">Viewing History<a class="anchor" aria-label="anchor" href="#viewing-history"></a>
-</h2>
-<div class="section level3">
-<h3 id="checking-commit-history">Checking Commit History<a class="anchor" aria-label="anchor" href="#checking-commit-history"></a>
-</h3>
-<p>View repository history:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># View recent commits</span></span>
-<span><span class="fu"><a href="../reference/git_log.html">git_log</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View more commits</span></span>
-<span><span class="fu"><a href="../reference/git_log.html">git_log</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View detailed log</span></span>
-<span><span class="fu"><a href="../reference/git_log.html">git_log</a></span><span class="op">(</span>oneline <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"feature/analysis"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="integration-with-dvc">Integration with DVC<a class="anchor" aria-label="anchor" href="#integration-with-dvc"></a>
 </h2>
-<p>The Git functions in <code>thoth</code> work seamlessly with DVC
-tracking:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Add and track a data file with DVC</span></span>
-<span><span class="fu"><a href="../reference/dvc_add.html">dvc_add</a></span><span class="op">(</span><span class="st">"data/raw/large_dataset.csv"</span><span class="op">)</span></span>
+<p><code>thoth</code>’s Git functions work seamlessly with DVC for
+complete version control:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Track data with DVC</span></span>
+<span><span class="fu"><a href="../reference/dvc_add.html">dvc_add</a></span><span class="op">(</span><span class="st">"data/raw/dataset.csv"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Stage the .dvc file</span></span>
-<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"data/raw/large_dataset.csv.dvc"</span><span class="op">)</span></span>
+<span><span class="co"># Version control the tracking file</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"data/raw/dataset.csv.dvc"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Add dataset tracking"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Commit the tracking file</span></span>
-<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Add large dataset tracking"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Push both Git changes and DVC data</span></span>
-<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/dvc_push.html">dvc_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Sync everything</span></span>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span>      <span class="co"># Push Git changes</span></span>
+<span><span class="fu"><a href="../reference/dvc_push.html">dvc_push</a></span><span class="op">(</span><span class="op">)</span>      <span class="co"># Push data to remote storage</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li>
-<p><strong>Regular Commits</strong></p>
+<div class="section level3">
+<h3 id="commit-structure">1. Commit Structure<a class="anchor" aria-label="anchor" href="#commit-structure"></a>
+</h3>
 <ul>
-<li>Make small, focused commits</li>
-<li>Write clear commit messages</li>
-<li>Use present tense in commit messages</li>
-</ul>
+<li>Make focused, single-purpose commits<br>
 </li>
-<li>
-<p><strong>Branch Management</strong></p>
+<li>Write clear, present-tense commit messages<br>
+</li>
+<li>Include context when necessary</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="branch-management-1">2. Branch Management<a class="anchor" aria-label="anchor" href="#branch-management-1"></a>
+</h3>
 <ul>
-<li>Create feature branches for new work</li>
-<li>Keep main/master branch stable</li>
-<li>Delete merged feature branches</li>
-</ul>
+<li>Use feature branches for new work<br>
 </li>
-<li>
-<p><strong>Syncing</strong></p>
-<ul>
-<li>Pull changes before starting new work</li>
-<li>Push changes regularly</li>
-<li>Handle conflicts promptly</li>
-</ul>
+<li>Keep the main branch stable<br>
 </li>
-<li>
-<p><strong>Integration with Analysis Workflow</strong></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example workflow</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span>
+<li>Clean up merged branches</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="workflow-integration">3. Workflow Integration<a class="anchor" aria-label="anchor" href="#workflow-integration"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example analysis workflow</span></span>
+<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/new-analysis"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Start new feature</span></span>
-<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/analysis"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co"># Do analysis work...</span></span>
 <span></span>
-<span><span class="co"># Do some work...</span></span>
-<span><span class="fu">process_data</span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Track changes</span></span>
 <span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"R/analysis.R"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Add data processing function"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Push changes</span></span>
-<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"feature/analysis"</span><span class="op">)</span></span></code></pre></div>
-</li>
-</ol>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="common-patterns">Common Patterns<a class="anchor" aria-label="anchor" href="#common-patterns"></a>
+<h2 id="common-workflows">Common Workflows<a class="anchor" aria-label="anchor" href="#common-workflows"></a>
 </h2>
 <div class="section level3">
 <h3 id="feature-development">Feature Development<a class="anchor" aria-label="anchor" href="#feature-development"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Start new feature</span></span>
 <span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"main"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/git_pull.html">git_pull</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/new-analysis"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"feature/analysis"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Work on feature...</span></span>
-<span></span>
-<span><span class="co"># Commit changes</span></span>
 <span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"."</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Complete new analysis"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Push to remote</span></span>
-<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="st">"origin"</span>, <span class="st">"feature/new-analysis"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Implement new analysis"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="hotfix">Hotfix<a class="anchor" aria-label="anchor" href="#hotfix"></a>
+<h3 id="quick-fixes">Quick Fixes<a class="anchor" aria-label="anchor" href="#quick-fixes"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create hotfix branch</span></span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create fix branch</span></span>
 <span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"main"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"hotfix/bug-123"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/git_checkout.html">git_checkout</a></span><span class="op">(</span><span class="st">"fix/issue-123"</span>, create <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fix bug...</span></span>
-<span></span>
-<span><span class="co"># Commit and push</span></span>
-<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"R/bugfix.R"</span><span class="op">)</span></span>
+<span><span class="co"># Make changes...</span></span>
+<span><span class="fu"><a href="../reference/git_add.html">git_add</a></span><span class="op">(</span><span class="st">"R/functions.R"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/git_commit.html">git_commit</a></span><span class="op">(</span><span class="st">"Fix calculation error"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/git_push.html">git_push</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
-<p>The Git integration in <code>thoth</code> provides a convenient way
-to manage version control directly from R. By combining these functions
-with your analysis workflow, you can maintain a clean and traceable
-project history.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sebrauschert/thoth" class="external-link">thoth</a></span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>Explore the end-to-end example:
+<code><a href="../articles/end-to-end-example.html">vignette("end-to-end-example")</a></code><br>
+</li>
+<li>Learn about DVC integration:
+<code><a href="../articles/dvc-tracking.html">vignette("dvc-tracking")</a></code><br>
+</li>
+<li>Check the <a href="https://git-scm.com/doc" class="external-link">Git documentation</a>
+for advanced features</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

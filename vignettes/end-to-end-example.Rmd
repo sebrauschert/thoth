@@ -1,8 +1,8 @@
 ---
-title: "End-to-End Example with Iris Dataset"
+title: "End-to-End Example: Iris Classification Project"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{End-to-End Example with Iris Dataset}
+  %\VignetteIndexEntry{End-to-End Example: Iris Classification Project}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,86 +15,92 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ## Introduction
 
-This vignette provides a complete end-to-end example of using `thoth` with the classic iris dataset. We'll cover:
+This guide walks you through a complete data science project using `thoth`. We'll use the classic iris dataset to demonstrate how all the package's features work together. By the end, you'll understand how to:
 
-1. Setting up a new analytics project
-2. Versioning the raw data
-3. Processing and cleaning the data
-4. Training a model
-5. Evaluating results
-6. Creating a reproducible pipeline
+- Set up a reproducible project structure  
+- Track data and code changes  
+- Document analytical decisions  
+- Create reproducible workflows  
+- Share your work with others  
 
-## Project Setup
+## 1. Project Setup
 
-First, let's create a new analytics project with DVC enabled:
+Let's start by creating a new project with all the necessary components:
 
-```{r setup}
+```{r}
+# Load required packages
 library(thoth)
 library(tidyverse)
 library(tidymodels)
 
-# Create a new project
+# Create a new project with all features enabled
 create_analytics_project(
-  "iris_analysis",
-  use_dvc = TRUE,
-  use_docker = TRUE,
-  git_init = TRUE
+  "iris_analysis",      # Project name
+  use_dvc = TRUE,       # Enable data version control
+  use_docker = TRUE,    # Enable containerization
+  git_init = TRUE       # Initialize Git repository
 )
 
-# Change to the project directory
+# Move into the project directory
 setwd("iris_analysis")
 ```
 
-## Save and Version Raw Data
+This creates a structured project with:    
+- Version control (Git) for code  
+- Data version control (DVC) for large files  
+- Docker for reproducible environments  
+- Organized directories for data, code, and results  
 
-Let's save the iris dataset as our raw data and track it with DVC:
+## 2. Data Management
 
-```{r raw_data}
-# Save raw iris data
+### 2.1 Save Raw Data
+
+First, let's save and track our raw data:
+
+```{r}
+# Save the iris dataset as our raw data
+# The write_csv_dvc function combines saving and tracking in one step
 iris %>% 
   as_tibble() %>%
   write_csv_dvc(
     "data/raw/iris.csv",
-    message = "Add raw iris dataset"
+    message = "Add original iris dataset",  # Descriptive message for tracking
+    stage_name = "save_raw_data"           # Name this step in our pipeline
   )
 ```
 
-## Data Processing
+### 2.2 Process Data
 
-Now let's process the data by:
-1. Converting column names to snake_case
-2. Creating a train/test split
-3. Scaling numeric features
+Now we'll clean and prepare our data for analysis:
 
-```{r processing}
-# Read and process data
+```{r}
+# Read the raw data and process it
 processed_data <- read_csv("data/raw/iris.csv") %>%
+  # Clean column names (e.g., Sepal.Length -> sepal_length)
   janitor::clean_names() %>%
+  # Convert species to a factor (categorical) variable
   mutate(
     species = as.factor(species),
-    # Scale numeric columns properly
-    across(where(is.numeric), function(x) {
-      as.numeric(scale(x))
-    })
+    # Scale numeric features to have mean=0 and sd=1
+    across(where(is.numeric), scale)
   )
 
-# Create train/test split
-set.seed(123)
+# Create training (80%) and testing (20%) sets
+set.seed(123)  # For reproducibility
 split <- initial_split(processed_data, prop = 0.8)
 train_data <- training(split)
 test_data <- testing(split)
 
-# Save processed datasets with DVC
+# Save and track the processed datasets
 train_data %>%
   write_csv_dvc(
     "data/processed/train.csv",
     message = "Add processed training data",
-    stage_name = "prepare_data",
-    deps = "data/raw/iris.csv",
-    params = list(
+    stage_name = "prepare_data",           # Name this pipeline stage
+    deps = "data/raw/iris.csv",           # Declare dependencies
+    params = list(                        # Track important parameters
       train_prop = 0.8,
       seed = 123
     )
@@ -107,177 +113,204 @@ test_data %>%
   )
 ```
 
-## Model Training
+## 3. Model Development
 
-Let's train a random forest model:
+### 3.1 Train Model
 
-```{r training}
-# Train random forest model
+Let's train a random forest classifier:
+
+```{r}
+# Define the model specification
 rf_spec <- rand_forest(
-  trees = 500,
-  mtry = 3
+  trees = 500,    # Number of trees
+  mtry = 3        # Number of variables to consider at each split
 ) %>%
-  set_engine("ranger") %>%
-  set_mode("classification")
+  set_engine("ranger") %>%           # Use ranger implementation
+  set_mode("classification")         # Set for classification task
 
+# Train the model
 rf_fit <- rf_spec %>%
   fit(
-    species ~ .,
+    species ~ .,    # Predict species using all other variables
     data = train_data
   )
 
-# Save model with DVC
+# Save and track the trained model
 rf_fit %>%
   write_rds_dvc(
     "models/rf_model.rds",
-    message = "Add trained random forest model",
+    message = "Save trained random forest model",
     stage_name = "train_model",
-    deps = "data/processed/train.csv",
-    params = list(
+    deps = "data/processed/train.csv",    # Model depends on training data
+    params = list(                        # Track model parameters
       n_trees = 500,
       mtry = 3
     )
   )
 ```
 
-## Model Evaluation
+### 3.2 Evaluate Model
 
-Let's evaluate our model and track the metrics:
+Let's assess how well our model performs:
 
-```{r evaluation}
-# Make predictions
+```{r}
+# Make predictions on test data
 predictions <- rf_fit %>%
   predict(test_data) %>%
   bind_cols(test_data)
 
-# Calculate metrics
+# Calculate performance metrics
 metrics <- predictions %>%
   metrics(truth = species, estimate = .pred_class)
 
-# Create and save confusion matrix plot
-predictions %>%
+# Create visualization
+conf_matrix_plot <- predictions %>%
   conf_mat(truth = species, estimate = .pred_class) %>%
-  autoplot() %>%
-  ggplot2::ggsave(
-    filename = "plots/confusion_matrix.png",
-    plot = .,
-    width = 8,
-    height = 6
-  )
+  autoplot()
 
-# Save metrics with DVC
+# Save confusion matrix plot
+ggsave(
+  "plots/confusion_matrix.png",
+  plot = conf_matrix_plot,
+  width = 8,
+  height = 6
+)
+
+# Track metrics with DVC
 metrics %>%
   write_csv_dvc(
     "metrics/model_metrics.csv",
     message = "Add model evaluation metrics",
     stage_name = "evaluate_model",
-    deps = c(
-      "models/rf_model.rds",
-      "data/processed/test.csv"
+    deps = c(                              # This stage depends on:
+      "models/rf_model.rds",              # - The trained model
+      "data/processed/test.csv"           # - The test data
     ),
-    metrics = TRUE
+    metrics = TRUE                        # Mark as metrics for tracking
   )
 ```
 
-## Creating a Decision Tree
+## 4. Decision Tracking
 
-Let's track our analysis decisions:
+Let's document our analytical decisions:
 
-```{r decisions}
-# Initialize decision tree
-decision_file <- initialize_decision_tree(
+```{r}
+# Start tracking decisions
+tree <- initialize_decision_tree(
   analysis_id = "iris_classification",
   analyst = "Data Scientist",
   description = "Classification of iris species using random forest"
 )
 
-# Record data processing decision
+# Record data processing decisions
 record_decision(
-  decision_file,
-  check = "Data preprocessing",
-  observation = "All features are on different scales",
-  decision = "Scale all numeric features",
-  reasoning = "Random forest performance can be affected by feature scales",
+  tree,
+  check = "Feature scaling",
+  observation = "Features are on different scales (e.g., length vs width)",
+  decision = "Scale all numeric features to mean=0, sd=1",
+  reasoning = "Standardized features ensure equal importance in the model",
   evidence = "data/processed/train.csv"
 )
 
-# Record model selection decision
 record_decision(
-  decision_file,
-  check = "Model selection",
-  observation = "Non-linear relationships between features",
+  tree,
+  check = "Train/Test Split",
+  observation = "Need to assess model performance on unseen data",
+  decision = "Use 80/20 split with random sampling",
+  reasoning = "Standard split ratio, enough data in both sets",
+  evidence = "scripts/prepare_data.R"
+)
+
+# Record modeling decisions
+record_decision(
+  tree,
+  check = "Model Selection",
+  observation = "Relationships between features may be non-linear",
   decision = "Use random forest classifier",
-  reasoning = "RF can capture non-linear relationships and feature interactions",
+  reasoning = "Can capture complex patterns, handles feature interactions well",
   evidence = "models/rf_model.rds"
 )
 
-# Create reports directory if it doesn't exist
-dir.create("reports", showWarnings = FALSE)
-
-# Export decision tree
+# Export decisions for documentation
 export_decision_tree(
-  decision_file,
+  tree,
   format = "html",
-  output_path = "reports/decisions.html"
+  output_path = "reports/analysis_decisions.html"
 )
 ```
 
-## Reproducible Pipeline
+## 5. Reproducible Pipeline
 
-Our complete DVC pipeline now includes:
-1. Data preparation stage
-2. Model training stage
-3. Model evaluation stage
+Our complete analysis pipeline now includes:   
+1. Raw data saving   
+2. Data preprocessing   
+3. Model training   
+4. Model evaluation   
+5. Decision documentation   
 
-You can reproduce the entire analysis with:
+To reproduce the entire analysis:
 
-```{r reproduce}
-system2("dvc", "repro")
+```{r}
+# Reproduce all pipeline stages
+dvc_repro()
+
+# Check pipeline status
+dvc_status()
 ```
 
-## Sharing Results
+## 6. Sharing Your Work
 
-To share your work with collaborators:
+### 6.1 Share Code
 
-1. Push code changes to Git:
-```bash
-git add .
-git commit -m "Complete iris analysis"
-git push
+Push your code to the remote repository:
+```{r}
+# Stage all changes
+git_add(".")
+
+# Commit changes
+git_commit("Complete iris species classification analysis")
+
+# Push to remote repository
+git_push("origin", "main")
 ```
 
-2. Push data and models to DVC remote:
-```bash
-dvc push
+### 6.2 Share Data and Models
+
+Push data and models to your DVC remote:
+```{r}
+# Push all tracked data and models
+dvc_push()
 ```
 
-## Conclusion
+### 6.3 Share Environment
 
-This example demonstrated how to:
-- Set up a complete analytics project with `thoth`
-- Version data and models with DVC
-- Create reproducible pipelines
-- Track analysis decisions
-- Share results with collaborators
+Others can reproduce your environment using these steps:
 
-The resulting project structure is:
+```{r}
+# 1. Clone the repository (one-time setup)
+git_clone("<repository-url>", "iris_analysis")
 
+# 2. Change to project directory
+setwd("iris_analysis")
+
+# 3. Pull the latest code
+git_pull()
+
+# 4. Pull data and models
+dvc_pull()
+
+# 5. Reproduce the analysis
+dvc_repro()
 ```
-iris_analysis/
-├── data/
-│   ├── raw/
-│   │   └── iris.csv
-│   └── processed/
-│       ├── train.csv
-│       └── test.csv
-├── models/
-│   └── rf_model.rds
-├── metrics/
-│   └── model_metrics.csv
-├── plots/
-│   └── confusion_matrix.png
-├── reports/
-│   └── decisions.html
-├── .dvc/
-└── .git/
-``` 
+
+Note: For Docker setup, use the functions from the Docker integration:
+```{r}
+# Start the Docker environment
+setup_docker()
+```
+
+## Next Steps
+
+- Try adapting this workflow to your own data  
+- Explore more advanced features in `vignette("dvc-tracking")`  
+- Learn about custom templates in `vignette("custom-templates")`  

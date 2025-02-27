@@ -11,131 +11,140 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE  # Don't evaluate code chunks by default
+  eval = FALSE
 )
 ```
-
 
 ## Introduction
 
-One of the challenges in bioinformatics and data analysis is documenting and tracking human decisions made during the analysis process. While code and data can be version controlled, the reasoning behind key analytical decisions often remains undocumented. The `thoth` package provides functionality to track these decisions in a structured way.
+`thoth` provides a structured way to document and track human decisions made during data analysis. While code and data can be version controlled, the reasoning behind analytical choices often remains undocumented. The decision tracking functionality helps make these choices explicit and traceable.
 
-## Installation
+## Core Functions
 
-To install the package from GitHub, first ensure you have all the required dependencies:
+### Initialize Tracking
 
-```{r installation}
-# Install required dependencies if not already installed
-required_packages <- c("usethis", "yaml", "cli", "digest", "rmarkdown", "tools")
-for (pkg in required_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)
-  }
-}
+Start tracking decisions in your analysis:
 
-# Install thoth from GitHub
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
-}
-devtools::install_github("sebrauschert/thoth")
-```
-
-## Getting Started
-
-First, let's load the package:
-
-```{r setup}
+```{r}
 library(thoth)
-```
 
-## Creating a Decision Tree
-
-When starting a new analysis, initialize a decision tree to track your decisions:
-
-```{r}
-decision_file <- initialize_decision_tree(
-  analysis_id = "RNA_seq_2024_01",
+# Create a new decision tree
+tree <- initialize_decision_tree(
+  analysis_id = "RNA_seq_2024",
   analyst = "Jane Smith",
-  description = "Differential expression analysis of treatment vs control samples"
+  description = "Differential expression analysis"
 )
 ```
 
-## Recording Decisions
+### Record Decisions
 
-As you progress through your analysis, record key decisions and observations:
+Document key analytical choices as you make them:
 
 ```{r}
-# Record a quality control decision
+# Quality control decision
 record_decision(
-  file_path = decision_file,
-  check = "Sample-wise PCA clustering",
-  observation = "Treatment samples cluster together except for sample T3",
-  decision = "Exclude sample T3",
-  reasoning = "T3 clusters with controls, likely sample swap",
-  evidence = "plots/PCA_pre_filtering.pdf"
+  file_path = tree,
+  check = "Sample QC",
+  observation = "Sample T3 clusters with controls in PCA",
+  decision = "Remove sample T3",
+  reasoning = "Likely sample swap or contamination",
+  evidence = "plots/pca_plot.pdf"
 )
 
-# Record a biological validation step
+# Analysis parameter decision
 record_decision(
-  file_path = decision_file,
-  check = "Known pathway markers",
-  observation = "Expected stress response genes upregulated",
-  decision = "Results biologically plausible",
-  reasoning = "Key marker genes show expected direction of change",
-  evidence = "tables/marker_genes_expression.csv"
+  file_path = tree,
+  check = "Differential Expression",
+  observation = "High biological variability in controls",
+  decision = "Use DESeq2 with LRT test",
+  reasoning = "Better handles overdispersion",
+  evidence = "tables/variance_analysis.csv"
 )
 ```
 
-## Generating Methods Documentation
+### Generate Documentation
 
-You can automatically generate a methods section from your decision tree:
+Automatically create documentation from your decisions:
 
 ```{r}
 # Generate methods section
-methods_text <- generate_methods_section(decision_file)
-cat(methods_text)
+methods_text <- generate_methods_section(tree)
+
+# Export decision tree
+export_decision_tree(tree, format = "md")    # Markdown
+export_decision_tree(tree, format = "html")   # HTML report
 ```
-
-## Exporting Decision Trees
-
-Export your decision tree to various formats for sharing or documentation:
-
-```{r}
-# Export to markdown
-export_decision_tree(decision_file, format = "md")
-
-# Export to HTML (requires rmarkdown)
-if (requireNamespace("rmarkdown", quietly = TRUE)) {
-  export_decision_tree(decision_file, format = "html")
-}
-```
-
-## Integration with Project Workflow
-
-The decision tracking functionality integrates seamlessly with your analysis workflow:
-
-1. Initialize a decision tree at the start of your analysis
-2. Record decisions as you make them
-3. Use the exported documentation for methods sections in papers
-4. Keep the decision tree under version control
 
 ## Best Practices
 
-Here are some recommended practices for using the decision tracking functionality:
+### 1. Recording Decisions
 
-1. **Be Consistent**: Record decisions as you make them, not after the fact
-2. **Be Specific**: Include clear observations and reasoning
-3. **Link Evidence**: Always link to supporting plots, tables, or other evidence
-4. **Version Control**: Keep decision trees under version control
-5. **Review**: Regularly review decisions with team members
+- Document decisions as they happen  
+- Include clear observations and reasoning  
+- Link to supporting evidence  
+- Use consistent terminology  
 
-## Conclusion
+### 2. Organization
 
-By tracking analytical decisions in a structured way, we can:
+- One decision tree per analysis  
+- Keep trees under version control  
+- Review decisions with team members  
+- Update as analysis evolves  
 
-- Make the analysis process more transparent
-- Facilitate knowledge transfer within teams
-- Improve reproducibility
-- Generate better documentation
+### 3. Documentation
+```{r}
+# Example workflow
+tree <- initialize_decision_tree(
+  analysis_id = "project_2024",
+  description = "Analysis workflow"
+)
 
-The decision tracking functionality in `thoth` helps make human expertise as trackable as code, breaking free from the "90% automation trap" where crucial human judgment remains hidden.
+# Record initial choices
+record_decision(
+  file_path = tree,
+  check = "Data Processing",
+  observation = "Raw data contains outliers",
+  decision = "Apply robust normalization",
+  reasoning = "Reduce impact of extreme values",
+  evidence = "scripts/normalize.R"
+)
+
+# Generate documentation
+methods <- generate_methods_section(tree)
+```
+
+## Common Patterns
+
+### Quality Control Decisions
+
+```{r}
+# Document QC steps
+record_decision(
+  file_path = tree,
+  check = "Data Quality",
+  observation = "10% missing values in variable X",
+  decision = "Impute using KNN",
+  reasoning = "Data appears MCAR",
+  evidence = "reports/missing_analysis.html"
+)
+```
+
+### Parameter Selection
+
+```{r}
+# Document parameter choices
+record_decision(
+  file_path = tree,
+  check = "Model Parameters",
+  observation = "Cross-validation shows overfitting",
+  decision = "Increase regularization to 0.1",
+  reasoning = "Reduces test error by 15%",
+  evidence = "plots/cv_results.pdf"
+)
+```
+
+## Next Steps
+
+- Try the end-to-end example: `vignette("end-to-end-example")`  
+- Learn about Git integration: `vignette("git-integration")`  
+- Check out DVC tracking: `vignette("dvc-tracking")`  
