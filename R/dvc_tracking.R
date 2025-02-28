@@ -176,7 +176,10 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Now add DVC files to Git
+    # Collect all files that need to be added to Git
+    files_to_add <- character(0)
+    
+    # Add DVC files to the list
     dvc_files <- c(
       paste0(path, ".dvc"),
       ".dvc/config",
@@ -187,13 +190,13 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     )
     
     # Add each DVC file that exists
-    files_to_add <- character(0)
     for (file in dvc_files) {
       if (file.exists(file)) {
         files_to_add <- c(files_to_add, file)
       }
     }
     
+    # Add all files at once
     if (length(files_to_add) > 0) {
       git_add(files_to_add, force = TRUE)
     }
@@ -212,10 +215,49 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     return(invisible(x))
   }
   
-  # Rest of the function for stage_name case
-  # Prepare DVC stage command
-  temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
-  writeLines(sprintf('readr::write_csv(x, "%s")', path), temp_script)
+  # Create R/pipeline directory if it doesn't exist
+  pipeline_dir <- "R/pipeline"
+  if (!dir.exists(pipeline_dir)) {
+    dir.create(pipeline_dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  # Create a permanent R script for this stage
+  script_path <- file.path(pipeline_dir, paste0(stage_name, ".R"))
+  
+  # Write the R script with proper documentation and error handling
+  script_content <- c(
+    "#!/usr/bin/env Rscript",
+    "",
+    sprintf("# DVC stage: %s", stage_name),
+    sprintf("# Created: %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
+    "",
+    "# Load required packages",
+    "library(readr)",
+    "library(dplyr)",
+    "",
+    "# Read input data if there are dependencies",
+    if (!is.null(deps)) {
+      c("# Read dependencies",
+        sprintf('input_data <- read_csv("%s")', deps[1]))
+    },
+    "",
+    "# Define the data to write",
+    "x <- get('x', envir = parent.frame())",
+    "",
+    "# Write the CSV file",
+    sprintf('write_csv(x, "%s")', path),
+    "",
+    "# Exit successfully",
+    "quit(save = 'no', status = 0)"
+  )
+  
+  # Write the script
+  writeLines(script_content, script_path)
+  
+  # Make the script executable
+  if (.Platform$OS.type != "windows") {
+    system2("chmod", c("+x", script_path))
+  }
   
   # Build DVC command arguments
   dvc_args <- c("stage", "add", "-n", stage_name)
@@ -224,6 +266,9 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     dvc_args <- c(dvc_args, unlist(lapply(deps, function(d) c("-d", d))))
   }
   
+  # Add script as a dependency
+  dvc_args <- c(dvc_args, "-d", script_path)
+  
   # File can't be both output and metrics
   if (metrics) {
     dvc_args <- c(dvc_args, "-M", path)
@@ -231,19 +276,31 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     dvc_args <- c(dvc_args, "-o", path)
   }
   
+  # Add parameters with proper formatting
   if (!is.null(params)) {
+    # Create params.yaml if it doesn't exist
+    if (!file.exists("params.yaml")) {
+      writeLines("", "params.yaml")
+    }
+    
+    # Update params.yaml with new parameters
+    params_yaml <- if (file.exists("params.yaml")) {
+      yaml::read_yaml("params.yaml")
+    } else {
+      list()
+    }
+    
+    # Add stage-specific parameters
+    params_yaml[[stage_name]] <- params
+    yaml::write_yaml(params_yaml, "params.yaml")
+    
+    # Add params.yaml as a dependency
+    dvc_args <- c(dvc_args, "-d", "params.yaml")
+    
+    # Add parameter references
     param_args <- mapply(
       function(name, value) {
-        formatted_value <- if (is.character(value)) {
-          shQuote(value)
-        } else if (is.numeric(value)) {
-          as.character(value)
-        } else if (is.logical(value)) {
-          tolower(as.character(value))
-        } else {
-          as.character(value)
-        }
-        c("-p", paste(name, formatted_value, sep = "="))
+        c("-p", sprintf("%s.%s", stage_name, name))
       },
       names(params),
       params,
@@ -253,7 +310,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   }
   
   # Add the command with proper quoting
-  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", temp_script)))
+  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", script_path)))
   
   # Execute DVC command
   tryCatch({
@@ -276,16 +333,18 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     # Collect all files that need to be added to Git
     files_to_add <- character(0)
     
-    # Add DVC files
+    # Add DVC files and R script to the list
     dvc_files <- c(
       "dvc.yaml",
       "dvc.lock",
       ".dvc/config",
       ".dvc/config.local",
-      ".dvc/.gitignore"
+      ".dvc/.gitignore",
+      "params.yaml",
+      script_path
     )
     
-    # Add existing DVC files to the list
+    # Add existing files to the list
     for (file in dvc_files) {
       if (file.exists(file)) {
         files_to_add <- c(files_to_add, file)
@@ -328,8 +387,6 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
   }, error = function(e) {
     cli::cli_alert_danger("Error creating DVC stage: {conditionMessage(e)}")
-  }, finally = {
-    unlink(temp_script)
   })
   
   invisible(x)
@@ -381,8 +438,24 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   dir_path <- dirname(file)
   if (!dir.exists(dir_path)) {
     dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
-    # Track newly created directory
-    git_add(dir_path)
+  }
+  
+  # Handle matrix and list columns if the object is a data frame
+  if (is.data.frame(object)) {
+    object <- as.data.frame(lapply(object, function(col) {
+      if (is.matrix(col)) {
+        # Extract the first column if it's a matrix
+        col[,1]
+      } else if (is.list(col)) {
+        # Convert list to character
+        as.character(col)
+      } else {
+        col
+      }
+    }))
+    
+    # Clean column names by removing [,1]
+    names(object) <- gsub("\\[,1\\]$", "", names(object))
   }
   
   # Save the object
@@ -414,42 +487,113 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    # Normal case - just track the file
-    dvc_track(file, message = message, push = push)
+    # Track the file with DVC first
+    dvc_result <- system2("dvc", c("add", "-f", file), stdout = TRUE, stderr = TRUE)
     
-    # Check git status and add any untracked files
-    status_output <- git_status()
-    if (length(status_output) > 0) {
-      # Get list of untracked files (those starting with '??')
-      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
-      if (length(untracked) > 0) {
-        # Extract file paths and add them to git
-        untracked_files <- sub("^\\?\\? ", "", untracked)
-        git_add(untracked_files)
-        if (!is.null(message)) {
-          git_commit(message)
-        }
-      }
-      
-      # Also check for modified files
-      modified <- grep("^ M ", status_output, value = TRUE)
-      if (length(modified) > 0) {
-        # Extract file paths and add them to git
-        modified_files <- sub("^ M ", "", modified)
-        git_add(modified_files)
-        if (!is.null(message)) {
-          git_commit(message)
-        }
+    if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to add file to DVC tracking")
+      cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+      return(invisible(object))
+    }
+    
+    # Collect all files that need to be added to Git
+    files_to_add <- character(0)
+    
+    # Add DVC files to the list
+    dvc_files <- c(
+      paste0(file, ".dvc"),
+      ".dvc/config",
+      ".dvc/config.local",
+      ".dvc/.gitignore",
+      "dvc.yaml",
+      "dvc.lock"
+    )
+    
+    # Add each DVC file that exists
+    for (dvc_file in dvc_files) {
+      if (file.exists(dvc_file)) {
+        files_to_add <- c(files_to_add, dvc_file)
       }
     }
     
+    # Check git status and add any remaining untracked or modified files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get untracked files
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        files_to_add <- c(files_to_add, untracked_files)
+      }
+      
+      # Get modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        modified_files <- sub("^ M ", "", modified)
+        files_to_add <- c(files_to_add, modified_files)
+      }
+    }
+    
+    # Add all files at once
+    if (length(files_to_add) > 0) {
+      git_add(files_to_add, force = TRUE)
+    }
+    
+    # Commit if message provided
+    if (!is.null(message)) {
+      git_commit(message)
+      
+      # Push if requested
+      if (push) {
+        git_push()
+      }
+    }
+    
+    cli::cli_alert_success("Successfully tracked {file} with DVC")
     return(invisible(object))
   }
   
-  # Rest of the function for stage_name case
-  # Prepare DVC stage command
-  temp_script <- tempfile(pattern = "dvc_stage_", fileext = ".R")
-  writeLines(sprintf('saveRDS(object, "%s")', file), temp_script)
+  # Create R/pipeline directory if it doesn't exist
+  pipeline_dir <- "R/pipeline"
+  if (!dir.exists(pipeline_dir)) {
+    dir.create(pipeline_dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  # Create a permanent R script for this stage
+  script_path <- file.path(pipeline_dir, paste0(stage_name, ".R"))
+  
+  # Write the R script with proper documentation and error handling
+  script_content <- c(
+    "#!/usr/bin/env Rscript",
+    "",
+    sprintf("# DVC stage: %s", stage_name),
+    sprintf("# Created: %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
+    "",
+    "# Load required packages",
+    "",
+    "# Read input data if there are dependencies",
+    if (!is.null(deps)) {
+      c("# Read dependencies",
+        sprintf('input_data <- readRDS("%s")', deps[1]))
+    },
+    "",
+    "# Define the object to save",
+    "object <- get('object', envir = parent.frame())",
+    "",
+    "# Save the object",
+    sprintf('saveRDS(object, "%s")', file),
+    "",
+    "# Exit successfully",
+    "quit(save = 'no', status = 0)"
+  )
+  
+  # Write the script
+  writeLines(script_content, script_path)
+  
+  # Make the script executable
+  if (.Platform$OS.type != "windows") {
+    system2("chmod", c("+x", script_path))
+  }
   
   # Build DVC command arguments
   dvc_args <- c("stage", "add", "-n", stage_name)
@@ -457,6 +601,9 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   if (!is.null(deps)) {
     dvc_args <- c(dvc_args, unlist(lapply(deps, function(d) c("-d", d))))
   }
+  
+  # Add script as a dependency
+  dvc_args <- c(dvc_args, "-d", script_path)
   
   # Handle outputs based on metrics and plots flags
   if (metrics) {
@@ -469,18 +616,29 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   
   # Add parameters with proper formatting
   if (!is.null(params)) {
+    # Create params.yaml if it doesn't exist
+    if (!file.exists("params.yaml")) {
+      writeLines("", "params.yaml")
+    }
+    
+    # Update params.yaml with new parameters
+    params_yaml <- if (file.exists("params.yaml")) {
+      yaml::read_yaml("params.yaml")
+    } else {
+      list()
+    }
+    
+    # Add stage-specific parameters
+    params_yaml[[stage_name]] <- params
+    yaml::write_yaml(params_yaml, "params.yaml")
+    
+    # Add params.yaml as a dependency
+    dvc_args <- c(dvc_args, "-d", "params.yaml")
+    
+    # Add parameter references
     param_args <- mapply(
       function(name, value) {
-        formatted_value <- if (is.character(value)) {
-          shQuote(value)
-        } else if (is.numeric(value)) {
-          as.character(value)
-        } else if (is.logical(value)) {
-          tolower(as.character(value))
-        } else {
-          as.character(value)
-        }
-        c("-p", paste(name, formatted_value, sep = "="))
+        c("-p", sprintf("%s.%s", stage_name, name))
       },
       names(params),
       params,
@@ -490,10 +648,18 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
   }
   
   # Add the command with proper quoting
-  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", temp_script)))
+  dvc_args <- c(dvc_args, shQuote(sprintf("Rscript %s", script_path)))
   
   # Execute DVC command
   tryCatch({
+    # First, ensure the file is not tracked by Git if it exists
+    # Only try to remove if git status shows it's tracked
+    status_output <- git_status()
+    if (length(grep(file, status_output, value = TRUE)) > 0) {
+      system2("git", c("rm", "-f", "--cached", file), stdout = TRUE, stderr = TRUE)
+    }
+    
+    # Create DVC stage
     dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
     
     if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
@@ -502,27 +668,48 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
       return(invisible(object))
     }
     
-    # Add DVC files to Git using our git functions
-    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local", dir_path), force = TRUE)
+    # Collect all files that need to be added to Git
+    files_to_add <- character(0)
     
-    # Check git status and add any remaining untracked files
+    # Add DVC files and R script to the list
+    dvc_files <- c(
+      "dvc.yaml",
+      "dvc.lock",
+      ".dvc/config",
+      ".dvc/config.local",
+      ".dvc/.gitignore",
+      "params.yaml",
+      script_path
+    )
+    
+    # Add existing files to the list
+    for (file in dvc_files) {
+      if (file.exists(file)) {
+        files_to_add <- c(files_to_add, file)
+      }
+    }
+    
+    # Check for any other untracked or modified files
     status_output <- git_status()
     if (length(status_output) > 0) {
-      # Get list of untracked files (those starting with '??')
+      # Get untracked files
       untracked <- grep("^\\?\\? ", status_output, value = TRUE)
       if (length(untracked) > 0) {
-        # Extract file paths and add them to git
         untracked_files <- sub("^\\?\\? ", "", untracked)
-        git_add(untracked_files)
+        files_to_add <- c(files_to_add, untracked_files)
       }
       
-      # Also check for modified files
+      # Get modified files
       modified <- grep("^ M ", status_output, value = TRUE)
       if (length(modified) > 0) {
-        # Extract file paths and add them to git
         modified_files <- sub("^ M ", "", modified)
-        git_add(modified_files)
+        files_to_add <- c(files_to_add, modified_files)
       }
+    }
+    
+    # Add all files at once
+    if (length(files_to_add) > 0) {
+      git_add(files_to_add, force = TRUE)
     }
     
     # Commit if message provided
@@ -538,8 +725,6 @@ write_rds_dvc <- function(object, file, message = NULL, stage_name = NULL,
     cli::cli_alert_success("Successfully created DVC stage: {stage_name}")
   }, error = function(e) {
     cli::cli_alert_danger("Error creating DVC stage: {conditionMessage(e)}")
-  }, finally = {
-    unlink(temp_script)
   })
   
   invisible(object)
