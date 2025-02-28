@@ -55,29 +55,36 @@ create_analytics_project <- function(path,
   
   lapply(dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 
-  # Initialize Git if requested (after project creation)
+  # Initialize Git if requested (before DVC to ensure .dvc is tracked)
   if (git_init) {
     # Initialize git repository
     git_init_repo()
     
     # Create initial .gitignore before any other files
-    if (use_dvc) {
-      setup_dvc_tracking()  # This now includes the initial git commit
-    } else {
-      write_gitignore()
-      # Create .gitkeep files
-      file.create("data/raw/.gitkeep")
-      file.create("data/processed/.gitkeep")
-      # Initial commit
-      git_add(".")
-      git_commit("Initial commit with project structure")
-    }
+    write_gitignore()
+    
+    # Initial commit of just the .gitignore
+    git_add(".gitignore")
+    git_commit("Initial commit with .gitignore")
   }
 
-  # Initialize DVC if requested (after git setup)
+  # Initialize DVC if requested (after git setup but before adding data directories)
   if (use_dvc) {
     system2("dvc", args = c("init"))
-    # No need to setup tracking again as it was done during git init
+    if (git_init) {
+      # Add .dvc directory to git
+      git_add(".dvc")
+      git_commit("Initialize DVC")
+    }
+    setup_dvc_tracking()
+  } else {
+    # If not using DVC, create .gitkeep files and track them
+    file.create("data/raw/.gitkeep")
+    file.create("data/processed/.gitkeep")
+    if (git_init) {
+      git_add(c("data/raw/.gitkeep", "data/processed/.gitkeep"))
+      git_commit("Add .gitkeep files to data directories")
+    }
   }
 
   # Set up Docker if requested
@@ -194,21 +201,27 @@ check_system_requirements <- function(use_dvc, use_docker) {
 #' @keywords internal
 write_gitignore <- function() {
   gitignore_content <- c(
+    # R specific ignores
     ".Rproj.user/",
     ".Rhistory",
     ".RData",
     ".Ruserdata",
     "*.Rproj",
-    # Data directories
+    # Data directories - exclude everything by default
     "/data/raw/*",
     "/data/processed/*",
+    # But allow .gitkeep files if needed
     "!/data/raw/.gitkeep",
     "!/data/processed/.gitkeep",
     # R environment
     ".env",
     "renv/library/",
     "renv/python/",
-    "renv/staging/"
+    "renv/staging/",
+    # DVC specific - don't ignore these
+    "!.dvc/config",
+    "!.dvc/cache",
+    "!*.dvc"
   )
   writeLines(gitignore_content, ".gitignore")
 }
@@ -219,43 +232,32 @@ setup_dvc_tracking <- function() {
   # Create .dvcignore
   dvcignore_content <- c(
     "# Add patterns of files dvc should ignore, which are specific to your project",
-    "# For example: *.png, *.log"
-  )
-  writeLines(dvcignore_content, ".dvcignore")
-  
-  # Create .gitignore if it doesn't exist
-  gitignore_content <- c(
+    "# For example: *.png, *.log",
+    "",
+    # Ignore R-specific files that shouldn't be tracked by DVC
     ".Rproj.user/",
     ".Rhistory",
     ".RData",
     ".Ruserdata",
     "*.Rproj",
-    # Data directories but allow .dvc files
-    "/data/raw/*",
-    "/data/processed/*",
-    "!/data/raw/.gitkeep",
-    "!/data/processed/.gitkeep",
-    "!/data/raw/**/*.dvc",     # Allow .dvc files in raw data directory
-    "!/data/processed/**/*.dvc", # Allow .dvc files in processed data directory
-    "!*.dvc",                  # Generally allow .dvc files
-    "!.dvc/config",           # Allow DVC config
-    "!.dvc/cache",           # Allow DVC cache directory
-    ".env",
-    "renv/library/",
-    "renv/python/",
-    "renv/staging/"
+    "renv/",
+    ".env"
   )
-  writeLines(gitignore_content, ".gitignore")
+  writeLines(dvcignore_content, ".dvcignore")
   
   # Create .gitkeep files
-  dir.create("data/raw", recursive = TRUE, showWarnings = FALSE)
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
   file.create("data/raw/.gitkeep")
   file.create("data/processed/.gitkeep")
   
-  # Add and commit initial files
-  git_add(".")
-  git_commit("Initial commit with project structure")
+  if (file.exists(".git")) {
+    # Add .gitkeep files to git
+    git_add(c("data/raw/.gitkeep", "data/processed/.gitkeep"))
+    git_commit("Add .gitkeep files to data directories")
+    
+    # Add .dvcignore to git
+    git_add(".dvcignore")
+    git_commit("Add .dvcignore file")
+  }
 }
 
 #' Set up Docker Configuration
