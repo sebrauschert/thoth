@@ -122,6 +122,22 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
   }
   
+  # Handle matrix columns and clean column names
+  x <- as.data.frame(lapply(x, function(col) {
+    if (is.matrix(col)) {
+      # Extract the first column if it's a matrix
+      col[,1]
+    } else if (is.list(col)) {
+      # Convert list to character
+      as.character(col)
+    } else {
+      col
+    }
+  }))
+  
+  # Clean column names by removing [,1]
+  names(x) <- gsub("\\[,1\\]$", "", names(x))
+  
   # Write the CSV file
   readr::write_csv(x, path)
   

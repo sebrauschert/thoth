@@ -78,20 +78,27 @@ Now we'll clean and prepare our data for analysis:
 ```{r}
 # Read the raw data and process it
 processed_data <- read_csv("data/raw/iris.csv") %>%
-  # Clean column names (e.g., Sepal.Length -> sepal_length)
   janitor::clean_names() %>%
-  # Convert species to a factor (categorical) variable
-  mutate(
-    species = as.factor(species),
-    # Scale numeric features to have mean=0 and sd=1
-    across(where(is.numeric), scale)
-  )
+  mutate(species = as.factor(species))
 
 # Create training (80%) and testing (20%) sets
 set.seed(123)  # For reproducibility
 split <- initial_split(processed_data, prop = 0.8)
 train_data <- training(split)
 test_data <- testing(split)
+
+# Create and apply the recipe for preprocessing
+iris_recipe <- recipe(species ~ ., data = train_data) %>%
+  step_normalize(all_numeric_predictors())
+
+# Apply the recipe to both training and testing data
+train_data <- iris_recipe %>%
+  prep() %>%
+  bake(new_data = NULL)
+
+test_data <- iris_recipe %>%
+  prep() %>%
+  bake(new_data = test_data)
 
 # Save and track the processed datasets
 train_data %>%
