@@ -171,10 +171,15 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
     )
     
     # Add each DVC file that exists
+    files_to_add <- character(0)
     for (file in dvc_files) {
       if (file.exists(file)) {
-        git_add(file, force = TRUE)
+        files_to_add <- c(files_to_add, file)
       }
+    }
+    
+    if (length(files_to_add) > 0) {
+      git_add(files_to_add, force = TRUE)
     }
     
     # Commit if message provided
@@ -252,7 +257,10 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Add DVC files to Git
+    # Collect all files that need to be added to Git
+    files_to_add <- character(0)
+    
+    # Add DVC files
     dvc_files <- c(
       "dvc.yaml",
       "dvc.lock",
@@ -261,11 +269,34 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       ".dvc/.gitignore"
     )
     
-    # Add each DVC file that exists
+    # Add existing DVC files to the list
     for (file in dvc_files) {
       if (file.exists(file)) {
-        git_add(file, force = TRUE)
+        files_to_add <- c(files_to_add, file)
       }
+    }
+    
+    # Check for any other untracked or modified files
+    status_output <- git_status()
+    if (length(status_output) > 0) {
+      # Get untracked files
+      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
+      if (length(untracked) > 0) {
+        untracked_files <- sub("^\\?\\? ", "", untracked)
+        files_to_add <- c(files_to_add, untracked_files)
+      }
+      
+      # Get modified files
+      modified <- grep("^ M ", status_output, value = TRUE)
+      if (length(modified) > 0) {
+        modified_files <- sub("^ M ", "", modified)
+        files_to_add <- c(files_to_add, modified_files)
+      }
+    }
+    
+    # Add all files at once
+    if (length(files_to_add) > 0) {
+      git_add(files_to_add, force = TRUE)
     }
     
     # Commit if message provided
