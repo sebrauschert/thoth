@@ -113,6 +113,7 @@ train_data %>%
     )
   )
 
+# Note: Parameters will be stored in params.yaml and the script in R/pipeline/prepare_data.R
 test_data %>%
   write_csv_dvc(
     "data/processed/test.csv",
@@ -248,22 +249,26 @@ export_decision_tree(
 
 ## 5. Reproducible Pipeline
 
-Our complete analysis pipeline now includes:   
-1. Raw data saving   
-2. Data preprocessing   
-3. Model training   
-4. Model evaluation   
-5. Decision documentation   
-
-To reproduce the entire analysis:
+Now that we've set up our DVC pipeline with permanent scripts in `R/pipeline/`, we can easily reproduce our entire workflow:
 
 ```{r}
-# Reproduce all pipeline stages
+# View the pipeline status
+dvc_status()
+
+# Reproduce the entire pipeline
 dvc_repro()
 
-# Check pipeline status
-dvc_status()
+# Or reproduce a specific stage
+dvc_repro("train_model")
 ```
+
+Each stage in our pipeline is backed by a permanent R script in the `R/pipeline/` directory:
+- `save_raw_data.R`: Saves and tracks the raw iris dataset
+- `prepare_data.R`: Processes and splits the data
+- `train_model.R`: Trains the random forest model
+- `evaluate_model.R`: Computes and saves performance metrics
+
+Parameters for each stage are stored in `params.yaml`, making it easy to track and modify parameters across the entire pipeline.
 
 ## 6. Sharing Your Work
 

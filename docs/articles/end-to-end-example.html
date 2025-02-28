@@ -207,6 +207,7 @@ components:</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Note: Parameters will be stored in params.yaml and the script in R/pipeline/prepare_data.R</span></span>
 <span><span class="va">test_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/processed/test.csv"</span>,</span>
@@ -342,19 +343,27 @@ components:</p>
 <div class="section level2">
 <h2 id="reproducible-pipeline">5. Reproducible Pipeline<a class="anchor" aria-label="anchor" href="#reproducible-pipeline"></a>
 </h2>
-<p>Our complete analysis pipeline now includes:<br>
-1. Raw data saving<br>
-2. Data preprocessing<br>
-3. Model training<br>
-4. Model evaluation<br>
-5. Decision documentation</p>
-<p>To reproduce the entire analysis:</p>
+<p>Now that we’ve set up our DVC pipeline with permanent scripts in
+<code>R/pipeline/</code>, we can easily reproduce our entire
+workflow:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Reproduce all pipeline stages</span></span>
+<code class="sourceCode R"><span><span class="co"># View the pipeline status</span></span>
+<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reproduce the entire pipeline</span></span>
 <span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check pipeline status</span></span>
-<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Or reproduce a specific stage</span></span>
+<span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="st">"train_model"</span><span class="op">)</span></span></code></pre></div>
+<p>Each stage in our pipeline is backed by a permanent R script in the
+<code>R/pipeline/</code> directory: - <code>save_raw_data.R</code>:
+Saves and tracks the raw iris dataset - <code>prepare_data.R</code>:
+Processes and splits the data - <code>train_model.R</code>: Trains the
+random forest model - <code>evaluate_model.R</code>: Computes and saves
+performance metrics</p>
+<p>Parameters for each stage are stored in <code>params.yaml</code>,
+making it easy to track and modify parameters across the entire
+pipeline.</p>
 </div>
 <div class="section level2">
 <h2 id="sharing-your-work">6. Sharing Your Work<a class="anchor" aria-label="anchor" href="#sharing-your-work"></a>
