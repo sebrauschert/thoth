@@ -131,6 +131,19 @@ create_analytics_project <- function(path,
   # Open the project if requested
   if (open) {
     if (rstudioapi::isAvailable()) {
+      # First, ensure all R project files are tracked
+      if (git_init) {
+        # Add all R project files
+        git_add(c(
+          "*.Rproj",
+          ".Rprofile",
+          "renv",
+          ".Rproj.user"
+        ), force = TRUE)
+        git_commit("Add R project files")
+      }
+      
+      # Now open the project
       tryCatch({
         rstudioapi::openProject(path, newSession = TRUE)
         cli::cli_alert_success("Opened new project in RStudio")
@@ -138,13 +151,13 @@ create_analytics_project <- function(path,
         # Wait briefly for RStudio to create its files
         Sys.sleep(2)
         
-        # Add and commit RStudio-generated files if git is initialized
+        # Add and commit any remaining RStudio-generated files
         if (git_init) {
           # Switch back to the project directory
           setwd(path)
-          # Add .Rprofile and other RStudio files
+          # Add any remaining files
           git_add(".")
-          git_commit("Add RStudio project files")
+          git_commit("Add remaining RStudio project files")
         }
       }, error = function(e) {
         cli::cli_alert_warning("Failed to open project in RStudio: {e$message}")

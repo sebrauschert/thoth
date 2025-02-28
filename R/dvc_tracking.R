@@ -120,8 +120,6 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   dir_path <- dirname(path)
   if (!dir.exists(dir_path)) {
     dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
-    # Track newly created directory
-    git_add(dir_path)
   }
   
   # Write the CSV file
@@ -153,35 +151,45 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    # Normal case - just track the file
-    dvc_track(path, message = message, push = push)
+    # First, ensure the directory is tracked in Git
+    git_add(dir_path, force = TRUE)
     
-    # Check git status and add any untracked files
-    status_output <- git_status()
-    if (length(status_output) > 0) {
-      # Get list of untracked files (those starting with '??')
-      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
-      if (length(untracked) > 0) {
-        # Extract file paths and add them to git
-        untracked_files <- sub("^\\?\\? ", "", untracked)
-        git_add(untracked_files)
-        if (!is.null(message)) {
-          git_commit(message)
-        }
-      }
-      
-      # Also check for modified files
-      modified <- grep("^ M ", status_output, value = TRUE)
-      if (length(modified) > 0) {
-        # Extract file paths and add them to git
-        modified_files <- sub("^ M ", "", modified)
-        git_add(modified_files)
-        if (!is.null(message)) {
-          git_commit(message)
-        }
+    # Track the file with DVC
+    dvc_result <- system2("dvc", c("add", "-f", path), stdout = TRUE, stderr = TRUE)
+    
+    if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
+      cli::cli_alert_warning("Failed to add file to DVC tracking")
+      cli::cli_alert_info("DVC output: {paste(dvc_result, collapse = '\n')}")
+      return(invisible(x))
+    }
+    
+    # Add DVC files to Git
+    dvc_files <- c(
+      paste0(path, ".dvc"),
+      ".dvc/config",
+      ".dvc/config.local",
+      "dvc.yaml",
+      "dvc.lock"
+    )
+    
+    # Add each DVC file that exists
+    for (file in dvc_files) {
+      if (file.exists(file)) {
+        git_add(file, force = TRUE)
       }
     }
     
+    # Commit if message provided
+    if (!is.null(message)) {
+      git_commit(message)
+      
+      # Push if requested
+      if (push) {
+        git_push()
+      }
+    }
+    
+    cli::cli_alert_success("Successfully tracked {path} with DVC")
     return(invisible(x))
   }
   
@@ -230,6 +238,9 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # Execute DVC command
   tryCatch({
+    # First, ensure the directory is tracked in Git
+    git_add(dir_path, force = TRUE)
+    
     dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
     
     if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
@@ -238,26 +249,19 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Add DVC files to Git using our git functions
-    git_add(c("dvc.yaml", "dvc.lock", ".dvc/config", ".dvc/config.local", dir_path), force = TRUE)
+    # Add DVC files to Git
+    dvc_files <- c(
+      "dvc.yaml",
+      "dvc.lock",
+      ".dvc/config",
+      ".dvc/config.local",
+      dir_path
+    )
     
-    # Check git status and add any remaining untracked files
-    status_output <- git_status()
-    if (length(status_output) > 0) {
-      # Get list of untracked files (those starting with '??')
-      untracked <- grep("^\\?\\? ", status_output, value = TRUE)
-      if (length(untracked) > 0) {
-        # Extract file paths and add them to git
-        untracked_files <- sub("^\\?\\? ", "", untracked)
-        git_add(untracked_files)
-      }
-      
-      # Also check for modified files
-      modified <- grep("^ M ", status_output, value = TRUE)
-      if (length(modified) > 0) {
-        # Extract file paths and add them to git
-        modified_files <- sub("^ M ", "", modified)
-        git_add(modified_files)
+    # Add each DVC file that exists
+    for (file in dvc_files) {
+      if (file.exists(file)) {
+        git_add(file, force = TRUE)
       }
     }
     

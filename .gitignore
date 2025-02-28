@@ -42,3 +42,6 @@ tests/testthat/.dvc/
 
 # R package check directory
 *.Rcheck
+
+# Paper directory
+/paper/
