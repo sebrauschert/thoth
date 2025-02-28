@@ -165,6 +165,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       paste0(path, ".dvc"),
       ".dvc/config",
       ".dvc/config.local",
+      ".dvc/.gitignore",
       "dvc.yaml",
       "dvc.lock"
     )
@@ -235,11 +236,14 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # Execute DVC command
   tryCatch({
-    # First, ensure the file is not tracked by Git
-    if (file.exists(path)) {
+    # First, ensure the file is not tracked by Git if it exists
+    # Only try to remove if git status shows it's tracked
+    status_output <- git_status()
+    if (length(grep(path, status_output, value = TRUE)) > 0) {
       system2("git", c("rm", "-f", "--cached", path), stdout = TRUE, stderr = TRUE)
     }
     
+    # Create DVC stage
     dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
     
     if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
@@ -253,7 +257,8 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       "dvc.yaml",
       "dvc.lock",
       ".dvc/config",
-      ".dvc/config.local"
+      ".dvc/config.local",
+      ".dvc/.gitignore"
     )
     
     # Add each DVC file that exists
