@@ -166,20 +166,27 @@ components:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Read the raw data and process it</span></span>
 <span><span class="va">processed_data</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/raw/iris.csv"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="co"># Clean column names (e.g., Sepal.Length -&gt; sepal_length)</span></span>
 <span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/clean_names.html" class="external-link">clean_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="co"># Convert species to a factor (categorical) variable</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
-<span>    <span class="co"># Scale numeric features to have mean=0 and sd=1</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">scale</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create training (80%) and testing (20%) sets</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
 <span><span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">processed_data</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
 <span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create and apply the recipe for preprocessing</span></span>
+<span><span class="va">iris_recipe</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train_data</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply the recipe to both training and testing data</span></span>
+<span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="va">iris_recipe</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="va">iris_recipe</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="va">test_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Save and track the processed datasets</span></span>
 <span><span class="va">train_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -194,6 +201,7 @@ components:</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Note: Parameters will be stored in params.yaml and the script in R/pipeline/prepare_data.R</span></span>
 <span><span class="va">test_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_csv_dvc.html">write_csv_dvc</a></span><span class="op">(</span></span>
 <span>    <span class="st">"data/processed/test.csv"</span>,</span>
@@ -329,19 +337,27 @@ components:</p>
 <div class="section level2">
 <h2 id="reproducible-pipeline">5. Reproducible Pipeline<a class="anchor" aria-label="anchor" href="#reproducible-pipeline"></a>
 </h2>
-<p>Our complete analysis pipeline now includes:<br>
-1. Raw data saving<br>
-2. Data preprocessing<br>
-3. Model training<br>
-4. Model evaluation<br>
-5. Decision documentation</p>
-<p>To reproduce the entire analysis:</p>
+<p>Now that we’ve set up our DVC pipeline with permanent scripts in
+<code>R/pipeline/</code>, we can easily reproduce our entire
+workflow:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Reproduce all pipeline stages</span></span>
+<code class="sourceCode R"><span><span class="co"># View the pipeline status</span></span>
+<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reproduce the entire pipeline</span></span>
 <span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check pipeline status</span></span>
-<span><span class="fu"><a href="../reference/dvc_status.html">dvc_status</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Or reproduce a specific stage</span></span>
+<span><span class="fu"><a href="../reference/dvc_repro.html">dvc_repro</a></span><span class="op">(</span><span class="st">"train_model"</span><span class="op">)</span></span></code></pre></div>
+<p>Each stage in our pipeline is backed by a permanent R script in the
+<code>R/pipeline/</code> directory: - <code>save_raw_data.R</code>:
+Saves and tracks the raw iris dataset - <code>prepare_data.R</code>:
+Processes and splits the data - <code>train_model.R</code>: Trains the
+random forest model - <code>evaluate_model.R</code>: Computes and saves
+performance metrics</p>
+<p>Parameters for each stage are stored in <code>params.yaml</code>,
+making it easy to track and modify parameters across the entire
+pipeline.</p>
 </div>
 <div class="section level2">
 <h2 id="sharing-your-work">6. Sharing Your Work<a class="anchor" aria-label="anchor" href="#sharing-your-work"></a>
