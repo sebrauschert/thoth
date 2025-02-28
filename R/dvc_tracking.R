@@ -151,10 +151,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # If no stage name provided, just track with dvc add
   if (is.null(stage_name)) {
-    # First, ensure the directory is tracked in Git
-    git_add(dir_path, force = TRUE)
-    
-    # Track the file with DVC
+    # Track the file with DVC first
     dvc_result <- system2("dvc", c("add", "-f", path), stdout = TRUE, stderr = TRUE)
     
     if (!is.null(attr(dvc_result, "status")) && attr(dvc_result, "status") != 0) {
@@ -163,7 +160,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       return(invisible(x))
     }
     
-    # Add DVC files to Git
+    # Now add DVC files to Git
     dvc_files <- c(
       paste0(path, ".dvc"),
       ".dvc/config",
@@ -238,8 +235,10 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
   
   # Execute DVC command
   tryCatch({
-    # First, ensure the directory is tracked in Git
-    git_add(dir_path, force = TRUE)
+    # First, ensure the file is not tracked by Git
+    if (file.exists(path)) {
+      system2("git", c("rm", "-f", "--cached", path), stdout = TRUE, stderr = TRUE)
+    }
     
     dvc_result <- system2("dvc", dvc_args, stdout = TRUE, stderr = TRUE)
     
@@ -254,8 +253,7 @@ write_csv_dvc <- function(x, path, message, stage_name = NULL,
       "dvc.yaml",
       "dvc.lock",
       ".dvc/config",
-      ".dvc/config.local",
-      dir_path
+      ".dvc/config.local"
     )
     
     # Add each DVC file that exists
