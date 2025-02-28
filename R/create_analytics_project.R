@@ -38,7 +38,11 @@ create_analytics_project <- function(path,
   
   # Change to project directory for remaining setup
   old_wd <- setwd(path)
-  on.exit(setwd(old_wd))
+  on.exit({
+    setwd(old_wd)
+    # Ensure the project is set back to the new project at the end
+    usethis::proj_set(path)
+  })
 
   # Create standard directory structure
   dirs <- c(
@@ -143,32 +147,24 @@ create_analytics_project <- function(path,
         git_commit("Add R project files")
       }
       
-      # Now open the project
-      tryCatch({
-        rstudioapi::openProject(path, newSession = TRUE)
-        cli::cli_alert_success("Opened new project in RStudio")
-        
-        # Wait briefly for RStudio to create its files
-        Sys.sleep(2)
-        
-        # Add and commit any remaining RStudio-generated files
-        if (git_init) {
-          # Switch back to the project directory
-          setwd(path)
-          # Add any remaining files
-          git_add(".")
-          git_commit("Add remaining RStudio project files")
-        }
-      }, error = function(e) {
-        cli::cli_alert_warning("Failed to open project in RStudio: {e$message}")
-        cli::cli_alert_info("You can manually open the project at: {.path {path}}")
-      })
+      # Find the .Rproj file
+      rproj_file <- list.files(path, pattern = "\\.Rproj$", full.names = TRUE)
+      if (length(rproj_file) == 1) {
+        # Open the project in a new session
+        tryCatch({
+          rstudioapi::openProject(rproj_file, newSession = TRUE)
+          cli::cli_alert_success("Opened new project in RStudio")
+        }, error = function(e) {
+          cli::cli_alert_warning("Failed to open project in RStudio: {e$message}")
+          cli::cli_alert_info("You can manually open the project at: {.path {rproj_file}}")
+        })
+      } else {
+        cli::cli_alert_warning("Could not find .Rproj file in {.path {path}}")
+      }
     } else {
       cli::cli_alert_warning("RStudio API not available. Setting working directory instead.")
-      # Set working directory and active project
       setwd(path)
-      usethis::proj_set(path)
-      cli::cli_alert_info("Project activated. Working directory changed to: {.path {path}}")
+      cli::cli_alert_info("Working directory changed to: {.path {path}}")
     }
   }
   
